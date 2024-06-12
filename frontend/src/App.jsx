@@ -23,6 +23,7 @@ function App() {
     <div className="h-screen">
      <Routes>
       <Route path='/' element={<Login />}/>
+      <Route path='/register' element={<Register />}/>
       <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}/>
      </Routes>
     </div>
