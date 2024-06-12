@@ -1,24 +1,46 @@
 import React, { useState, useReducer } from "react";
+import { auth } from "../../../utils/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const reducer = (newUser, action) => {
-    switch (action.type) {
-        case "name":
-            return {...newUser, name: action.payload}
-        case "surname":
-            return {...newUser, surname: action.payload}
-        case "email":
-            return {...newUser, email: action.payload}
-        case "password":
-            return {...newUser, password: action.payload}
-        default:
-            return newUser
-    }
-}
+  switch (action.type) {
+    case "name":
+      return { ...newUser, name: action.payload };
+    case "surname":
+      return { ...newUser, surname: action.payload };
+    case "email":
+      return { ...newUser, email: action.payload };
+    case "password":
+      return { ...newUser, password: action.payload };
+    default:
+      return newUser;
+  }
+};
 
 const Register = () => {
   const [error, setError] = useState();
+  const [newUser, dispatch] = useReducer(reducer, {});
 
-  const [newUser, dispatch] = useReducer(reducer, {})
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (newUser.name && newUser.surname && newUser.email && newUser.password) {
+      createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          updateProfile(user, { displayName: newUser.name })
+          .then(() => {
+            navigate("/home");
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
 
   return (
     <div className="flex justify-center items-center h-full bg-slate-50">
@@ -31,13 +53,17 @@ const Register = () => {
               type="text"
               placeholder="Name"
               className="border py-2 px-3 rounded-md"
-              onChange={(e) => dispatch({type: "name", payload: e.target.value})}
+              onChange={(e) =>
+                dispatch({ type: "name", payload: e.target.value })
+              }
             />
             <input
               type="text"
               placeholder="Surname"
               className="border py-2 px-3 rounded-md"
-              onChange={(e) => dispatch({type: "surname", payload: e.target.value})}
+              onChange={(e) =>
+                dispatch({ type: "surname", payload: e.target.value })
+              }
             />
           </div>
 
@@ -47,7 +73,9 @@ const Register = () => {
             id=""
             className="border py-2 px-3 rounded-md"
             placeholder="Email"
-            onChange={(e) => dispatch({type: "email", payload: e.target.value})}
+            onChange={(e) =>
+              dispatch({ type: "email", payload: e.target.value })
+            }
           />
           <input
             type="password"
@@ -55,13 +83,15 @@ const Register = () => {
             id=""
             className="border py-2 px-3 rounded-md"
             placeholder="Password"
-            onChange={(e) => dispatch({type: "password", payload: e.target.value})}
+            onChange={(e) =>
+              dispatch({ type: "password", payload: e.target.value })
+            }
           />
 
           <button
             type="submit"
             className="border py-1.5 rounded-md mt-4 bg-black text-white font-semibold"
-            //   onClick={handleSubmit}
+            onClick={handleSubmit}
           >
             Register
           </button>

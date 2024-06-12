@@ -12,8 +12,6 @@ import Register from "./Register";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
   const [error, setError] = useState();
   const [user, setUser] = useState();
   const [authenticated, setAuthenticated] = useState(false);
