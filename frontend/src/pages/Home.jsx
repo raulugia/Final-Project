@@ -3,6 +3,7 @@ import { signOut } from "firebase/auth";
 import {auth} from '../../utils/firebase'
 
 const Home = () => {
+  const user = auth.currentUser
   const handleClick = () => {
     signOut(auth).then(() => {
 
@@ -10,7 +11,7 @@ const Home = () => {
   }
   return (
     <div>
-      <p>Home</p>
+      <p>Welcome Home, {user.displayName}</p>
       <p className="cursor-pointer font-semibold" onClick={handleClick}>Log Out</p>
     </div>
   )
