@@ -2,6 +2,7 @@ import React, { useState, useReducer } from "react";
 import { auth } from "../../../utils/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const reducer = (newUser, action) => {
   switch (action.type) {
@@ -24,21 +25,38 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (newUser.name && newUser.surname && newUser.email && newUser.password) {
-      createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          updateProfile(user, { displayName: newUser.name })
-          .then(() => {
-            navigate("/home");
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+        try{
+            const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
+            const user = userCredential.user;
+            await updateProfile(user, { displayName: newUser.name })
+
+            await axios.post("/api/register", {
+                email: newUser.email,
+                name: newUser.name,
+                surname: newUser.surname
+            })
+
+            navigate("/home")
+        } catch(err) {
+            console.log(err.message)
+            setError(err.message)
+        }
+    //   createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
+    //     .then((userCredential) => {
+    //       const user = userCredential.user;
+    //       updateProfile(user, { displayName: newUser.name })
+    //       .then(() => {
+
+    //         navigate("/home");
+    //       });
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
     }
   };
 

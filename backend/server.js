@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json())
 
-app.post("api/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
     const { email, name, surname } = req.body
 
     try {
