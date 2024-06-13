@@ -3,6 +3,7 @@ import { auth } from "../../../utils/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import axiosInstance from "../../../utils/axiosInstance"
 
 const reducer = (newUser, action) => {
   switch (action.type) {
@@ -34,7 +35,7 @@ const Register = () => {
             const user = userCredential.user;
             await updateProfile(user, { displayName: newUser.name })
 
-            await axios.post("/api/register", {
+            await axiosInstance.post("/api/register", {
                 email: newUser.email,
                 name: newUser.name,
                 surname: newUser.surname
