@@ -8,6 +8,7 @@ import {
 import { Navigate, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import Register from "./Register";
+import axiosInstance from "../../../utils/axiosInstance"
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -20,10 +21,19 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (email && password) {
+        try{
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+            const user = userCredential.user
+            setUser(user)
+            setAuthenticated(true);
+            console.log("success", user);
+        } catch(err) {
+            setError(err.message)
+        }
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           setUser(userCredential.user);
@@ -37,15 +47,27 @@ const Login = () => {
   };
 
   const googleSignIn = async () => {
-    signInWithPopup(auth, provider)
-      .then((userCredential) => {
-        setUser(userCredential.user);
+    try{
+        const userCredential = await signInWithPopup(auth, provider)
+        const user = userCredential.user
+        setUser(user)
         setAuthenticated(true);
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
-    console.log("success");
+
+        //check if the user is new or existing. If the creationTime and lastSignInTime are the same, the user is new.
+        const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
+
+        if(isNewUser) {
+            await axiosInstance.post("/api/register", {
+                email: user.email,
+                name: user.displayName || "",
+                surname: "",
+            })
+        }
+
+        console.log("success", user)
+    } catch(err) {
+        setError(err.message)
+    }
   };
 
   if (authenticated) {

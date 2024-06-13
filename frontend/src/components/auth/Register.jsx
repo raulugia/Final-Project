@@ -46,18 +46,6 @@ const Register = () => {
             console.log(err.message)
             setError(err.message)
         }
-    //   createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
-    //     .then((userCredential) => {
-    //       const user = userCredential.user;
-    //       updateProfile(user, { displayName: newUser.name })
-    //       .then(() => {
-
-    //         navigate("/home");
-    //       });
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
     }
   };
 
