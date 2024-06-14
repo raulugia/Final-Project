@@ -17,17 +17,25 @@ console.log("Image processing worker started...");
 //process images
 imageQueue.process(async (job) => {
   const { filePath, mealId } = job.data;
-  console.log(`Processing job for meal ID: ${mealId}`);
 
   try {
-    //create a thumbnail
-    const thumbnailPath = `thumbnails/${filePath}`;
-    await sharp(filePath).resize(200).toFile(thumbnailPath);
+    console.log(`Processing job for meal ID: ${mealId}`);
+    //read the original image
+    const imageBuffer = await sharp(filePath).toBuffer();
+
+    //create a thumbnail in memory
+    const thumbnailBuffer = await sharp(imageBuffer).resize(200).toBuffer()
 
     //upload original image and thumbnail to cloudinary
     const [originalUpload, thumbnailUpload] = await Promise.all([
-      cloudinary.uploader.upload(filePath),
-      cloudinary.uploader.upload(thumbnailPath),
+      cloudinary.uploader.upload_stream({ resource_type: "image"}, (error, result) => {
+        if(error) throw error
+        return result
+      }).end(imageBuffer),
+      cloudinary.uploader.upload_stream({ resource_type: "image"}, (error, result) => {
+        if(error) throw error
+        return result
+      }).end(thumbnailBuffer),
     ]);
 
     console.log(`Uploaded imaged for meal id: ${mealId}`);
