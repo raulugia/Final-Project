@@ -27,7 +27,7 @@ model User {
 
 model Restaurant {
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   meals Meal[] @relation("RestaurantMeals")
 }
 
@@ -37,6 +37,7 @@ model Meal {
   restaurant Restaurant @relation("RestaurantMeals" ,fields: [restaurantId], references: [id])
   restaurantId Int
   logs MealLog[]
+  @@unique([name, restaurantId]) //ensure the same meal name can only be logged once per restaurant
 }
 
 model MealLog {
