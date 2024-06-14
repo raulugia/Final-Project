@@ -1,6 +1,9 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors")
+const multer = require("multer")
+const { imageQueue } = require("./queue")
+require("dotenv").config()
 
 const prisma = new PrismaClient();
 const app = express();
