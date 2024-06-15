@@ -11,52 +11,63 @@ import Register from "./Register";
 import axiosInstance from "../../../utils/axiosInstance"
 
 const Login = () => {
+  //states to store email and password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  //state to store errors
   const [error, setError] = useState();
+  //state to store the user
   const [user, setUser] = useState();
+  //state to check if the user is authenticated
   const [authenticated, setAuthenticated] = useState(false);
 
+  //create an instance of the Google provider object
   const provider = new GoogleAuthProvider();
-
+  //hook for navigation
   const navigate = useNavigate();
 
+  //method triggered when the user submits the form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    //if email and password have been provided
     if (email && password) {
-        try{
-            const userCredential = await signInWithEmailAndPassword(auth, email, password)
-            const user = userCredential.user
-            setUser(user)
-            setAuthenticated(true);
-            console.log("success", user);
-        } catch(err) {
-            setError(err.message)
-        }
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          setUser(userCredential.user);
+      try{
+          //sign in with email and password
+          const userCredential = await signInWithEmailAndPassword(auth, email, password)
+          //store the returned user
+          const user = userCredential.user
+          
+          //update the state with the authenticated user
+          setUser(user)
+          //update authenticated to true
           setAuthenticated(true);
           console.log("success", user);
-        })
-        .catch((err) => {
-          setError(err.message);
-        });
+      } catch(err) {
+          setError(err.message)
+      }
     }
   };
 
+  //method triggered if user clicks on the sign in with Google button
   const googleSignIn = async () => {
     try{
+        //sign in with Google using a popup
         const userCredential = await signInWithPopup(auth, provider)
+        //store the authenticated user
         const user = userCredential.user
+
+        //update state with the user
         setUser(user)
+        //update state to true
         setAuthenticated(true);
 
         //check if the user is new or existing. If the creationTime and lastSignInTime are the same, the user is new.
         const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
 
+        //if the user is new
         if(isNewUser) {
+            //send a POST request to the server so the user is added to the database in Railway
             await axiosInstance.post("/api/register", {
                 email: user.email,
                 name: user.displayName || "",
@@ -66,10 +77,12 @@ const Login = () => {
 
         console.log("success", user)
     } catch(err) {
+        //update the error state if there was an error
         setError(err.message)
     }
   };
 
+  //if the user is authenticated, navigate to "/home"
   if (authenticated) {
     return <Navigate to="/home" />;
   }
