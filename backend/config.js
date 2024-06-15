@@ -1,3 +1,4 @@
+//export configuration settings for Redis and Cloudinary
 module.exports = {
   redisConfig: {
     host: process.env.REDIS_HOST,
