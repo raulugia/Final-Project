@@ -5,15 +5,20 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import axiosInstance from "../../../utils/axiosInstance"
 
+//reducer function to manage state updates based on action types
 const reducer = (newUser, action) => {
   switch (action.type) {
     case "name":
+      //update the user's name
       return { ...newUser, name: action.payload };
     case "surname":
+      //update the user's surname
       return { ...newUser, surname: action.payload };
     case "email":
+      //update the user's email
       return { ...newUser, email: action.payload };
     case "password":
+      //update the user's password
       return { ...newUser, password: action.payload };
     default:
       return newUser;
@@ -21,26 +26,35 @@ const reducer = (newUser, action) => {
 };
 
 const Register = () => {
+  //state to store errors
   const [error, setError] = useState();
+  //hook to manage user details
   const [newUser, dispatch] = useReducer(reducer, {});
-
+  //hook to navigate withing the web app
   const navigate = useNavigate();
 
+  //method triggered after the user submits the form to register
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    //if all the details were provided 
     if (newUser.name && newUser.surname && newUser.email && newUser.password) {
         try{
+            //create a new user with the email and password provided in the form - new user will be signed in
             const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
+            //store new user
             const user = userCredential.user;
+            //update the user's name in Firebase
             await updateProfile(user, { displayName: newUser.name })
 
+            //send a POST request with the user's data so it can be saved in the database in Railway
             await axiosInstance.post("/api/register", {
                 email: newUser.email,
                 name: newUser.name,
                 surname: newUser.surname
             })
 
+            //navigate to "/home"
             navigate("/home")
         } catch(err) {
             console.log(err.message)
