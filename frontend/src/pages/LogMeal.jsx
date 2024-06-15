@@ -5,25 +5,32 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../../utils/firebase";
 
 const LogMeal = () => {
+  //state to store the meal rating
   const [mealRating, setMealRating] = useState("");
+  //state to store the meal data as an object
   const [mealData, setMealData] = useState({
     mealName: "",
     restaurantName: "",
     carbEstimate: "",
     description: "",
   });
+  //state to store the picture uploaded by the user
   const [file, setFile] = useState(null);
 
+  //hook for navigating withing the web app
   const navigate = useNavigate();
 
+  //method to update the mealData state when the inputs change
   const handleChange = (e) => {
     setMealData({ ...mealData, [e.target.name]: e.target.value });
   };
 
+  //method to update the file state when the file input changes
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
+  //method triggered when the user submits the form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -33,9 +40,11 @@ const LogMeal = () => {
       return;
     }
 
+    //create a FormData object so the data can be sent to the server
     const data = new FormData();
     const { mealName, restaurantName, carbEstimate, description } = mealData;
 
+    //append the form data to the FormData object
     data.append("mealName", mealName);
     data.append("restaurantName", restaurantName);
     data.append("carbEstimate", carbEstimate);
@@ -44,10 +53,14 @@ const LogMeal = () => {
     data.append("picture", file);
 
     try {
+      //get the current user
       const user = auth.currentUser;
+      //case user is authenticated
       if (user) {
+        //get the id token
         const token = await user.getIdToken();
 
+        //send a POST request with the form data and authorization header
         const response = await axiosInstance.post("/api/log-meal", data, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -55,6 +68,7 @@ const LogMeal = () => {
         });
 
         console.log(response.data);
+        //navigate to the /home route
         navigate("/home");
       } else {
         console.log("User not authenticated");
