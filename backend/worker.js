@@ -19,7 +19,8 @@ console.log("Image processing worker started...");
 const uploadToCloudinary = (buffer) => {
     return new Promise((resolve, reject) => {
         //create an upload stream
-        const uploadStream = cloudinary.uploader.upload_stream({ resource_type: "image"}, (error, uploadResult) => {
+        const uploadStream = cloudinary.uploader.upload_stream({ resource_type: "image"}, 
+            (error, uploadResult) => {
             //reject the promise if there is an error
             if(error) {
                 return reject(error)

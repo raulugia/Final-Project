@@ -1,4 +1,7 @@
+//Load environment variables from .env
 require("dotenv").config();
+
+//import modules
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
@@ -6,20 +9,30 @@ const multer = require("multer");
 const { imageQueue } = require("./queue");
 const authenticateUser = require("./authMiddleware");
 
+//initialize the Prisma client
 const prisma = new PrismaClient();
+
+//create an express application
 const app = express();
+
+//establish the port for the server
 const PORT = process.env.PORT || 5000;
 
+//use cors middleware
 app.use(cors());
+//use JSON middleware
 app.use(express.json());
 
+//configure multer for file uploads using "uploads/" as the destination directory
 const upload = multer({ dest: "uploads/" });
 
+//endpoint for user registration
 app.post("/api/register", async (req, res) => {
-  console.log("running");
+  //extract email, name and surname from the request body
   const { email, name, surname } = req.body;
 
   try {
+    //create a new user in the database with the extracted data
     const user = await prisma.user.create({
       data: {
         email,
@@ -27,23 +40,39 @@ app.post("/api/register", async (req, res) => {
         surname,
       },
     });
+    
+    //respond with the new user object
     res.json(user);
   } catch (err) {
+    //respond with a 400 status code if there was an error
     res.status(400).json({ error: err.message });
   }
 });
 
+//endpoint for logging a meal
 app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req, res) => {
     console.log("Request received at /api/log-meal");
     console.log("Authenticated user: ", req.user)
+    //extract the meal information from the request body
     const { mealName, restaurantName, carbEstimate, description, rating } = req.body;
+    //extract the picture uploaded by the user
     const picture = req.file;
+
+    //find the user in the database and store it
+    const user = await prisma.user.findUnique({
+        where : { email: req.user.email }
+      })
+
+    //throw an error if the user does not exist
+    if(!user) {
+    throw new Error("User not found")
+    }
 
     console.log("Requested body: ", req.body)
     console.log("Uploaded picture: ", picture)
 
     try {
-      //check if the restaurant already exists
+      //check if the restaurant already exists in the database using the restaurant name
       let restaurant = await prisma.restaurant.findUnique({
         where: { name: restaurantName },
       });
@@ -57,13 +86,16 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
 
       //update or create meal based on unique combination name and restaurantId
       const meal = await prisma.meal.upsert({
+        //find the meal using the meal name and restaurant id
         where: {
             name_restaurantId: {
                 name: mealName,
                 restaurantId: restaurant.id
             },
         },
+        //update{} is empty as we do not need to do anything if the meal already exists. Duplicated meals are not allowed
         update: {},
+        //create a new meal if it does not exist
         create: {
             name: mealName,
             restaurant: { connect: {id: restaurant.id}}
@@ -71,38 +103,36 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
 
       })
 
-      //get the user's id from the database
-      const user = await prisma.user.findUnique({
-        where : { email: req.user.email }
-      })
-
-      if(!user) {
-        throw new Error("User not found")
-      }
-
       //create the meal log entry
       const mealLog = await prisma.mealLog.create({
         data: {
+          //associate the meal log with the existing meal   
           meal: { connect:{ id: meal.id }},
           //log the carb estimate, description and rating
           carbEstimate: parseInt(carbEstimate),
           description,
           rating,
-          //Associate the log with the authenticated user
+          //associate the meal log with the authenticated user
           user: { connect: { id: user.id } },
+          //placeholders - picture and thumbnail will be added in worker.js once they have been processed
           picture: "",
           thumbnail:"",
         },
       });
 
+      //send the response to the client
+      res.json(mealLog);
+
       //add job to queue for image processing
+      //as a result, a thumbnail will be created and both the original image and thumbnail will be uploaded to
+      //Clodinary and their URLs will be added to the database in Railway
       await imageQueue.add({
         filePath: picture.path,
         mealId: mealLog.id,
       });
 
-      res.json(mealLog);
     } catch (err) {
+      //respond with a 400 status code if there was an error  
       res.status(400).json({ error: err.message });
     }
   }
@@ -111,25 +141,3 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-// app.post("/api/login", async (req, res) => {
-//     const { email, name, surname } = req.body
-
-//     try {
-//         let user = await prisma.user.findUnique({
-//             where: { email }
-//         })
-
-//         if(!user){
-//             user = await prisma.user.create({
-//                 data: {
-//                     email, name, surname
-//                 }
-//             })
-//         }
-
-//         res.json(user)
-//     } catch(err) {
-//         res.status(400).json({error: err.message})
-//     }
-// })

@@ -47,7 +47,6 @@ const LogMeal = () => {
       const user = auth.currentUser;
       if (user) {
         const token = await user.getIdToken();
-        console.log("token: ", token);
 
         const response = await axiosInstance.post("/api/log-meal", data, {
           headers: {
