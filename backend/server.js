@@ -138,6 +138,7 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
   }
 );
 
+//start express server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
