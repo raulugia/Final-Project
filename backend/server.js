@@ -176,12 +176,26 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
             include: {
                 friends: {
                     include: {
-                        friend: true
+                        friend: {
+                            //only return id, name and surname
+                            select: {
+                                id: true,
+                                name: true,
+                                surname: true
+                            },
+                        },
                     },
                 },
                 friendOf: {
                     include: {
-                        user: true
+                        user: {
+                            //only return id, name and surname
+                            select: {
+                                id: true,
+                                name: true,
+                                surname: true
+                            },
+                        },
                     },
                 },
             },
@@ -191,6 +205,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
             return res.status(404).json({ error: "User not found" })
         }
 
+        //combine friends and friendsOf
         const friends = [
             ...user.friends.map(data => data.friend),
             ...user.friendOf.map(data => data.friendOf),

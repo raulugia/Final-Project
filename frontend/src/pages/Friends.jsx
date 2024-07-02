@@ -4,7 +4,8 @@ import { auth } from '../../utils/firebase'
 
 const Friends = () => {
     const user = auth.currentUser
-    const [userFriends, setUserFriends] = useState(null)
+    const [userFriends, setUserFriends] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         (
@@ -19,6 +20,7 @@ const Friends = () => {
                     })
 
                     setUserFriends(data)
+                    setLoading(false)
                     console.log(data)
                 } catch(err) {
                     console.log(err)
@@ -27,8 +29,20 @@ const Friends = () => {
         )()
     }, [])
 
+    if(loading) {
+        return <p>Loading...</p>
+    }
+
   return (
-    <div>Friends</div>
+   <div>
+    {
+        userFriends.length > 0 ? (
+            <p>{userFriends[0].name}</p>
+        ) : (
+            <p>No Friends</p>
+        )
+    }
+   </div>
   )
 }
 
