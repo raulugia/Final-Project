@@ -67,7 +67,6 @@ const LogMeal = () => {
           },
         });
 
-        console.log(response.data);
         //navigate to the /home route
         navigate("/home");
       } else {

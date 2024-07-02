@@ -51,8 +51,6 @@ app.post("/api/register", async (req, res) => {
 
 //endpoint for logging a meal
 app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req, res) => {
-    console.log("Request received at /api/log-meal");
-    console.log("Authenticated user: ", req.user)
     //extract the meal information from the request body
     const { mealName, restaurantName, carbEstimate, description, rating } = req.body;
     //extract the picture uploaded by the user
@@ -67,9 +65,6 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
     if(!user) {
     throw new Error("User not found")
     }
-
-    console.log("Requested body: ", req.body)
-    console.log("Uploaded picture: ", picture)
 
     try {
       //check if the restaurant already exists in the database using the restaurant name
@@ -93,7 +88,8 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
                 restaurantId: restaurant.id
             },
         },
-        //update{} is empty as we do not need to do anything if the meal already exists. Duplicated meals are not allowed
+        //update{} is empty as we do not need to do anything if the meal already exists. 
+        //Duplicated meals are not allowed
         update: {},
         //create a new meal if it does not exist
         create: {
@@ -114,7 +110,8 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
           rating,
           //associate the meal log with the authenticated user
           user: { connect: { id: user.id } },
-          //placeholders - picture and thumbnail will be added in worker.js once they have been processed
+          //placeholders - picture and thumbnail will be added in worker.js once 
+          //they have been processed
           picture: "",
           thumbnail:"",
         },
@@ -137,6 +134,38 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
     }
   }
 );
+
+app.get("/api/user-data", authenticateUser, async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email: req.user.email },
+            include: {
+               meals: {
+                include: {
+                    meal: {
+                        include: {
+                            restaurant: true
+                        }
+                    }
+                }
+               },
+               friends: true,
+               friendOf: true,
+               chatsSent: true,
+               chatsReceived: true
+            }
+        })
+
+        if(!user) {
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        res.json(user)
+
+    } catch(err) {
+        console.log(err)
+    }
+})
 
 //start express server
 app.listen(PORT, () => {

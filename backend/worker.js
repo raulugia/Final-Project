@@ -51,10 +51,6 @@ imageQueue.process(async (job) => {
         uploadToCloudinary(thumbnailBuffer),
     ])
 
-    console.log(`Uploaded image for meal id: ${mealId}`);
-    console.log(`Original image url: ${originalUpload.secure_url}`);
-    console.log(`Thumbnail image url: ${thumbnailUpload.secure_url}`);
-
     //update meal log in the database with the Cloudinary urls
     const updatedMealLog = await prisma.mealLog.update({
       where: { id: mealId },
