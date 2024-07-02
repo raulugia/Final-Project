@@ -49,7 +49,7 @@ const Register = () => {
               surname: newUser.surname,
               username: newUser.username,
             })
-            
+
             //create a new user with the email and password provided in the form - new user will be signed in
             const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
             //store new user

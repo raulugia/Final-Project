@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import Navbar from './components/Navbar'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import LogMeal from './pages/LogMeal'
@@ -34,10 +35,13 @@ function App() {
      <Routes>
       <Route path='/' element={<Login />}/>
       <Route path='/register' element={<Register />}/>
+
+      <Route element={ <Navbar /> }>
       <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}/>
       <Route path='/friends' element={<ProtectedRoute><Friends /></ProtectedRoute>}/>
       <Route path='/friends/:id' element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
       <Route path='/log-meal' element={<ProtectedRoute><LogMeal /></ProtectedRoute>}/>
+      </Route>
      </Routes>
     </div>
   )
