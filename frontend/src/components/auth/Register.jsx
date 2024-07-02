@@ -14,6 +14,8 @@ const reducer = (newUser, action) => {
     case "surname":
       //update the user's surname
       return { ...newUser, surname: action.payload };
+    case "username":
+      return { ...newUser, username: action.payload };
     case "email":
       //update the user's email
       return { ...newUser, email: action.payload };
@@ -88,6 +90,16 @@ const Register = () => {
             />
           </div>
 
+          <input
+            type="text"
+            name=""
+            id=""
+            className="border py-2 px-3 rounded-md"
+            placeholder="Username"
+            onChange={(e) =>
+              dispatch({ type: "username", payload: e.target.value })
+            }
+          />
           <input
             type="email"
             name=""
