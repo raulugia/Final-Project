@@ -1,7 +1,9 @@
 import React, {useEffect, useState} from 'react'
 import axiosInstance from '../../utils/axiosInstance'
+import { auth } from '../../utils/firebase'
 
 const Friends = () => {
+    const user = auth.currentUser
     const [userFriends, setUserFriends] = useState(null)
 
     useEffect(() => {

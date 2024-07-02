@@ -135,6 +135,7 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
   }
 );
 
+
 app.get("/api/user-data", authenticateUser, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
@@ -162,6 +163,40 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
         }
 
         res.json(user)
+
+    } catch(err) {
+        console.log(err)
+    }
+})
+
+app.get("/api/friends", authenticateUser, async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where : { email: req.user.email},
+            include: {
+                friends: {
+                    include: {
+                        friend: true
+                    },
+                },
+                friendOf: {
+                    include: {
+                        user: true
+                    },
+                },
+            },
+        })
+
+        if(!user) {
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        const friends = [
+            ...user.friends.map(data => data.friend),
+            ...user.friendOf.map(data => data.friendOf),
+        ]
+
+        res.json(friends)
 
     } catch(err) {
         console.log(err)
