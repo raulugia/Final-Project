@@ -19,6 +19,7 @@ const Home = () => {
             Authorization: `Bearer ${token}`,
           },
         })
+
         setUserData(data)
         console.log(data)
       } catch(err) {
