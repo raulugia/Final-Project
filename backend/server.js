@@ -140,6 +140,7 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
         const user = await prisma.user.findUnique({
             where: { email: req.user.email },
             include: {
+               //include all the meal log records logged by the user 
                meals: {
                 include: {
                     meal: {
