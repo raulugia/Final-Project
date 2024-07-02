@@ -29,7 +29,7 @@ const upload = multer({ dest: "uploads/" });
 //endpoint for user registration
 app.post("/api/register", async (req, res) => {
   //extract email, name and surname from the request body
-  const { email, name, surname } = req.body;
+  const { email, name, surname, username } = req.body;
 
   try {
     //create a new user in the database with the extracted data
@@ -38,6 +38,7 @@ app.post("/api/register", async (req, res) => {
         email,
         name,
         surname,
+        username,
       },
     });
     

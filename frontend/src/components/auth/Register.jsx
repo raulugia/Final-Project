@@ -42,19 +42,20 @@ const Register = () => {
     //if all the details were provided 
     if (newUser.name && newUser.surname && newUser.email && newUser.password) {
         try{
+            //send a POST request with the user's data so it can be saved in the database in Railway
+            await axiosInstance.post("/api/register", {
+              email: newUser.email,
+              name: newUser.name,
+              surname: newUser.surname,
+              username: newUser.username,
+            })
+            
             //create a new user with the email and password provided in the form - new user will be signed in
             const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
             //store new user
             const user = userCredential.user;
             //update the user's name in Firebase
             await updateProfile(user, { displayName: newUser.name })
-
-            //send a POST request with the user's data so it can be saved in the database in Railway
-            await axiosInstance.post("/api/register", {
-                email: newUser.email,
-                name: newUser.name,
-                surname: newUser.surname
-            })
 
             //navigate to "/home"
             navigate("/home")
