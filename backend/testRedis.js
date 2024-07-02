@@ -21,12 +21,14 @@ const prisma = new PrismaClient();
 
 async function resetData() {
     try {
-        await prisma.mealLog.deleteMany({});
-        await prisma.meal.deleteMany({});
-        await prisma.restaurant.deleteMany({});
-        await prisma.message.deleteMany({});
-        await prisma.friendship.deleteMany({});
-        await prisma.user.deleteMany({});
+        // await prisma.mealLog.deleteMany({});
+        // await prisma.meal.deleteMany({});
+        // await prisma.restaurant.deleteMany({});
+        // await prisma.message.deleteMany({});
+        // await prisma.friendship.deleteMany({});
+        // await prisma.user.deleteMany({});
+
+        await prisma.$executeRaw`TRUNCATE TABLE "MealLog", "Meal", "Restaurant", "Message", "Friendship", "User" RESTART IDENTITY CASCADE`
 
     console.log("All tables have been reset.");
     } catch (err) {

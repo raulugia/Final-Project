@@ -16,6 +16,7 @@ datasource db {
 model User {
   id Int @id @default(autoincrement())
   email String @unique
+  username String @unique
   name String
   surname String
   meals MealLog[]
@@ -23,6 +24,8 @@ model User {
   friendOf Friendship[] @relation("FriendFriends")
   chatsSent Message[] @relation("SentMessages")
   chatsReceived Message[] @relation("ReceivedMessages")
+  sentRequests FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
 }
 
 model Restaurant {
@@ -68,6 +71,22 @@ model Friendship {
   friendId Int
 
   @@unique([userId, friendId])
+}
+
+model FriendRequest {
+  id Int @id @default(autoincrement())
+  sender User @relation("SentRequests", fields: [senderId], references: [id])
+  senderId Int
+  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  receiverId Int
+  status RequestStatus
+  createdAt DateTime @default(now())
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 model Message {
