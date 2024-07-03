@@ -237,7 +237,17 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 },
             },
             include: {
-                restaurant: true
+                restaurant: true,
+                logs: {
+                    where: {
+                        userId: req.user.id
+                    },
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    //get only the latest log
+                    take: 1,
+                }
             }
         })
 
@@ -252,16 +262,45 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                         logs: {
                             some: {
                                 userId: req.user.id
-                            }
-                        }
+                            },
+                        },
+                    },
+                },
+            },
+            include: {
+                meals: {
+                    include: {
+                        logs: true
                     }
                 }
             }
         })
 
         const results = [
-            ...meals.map(meal => ({id: meal.id, name: meal.name, type: "meal", restaurant: meal.restaurant.name})),
-            ...restaurants.map(restaurant => ({ id: restaurant.id, name: restaurant.name, type: "restaurant"}))
+            ...meals.map(meal => {
+                const latestLog = meal.logs[0];
+                return {
+                    id: meal.id, 
+                    mealName: meal.name, 
+                    type: "meal", 
+                    restaurantName: meal.restaurant.name,
+                    carbs: latestLog?.carbEstimate,
+                    accuracy: latestLog?.rating,
+                    date: latestLog?.createdAt,
+                    imgUrl: latestLog?.picture,
+                    totalLogs: meal.logs.length
+                }
+            }),
+            ...restaurants.map(restaurant => {
+                //get the total number of meal logs linked to a restaurant 
+                const totalLogs = restaurant.meals.reduce((acc, meal) => acc + meal.logs.length, 0)
+                return {
+                    id: restaurant.id, 
+                    restaurantName: restaurant.name, 
+                    type: "restaurant",
+                    totalLogs: totalLogs,
+                }
+            }),
         ]
 
         res.json(results)
