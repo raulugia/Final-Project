@@ -219,6 +219,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
     }
 })
 
+//endpoint to get the restaurants and meals requested by the user
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
 

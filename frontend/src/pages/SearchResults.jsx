@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { useLocation } from 'react-router-dom'
 import axiosInstance from '../../utils/axiosInstance'
 import { auth } from '../../utils/firebase'
+import SearchResultCard from '../components/SearchResultCard'
 
 const SearchResults = () => {
     const user = auth.currentUser
@@ -29,7 +30,9 @@ const SearchResults = () => {
 
     result.length > 0 ? console.log(result) : ""
   return (
-    <div>SearchResults</div>
+    <div className='flex flex-col'>
+        <SearchResultCard />
+    </div>
   )
 }
 
