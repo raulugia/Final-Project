@@ -38,7 +38,7 @@ const Home = () => {
   }
   return (
     <div>
-      <p>Welcome Home, {user.displayName}</p>
+      <p>Welcome Home</p>
       <p className="cursor-pointer font-semibold" onClick={handleClick}>Log Out</p>
     </div>
   )

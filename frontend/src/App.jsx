@@ -7,6 +7,7 @@ import LogMeal from './pages/LogMeal'
 import Home from './pages/Home'
 import Friends from './pages/Friends'
 import Profile from './pages/Profile'
+import SearchResults from './pages/SearchResults'
 import { auth } from '../utils/firebase'
 import {Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
@@ -36,11 +37,12 @@ function App() {
       <Route path='/' element={<Login />}/>
       <Route path='/register' element={<Register />}/>
 
-      <Route element={ <Navbar /> }>
+      <Route element={ <Navbar name={user?.displayName}/> }>
       <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}/>
       <Route path='/friends' element={<ProtectedRoute><Friends /></ProtectedRoute>}/>
       <Route path='/friends/:id' element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
       <Route path='/log-meal' element={<ProtectedRoute><LogMeal /></ProtectedRoute>}/>
+      <Route path='/search' element={<ProtectedRoute><SearchResults /></ProtectedRoute>}/>
       </Route>
      </Routes>
     </div>
