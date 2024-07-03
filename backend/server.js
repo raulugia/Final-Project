@@ -219,6 +219,57 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
     }
 })
 
+app.get("/api/search", authenticateUser, async(req, res) => {
+    const { query } = req.query
+
+    try{
+        const meals = await prisma.meal.findMany({
+            where: {
+                name: {
+                    contains: query,
+                    mode: "insensitive"
+                },
+                logs: {
+                    some: {
+                        userId: req.user.id
+                    },
+                },
+            },
+            include: {
+                restaurant: true
+            }
+        })
+
+        const restaurants = await prisma.restaurant.findMany({
+            where: {
+                name: {
+                    contains: query,
+                    mode: "insensitive"
+                },
+                meals: {
+                    some: {
+                        logs: {
+                            some: {
+                                userId: req.user.id
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        const results = [
+            ...meals.map(meal => ({id: meal.id, name: meal.name, type: "meal", restaurant: meal.restaurant.name})),
+            ...restaurants.map(restaurant => ({ id: restaurant.id, name: restaurant.name, type: "restaurant"}))
+        ]
+
+        res.json(results)
+    } catch(err) {
+        console.log(err)
+        res.status(400).json({error: err.message})
+    }
+})
+
 //start express server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
