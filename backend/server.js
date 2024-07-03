@@ -276,7 +276,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             }
         })
 
-        const results = [
+        const mea = [
             ...meals.map(meal => {
                 const latestLog = meal.logs[0];
                 return {
@@ -290,7 +290,10 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                     imgUrl: latestLog?.picture,
                     totalLogs: meal.logs.length
                 }
-            }),
+            })
+        ]
+
+        const rest = [
             ...restaurants.map(restaurant => {
                 //get the total number of meal logs linked to a restaurant 
                 const totalLogs = restaurant.meals.reduce((acc, meal) => acc + meal.logs.length, 0)
@@ -300,8 +303,36 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                     type: "restaurant",
                     totalLogs: totalLogs,
                 }
-            }),
+            })
         ]
+
+        // const results = [
+        //     ...meals.map(meal => {
+        //         const latestLog = meal.logs[0];
+        //         return {
+        //             id: meal.id, 
+        //             mealName: meal.name, 
+        //             type: "meal", 
+        //             restaurantName: meal.restaurant.name,
+        //             carbs: latestLog?.carbEstimate,
+        //             accuracy: latestLog?.rating,
+        //             date: latestLog?.createdAt,
+        //             imgUrl: latestLog?.picture,
+        //             totalLogs: meal.logs.length
+        //         }
+        //     }),
+        //     ...restaurants.map(restaurant => {
+        //         //get the total number of meal logs linked to a restaurant 
+        //         const totalLogs = restaurant.meals.reduce((acc, meal) => acc + meal.logs.length, 0)
+        //         return {
+        //             id: restaurant.id, 
+        //             restaurantName: restaurant.name, 
+        //             type: "restaurant",
+        //             totalLogs: totalLogs,
+        //         }
+        //     }),
+        // ]
+        const results = [{meals: mea}, {restaurants: rest}]
 
         res.json(results)
     } catch(err) {

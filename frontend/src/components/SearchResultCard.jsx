@@ -24,7 +24,10 @@ const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, tot
           </div>
         </div>
       ) : (
-        <div>Meal</div>
+        <div className="border border-black w-[50%] mx-auto py-4 px-4 flex flex-col gap-5 rounded-lg">
+            <p className="text-xl font-semibold">{restaurantName}</p>
+            <p className="text-xs">Number of logs: {totalLogs}</p>
+        </div>
       )}
     </>
   );
