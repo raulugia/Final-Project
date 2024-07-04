@@ -15,15 +15,15 @@ const Navbar = ({ name }) => {
     
   return (
     <>
-    <div className='bg-black py-2 px-6 flex justify-between items-center fixed w-full'>
+    <div className='py-2 px-6 flex justify-between items-center fixed w-full text-slate-800 backdrop-blur-sm bg-white/40 shadow-md'>
         <div>
-            <Link to="/home" className='text-2xl text-white'>DiaMate</Link>
+            <Link to="/home" className='text-2xl font-bold'>DiaMate</Link>
         </div>
-        <div className='flex gap-10 justify-around'>
-            <Link to="/log-meal" className='text-md text-white'>Log Meal</Link>
-            <Link to="/friends" className='text-md text-white'>My Meals</Link>
-            <Link to="/friends" className='text-md text-white'>My Restaurants</Link>
-            <Link to="/friends" className='text-md text-white'>Friends</Link>
+        <div className='flex gap-10 justify-around text-md'>
+            <Link to="/log-meal" className=''>Log Meal</Link>
+            <Link to="/friends" className=''>My Meals</Link>
+            <Link to="/friends" className=''>My Restaurants</Link>
+            <Link to="/friends" className=''>Friends</Link>
         </div>
         <form className='flex w-64 items-center gap-1' onSubmit={handleSubmit}>
             <input type="search" name="" id="" placeholder="Search meals, restaurants"
