@@ -1,11 +1,12 @@
 import React from 'react'
 import Accuracy from "./Accuracy"
 
+
 const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, totalLogs, imgUrl, type }) => {
   return (
     <>
       {type === "meal" ? (
-        <div className="shadow-md bg-white text-slate-800 w-[70%] h-[190px] mx-auto py-4 px-4 flex gap-10 rounded-lg hover:cursor-pointer">
+        <div className="shadow-md bg-white text-slate-800 w-[70%] h-[185px] mx-auto py-4 px-4 flex gap-10 rounded-lg hover:cursor-pointer">
           <div className="w-[30%]">
             <img src={imgUrl} alt="" className="rounded-md w-full h-full" />
           </div>
