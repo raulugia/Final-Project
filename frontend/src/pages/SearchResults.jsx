@@ -35,25 +35,37 @@ const SearchResults = () => {
     },[])
 
   return (
-    <div className='flex flex-col h-screen gap-4 bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500'>
-        <h1 className='text-2xl font-semibold mt-20 mb-5 ml-[5%] text-slate-800'>Search Results</h1>
+    <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
+        <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>Search Results</h1>
         {
             loading ? (
                 <SkeletonSearchResultCard />
             ) : (
 
-                <div className='flex flex-col gap-4 py-10 mx-auto w-[60%] rounded-lg backdrop-blur-sm bg-white/40 shadow-lg'>
+                <div className='flex flex-col gap-4 py-10 mx-auto w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg'>
                     <h2 className='text-xl font-semibold mb-1 mx-[15%] border-b-2 border-slate-800  pb-2 text-slate-800'>Meals</h2>
-                    {
-                        meals.map(item => (
-                            <SearchResultCard key={item.id+item.restaurantName} {...item}/>
-                        ))
+                    {   
+                        meals.length > 0 ? (
+                            meals.map(item => (
+                                <SearchResultCard key={item.id+item.restaurantName} {...item}/>
+                            ))
+                        ) : (
+                            <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-10 px-4 flex items-center rounded-lg">
+                                <p>We couldn't find any matches for your search.</p>
+                            </div>
+                        )
                     }
                     <h2 className='text-xl font-semibold mt-4 mb-1 mx-[15%] border-b-2 border-slate-800 pb-2 text-slate-800'>Restaurants</h2>
-                    {
-                        restaurants.map(item => (
-                            <SearchResultCard key={item.id+item.restaurantName} {...item}/>
-                        ))
+                    {   
+                        restaurants.length > 0 ? (
+                            restaurants.map(item => (
+                                <SearchResultCard key={item.id+item.restaurantName} {...item}/>
+                            ))
+                        ) : (
+                            <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-10 px-4 flex items-center rounded-lg">
+                                <p>We couldn't find any matches for your search.</p>
+                            </div>
+                        )
                     }
                 </div>
             )
