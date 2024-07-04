@@ -19,7 +19,7 @@ const Navbar = ({ name }) => {
         <div>
             <Link to="/home" className='text-2xl font-bold'>DiaMate</Link>
         </div>
-        <div className='flex gap-10 justify-around text-md'>
+        <div className='flex gap-10 justify-around text-md font-semibold'>
             <Link to="/log-meal" className=''>Log Meal</Link>
             <Link to="/friends" className=''>My Meals</Link>
             <Link to="/friends" className=''>My Restaurants</Link>
