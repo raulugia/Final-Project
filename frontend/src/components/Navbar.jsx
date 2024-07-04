@@ -15,7 +15,7 @@ const Navbar = ({ name }) => {
     
   return (
     <>
-    <div className='bg-black py-2 px-6 flex justify-between items-center'>
+    <div className='bg-black py-2 px-6 flex justify-between items-center fixed w-full'>
         <div>
             <Link to="/home" className='text-2xl text-white'>DiaMate</Link>
         </div>

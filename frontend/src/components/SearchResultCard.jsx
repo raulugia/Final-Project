@@ -4,7 +4,7 @@ const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, tot
   return (
     <>
       {type === "meal" ? (
-        <div className="border border-black w-[50%] h-[205px] mx-auto py-4 px-4 flex gap-10 rounded-lg">
+        <div className="shadow-md bg-white text-slate-800 w-[70%] h-[205px] mx-auto py-4 px-4 flex gap-10 rounded-lg">
           <div className="w-[30%]">
             <img src={imgUrl} alt="" className="rounded-md w-full h-full" />
           </div>
@@ -24,7 +24,7 @@ const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, tot
           </div>
         </div>
       ) : (
-        <div className="border border-black w-[50%] mx-auto py-4 px-4 flex flex-col gap-5 rounded-lg">
+        <div className="shadow-md bg-white text-slate-800 w-[70%] mx-auto py-4 px-4 flex flex-col gap-5 rounded-lg">
             <p className="text-xl font-semibold">{restaurantName}</p>
             <p className="text-xs">Number of logs: {totalLogs}</p>
         </div>

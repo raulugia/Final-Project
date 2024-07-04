@@ -32,7 +32,7 @@ function App() {
   //set up the different routes users can access
   //components rendered by protected routes will be wrapped by ProtectedRoute to ensure the user is authenticated
   return (
-    <div className="h-screen">
+    <div>
      <Routes>
       <Route path='/' element={<Login />}/>
       <Route path='/register' element={<Register />}/>
