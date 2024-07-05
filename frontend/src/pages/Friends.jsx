@@ -39,14 +39,12 @@ const Friends = () => {
 
         if(userFriends.length > 0) {
             const filtered = userFriends.filter(friend => {
-                `${friend.name} ${friend.surname}`.toLowerCase().includes(searchValue.toLowerCase())
+                console.log("friend", friend.name)
+                return `${friend.name} ${friend.surname}`.toLowerCase().includes(searchValue.toLowerCase())
             })
 
+            console.log("filtered", filtered)
             setFilteredFriends(filtered)
-        }
-
-        if(searchValue.length < 0) {
-            setFilteredFriends(userFriends)
         }
     }
 
