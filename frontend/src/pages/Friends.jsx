@@ -5,6 +5,7 @@ import { auth } from '../../utils/firebase'
 const Friends = () => {
     const user = auth.currentUser
     const [userFriends, setUserFriends] = useState([])
+    const [filteredFriends, setFilteredFriends] = useState([])
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
 
@@ -30,6 +31,19 @@ const Friends = () => {
         )()
     }, [])
 
+    const handleInputChange = (e) => {
+        const searchValue = e.target.value
+        setSearchInput(searchValue)
+
+        if(userFriends.length > 0) {
+            const filtered = userFriends.filter(friend => {
+                `${friend.name} ${friend.surname}`.toLowerCase().includes(searchValue.toLowerCase())
+            })
+
+            setFilteredFriends(filtered)
+        }
+    }
+
     if(loading) {
         return <p>Loading...</p>
     }
@@ -41,7 +55,7 @@ const Friends = () => {
         <form action="" className='absolute inset-0 mt-[-30px] mx-10'>
             <input type="search" name="" id="" value={searchInput} placeholder='Search for friends...' 
                 className='py-3 px-6 text-lg w-full rounded-full shadow-md'
-                onChange={e => setSearchInput(e.target.value)}
+                onChange={handleInputChange}
             />
         </form>
     {
