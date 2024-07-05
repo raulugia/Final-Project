@@ -3,29 +3,38 @@ import axiosInstance from '../../utils/axiosInstance'
 import { auth } from '../../utils/firebase'
 import FriendCard from '../components/FriendCard'
 
+
 const Friends = () => {
+    //get current user
     const user = auth.currentUser
+    //state to store all the user friends
     const [userFriends, setUserFriends] = useState([])
+    //state to store all the friends on first render and filtered friends when the search bar is used
     const [filteredFriends, setFilteredFriends] = useState([])
+    //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
+    //state to track when content is being loaded
     const [loading, setLoading] = useState(true)
 
+    //get the user's friends
     useEffect(() => {
         (
             async() => {
                 try {
                     //get the id token
                     const token = await user.getIdToken();
+
+                    //make a get request to get the users friends passing the id token for verification
                     const { data } = await axiosInstance.get("/api/friends", {
                         headers: {
                         Authorization: `Bearer ${token}`,
                         },
                     })
 
+                    //update states
                     setUserFriends(data)
                     setFilteredFriends(data)
                     setLoading(false)
-                    console.log(data)
                 } catch(err) {
                     console.log(err)
                 }
@@ -33,17 +42,21 @@ const Friends = () => {
         )()
     }, [])
 
+    //method triggered by typing in the search bar - filter friends
     const handleInputChange = (e) => {
+        //store input value
         const searchValue = e.target.value
+        //update state
         setSearchInput(searchValue)
 
+        //if friends were found
         if(userFriends.length > 0) {
+            //get the friends that match the search input
             const filtered = userFriends.filter(friend => {
-                console.log("friend", friend.name)
                 return `${friend.name} ${friend.surname}`.toLowerCase().includes(searchValue.toLowerCase())
             })
 
-            console.log("filtered", filtered)
+            //update state so the filtered friends are displayed
             setFilteredFriends(filtered)
         }
     }
@@ -56,7 +69,7 @@ const Friends = () => {
    <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200 pt-20'>
     <h1 className='text-2xl font-semibold mb-4 ml-[5%] text-slate-800'>Friends</h1>
     <div className='flex flex-col gap-4 py-10 mx-auto w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
-        <form action="" className='absolute inset-0 mt-[-30px] mx-10'>
+        <form action="" className='absolute h-fit inset-0 mt-[-30px] mx-10'>
             <input type="search" name="" id="" value={searchInput} placeholder='Search for friends...' 
                 className='py-3 px-6 text-lg w-full rounded-full shadow-md'
                 onChange={handleInputChange}

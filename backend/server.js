@@ -178,11 +178,12 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
                 friends: {
                     include: {
                         friend: {
-                            //only return id, name and surname
+                            //only return id, name, surname and username - email should not be returned
                             select: {
                                 id: true,
                                 name: true,
-                                surname: true
+                                surname: true,
+                                username: true,
                             },
                         },
                     },
