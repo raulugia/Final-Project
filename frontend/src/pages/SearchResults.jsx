@@ -42,7 +42,7 @@ const SearchResults = () => {
                 <SkeletonSearchResultCard />
             ) : (
 
-                <div className='flex flex-col gap-4 py-10 mx-auto w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg'>
+                <div className='flex flex-col gap-4 py-10 mx-auto w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
                     <h2 className='text-xl font-semibold mb-1 mx-[15%] border-b-2 border-slate-800  pb-2 text-slate-800'>Meals</h2>
                     {   
                         meals.length > 0 ? (

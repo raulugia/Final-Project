@@ -15,7 +15,7 @@ const Navbar = ({ name }) => {
     
   return (
     <>
-    <div className='py-2 px-6 flex justify-between items-center fixed w-full text-slate-800 backdrop-blur-sm bg-white/40 shadow-md'>
+    <div className='py-2 px-6 flex justify-between items-center fixed z-10 w-full text-slate-800 backdrop-blur-[5px] bg-white/40 shadow-md'>
         <div>
             <Link to="/home" className='text-2xl font-bold'>DiaMate</Link>
         </div>

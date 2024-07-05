@@ -78,8 +78,8 @@ const LogMeal = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-full bg-slate-50">
-      <div className="border py-5 px-3 rounded-lg lg:w-[50%] md:w-1/3 shadow-md bg-white">
+    <div className="flex justify-center items-center min-h-screen bg-slate-50">
+      <div className="border mt-12 py-5 px-3 rounded-lg lg:w-[50%] md:w-1/3 shadow-md bg-white">
         <form action="" className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex items-center justify-center w-[50%] mx-auto mb-2">
             <label
