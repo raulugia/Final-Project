@@ -53,7 +53,7 @@ const Friends = () => {
         if(userFriends.length > 0) {
             //get the friends that match the search input
             const filtered = userFriends.filter(friend => {
-                return `${friend.name} ${friend.surname}`.toLowerCase().includes(searchValue.toLowerCase())
+                return `${friend.name} ${friend.surname} ${friend.username}`.toLowerCase().includes(searchValue.toLowerCase())
             })
 
             //update state so the filtered friends are displayed
@@ -78,7 +78,7 @@ const Friends = () => {
     {
         filteredFriends.length > 0 ? (
             filteredFriends.map(friend => (
-                <FriendCard name={friend.name} surname={friend.surname} key={friend.id+friend.name}/>
+                <FriendCard name={friend.name} surname={friend.surname} username={friend.username} key={friend.id+friend.name}/>
             ))
         ) : (
            
