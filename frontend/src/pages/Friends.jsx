@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import axiosInstance from '../../utils/axiosInstance'
 import { auth } from '../../utils/firebase'
+import FriendCard from '../components/FriendCard'
 
 const Friends = () => {
     const user = auth.currentUser
@@ -22,6 +23,7 @@ const Friends = () => {
                     })
 
                     setUserFriends(data)
+                    setFilteredFriends(data)
                     setLoading(false)
                     console.log(data)
                 } catch(err) {
@@ -42,6 +44,10 @@ const Friends = () => {
 
             setFilteredFriends(filtered)
         }
+
+        if(searchValue.length < 0) {
+            setFilteredFriends(userFriends)
+        }
     }
 
     if(loading) {
@@ -59,13 +65,15 @@ const Friends = () => {
             />
         </form>
     {
-        userFriends.length > 0 ? (
-            <p>{userFriends[0].name}</p>
+        filteredFriends.length > 0 ? (
+            filteredFriends.map(friend => (
+                <FriendCard name={friend.name} surname={friend.surname} key={friend.id+friend.name}/>
+            ))
         ) : (
            
-                <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
-                    <p>We couldn't find any friends that match your search.</p>
-                </div>
+            <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
+                <p>We couldn't find any friends that match your search.</p>
+            </div>
         )
         }
     </div>
