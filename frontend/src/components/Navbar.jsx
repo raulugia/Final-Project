@@ -22,7 +22,7 @@ const Navbar = ({ name }) => {
         <div className='flex gap-10 justify-around text-md font-semibold'>
             <Link to="/log-meal" className=''>Log Meal</Link>
             <Link to="/friends" className=''>My Meals</Link>
-            <Link to="/friends" className=''>My Restaurants</Link>
+            <Link to="/my-restaurants" className=''>My Restaurants</Link>
             <Link to="/friends" className=''>Friends</Link>
         </div>
         <form className='flex w-64 items-center gap-1' onSubmit={handleSubmit}>
