@@ -220,6 +220,37 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
     }
 })
 
+
+app.get("/api/restaurants", authenticateUser, async(req, res,) => {
+    try {
+        const mealLogs = await prisma.mealLog.findMany({
+            where: {
+                userId: req.user.id
+            },
+            include: {
+                meal: {
+                    include: {
+                        restaurant: true
+                    }
+                }
+            }
+        })
+
+        
+        const restaurantsMap = new Map()
+        
+        mealLogs.forEach(log => {
+            restaurantsMap.set(log.meal.restaurant.id, log.meal.restaurant)
+        })
+        const uniqueRestaurants = Array.from(restaurantsMap.values())
+        
+        res.json(uniqueRestaurants)
+
+    } catch(err) {
+        console.log(err)
+    }
+})
+
 //endpoint to get the restaurants and meals requested by the user
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
