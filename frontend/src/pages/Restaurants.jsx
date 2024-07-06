@@ -3,6 +3,7 @@ import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import SkeletonSearchResultCard from '../components/SkeletonSearchResultCard'
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { Link } from "react-router-dom"
 
 const Restaurants = () => {
     const user = auth.currentUser
@@ -11,6 +12,7 @@ const Restaurants = () => {
     //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
+    const [hoveredRestaurant, setHoveredRestaurant] = useState(null)
 
     useEffect(() => {
         (
@@ -69,14 +71,18 @@ const Restaurants = () => {
         {
             filteredRestaurants.length > 0 ? (
                 filteredRestaurants.map(restaurant => (
-                    <div key={restaurant.id+restaurant.name} className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer">
+                    <Link key={restaurant.id+restaurant.name}
+                        onMouseEnter={() => setHoveredRestaurant(restaurant.id)} 
+                        onMouseLeave={() => setHoveredRestaurant(null)} 
+                        className={`shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer ${hoveredRestaurant === restaurant.id ? "underline" : ""}`}
+                    >
                         <div className='flex flex-col'>
                             <p className="text-xl font-semibold">{restaurant.name}</p>
                         </div>
                         <div>
                             <MdKeyboardArrowRight size={40} />
                         </div>
-                    </div>
+                    </Link>
                 ))
             ) : (
             
