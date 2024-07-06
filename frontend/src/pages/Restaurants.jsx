@@ -1,7 +1,7 @@
 import React, { useEffect, useState} from 'react'
 import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
-import SkeletonSearchResultCard from '../components/SkeletonSearchResultCard'
+import SkeletonRestaurantCard from '../components/SkeletonRestaurantCard';
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from "react-router-dom"
 
@@ -68,8 +68,8 @@ const Restaurants = () => {
                 />
             </form>
             <div className='flex flex-col gap-4 mt-4'>
-        {
-            filteredRestaurants.length > 0 ? (
+        {   
+            filteredRestaurants.length > 0 && !loading ? (
                 filteredRestaurants.map(restaurant => (
                     <Link key={restaurant.id+restaurant.name}
                         onMouseEnter={() => setHoveredRestaurant(restaurant.id)} 
@@ -84,11 +84,13 @@ const Restaurants = () => {
                         </div>
                     </Link>
                 ))
-            ) : (
+            ) :  filteredRestaurants.length <= 0 && !loading ?(
             
                 <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
                     <p>We couldn't find any restaurants that match your search.</p>
                 </div>
+            ) : (
+                <SkeletonRestaurantCard />
             )
         }
             </div>
