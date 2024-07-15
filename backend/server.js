@@ -264,6 +264,8 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
 
+    console.log("user id:", req.user.id)
+
     try{
         const meals = await prisma.meal.findMany({
             where: {
@@ -359,6 +361,8 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             }
         })
 
+        console.log("USERS: ", users.friendOf)
+
         const mealResults = [
             ...meals.map(meal => {
                 const latestLog = meal.logs[0];
@@ -390,6 +394,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
         ]
 
         const userResults = users.map(user => {
+            console.log(`User name: ${user.name} friends of ${JSON.stringify(user.friendOf)}`)
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
             return {
                 id: user.id,
