@@ -9,12 +9,20 @@ const multer = require("multer");
 const { imageQueue } = require("./queue");
 const authenticateUser = require("./authMiddleware");
 const { types } = require("pg");
+const http = require("http");
+const { initializeSocket } = require("./socket");
 
 //initialize the Prisma client
 const prisma = new PrismaClient();
 
 //create an express application
 const app = express();
+
+//create HTTP server
+const server = http.createServer(app);
+
+//initialize socket.io
+initializeSocket(server);
 
 //establish the port for the server
 const PORT = process.env.PORT || 5000;
@@ -350,7 +358,6 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 }
             }
         })
-        console.log("FRIENDS: ", users)
 
         const mealResults = [
             ...meals.map(meal => {
@@ -383,7 +390,6 @@ app.get("/api/search", authenticateUser, async(req, res) => {
         ]
 
         const userResults = users.map(user => {
-            console.log("USERR: ", user)
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
             return {
                 id: user.id,
