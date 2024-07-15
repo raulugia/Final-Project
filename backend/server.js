@@ -8,6 +8,7 @@ const cors = require("cors");
 const multer = require("multer");
 const { imageQueue } = require("./queue");
 const authenticateUser = require("./authMiddleware");
+const { types } = require("pg");
 
 //initialize the Prisma client
 const prisma = new PrismaClient();
@@ -308,7 +309,50 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             }
         })
 
-        const mea = [
+        const users =  await prisma.user.findMany({
+            where : {
+                OR: [ {
+                    name: {
+                        contains: query,
+                        mode: "insensitive"
+                    },
+                },
+                {
+                    surname: {
+                        contains: query,
+                        mode: "insensitive"
+                    },
+                },
+                {
+                    username: {
+                        contains: query,
+                        mode: "insensitive"
+                    },
+                },
+            ]
+            },
+            include: {
+                friends: {
+                    where: {
+                        friendId: req.user.id
+                    },
+                    select: {
+                        id: true
+                    }
+                },
+                friendOf: {
+                    where: {
+                        userId: req.user.id,
+                    },
+                    select: {
+                        id: true,
+                    }
+                }
+            }
+        })
+        console.log("FRIENDS: ", users)
+
+        const mealResults = [
             ...meals.map(meal => {
                 const latestLog = meal.logs[0];
                 return {
@@ -325,7 +369,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             })
         ]
 
-        const rest = [
+        const restaurantResults = [
             ...restaurants.map(restaurant => {
                 //get the total number of meal logs linked to a restaurant 
                 const totalLogs = restaurant.meals.reduce((acc, meal) => acc + meal.logs.length, 0)
@@ -338,33 +382,20 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             })
         ]
 
-        // const results = [
-        //     ...meals.map(meal => {
-        //         const latestLog = meal.logs[0];
-        //         return {
-        //             id: meal.id, 
-        //             mealName: meal.name, 
-        //             type: "meal", 
-        //             restaurantName: meal.restaurant.name,
-        //             carbs: latestLog?.carbEstimate,
-        //             accuracy: latestLog?.rating,
-        //             date: latestLog?.createdAt,
-        //             imgUrl: latestLog?.picture,
-        //             totalLogs: meal.logs.length
-        //         }
-        //     }),
-        //     ...restaurants.map(restaurant => {
-        //         //get the total number of meal logs linked to a restaurant 
-        //         const totalLogs = restaurant.meals.reduce((acc, meal) => acc + meal.logs.length, 0)
-        //         return {
-        //             id: restaurant.id, 
-        //             restaurantName: restaurant.name, 
-        //             type: "restaurant",
-        //             totalLogs: totalLogs,
-        //         }
-        //     }),
-        // ]
-        const results = [{meals: mea}, {restaurants: rest}]
+        const userResults = users.map(user => {
+            console.log("USERR: ", user)
+            const isFriend = user.friends.length > 0 || user.friendOf.length > 0
+            return {
+                id: user.id,
+                name: user.name,
+                surname: user.surname,
+                username: user.username,
+                type: "user",
+                isFriend,
+            }
+        })
+        
+        const results = [{meals: mealResults}, {restaurants: restaurantResults}, {users: userResults}]
 
         res.json(results)
     } catch(err) {

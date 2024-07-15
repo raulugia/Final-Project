@@ -38,6 +38,7 @@ const Restaurants = () => {
         )()
     }, [])
 
+
     //method triggered by typing in the search bar - filter restaurants
     const handleInputChange = (e) => {
         //store input value
@@ -49,7 +50,7 @@ const Restaurants = () => {
         if(restaurants.length > 0) {
             //get the restaurants that match the search input
             const filtered = restaurants.filter(restaurant => {
-                return `${restaurant.name}`.toLowerCase().includes(searchValue.toLowerCase())
+                return restaurant.name.toLowerCase().includes(searchValue.toLowerCase())
             })
 
             //update state so the filtered restaurants are displayed
