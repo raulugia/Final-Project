@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import { auth } from '../../utils/firebase'
 import SearchResultCard from '../components/SearchResultCard'
 import SkeletonSearchResultCard from '../components/SkeletonSearchResultCard'
+import UserCard from '../components/UserCard'
 import { Link } from 'react-router-dom'
 import { MdKeyboardArrowRight } from "react-icons/md";
 
@@ -75,36 +76,7 @@ const SearchResults = () => {
                     {   
                         users.length > 0 ? (
                             users.map(user => (
-                                <Link to={`/${user.username}`}
-                                    // onMouseEnter={() => setIsHovered(username)}
-                                    // onMouseLeave={() => setIsHovered(null)}
-                                    className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg"
-                                >   
-                                    <div className="flex items-center flex-grow justify-between">
-                                        <div className="flex items-center justify-between gap-10">
-                                            <div>
-                                                <div className="bg-slate-500 rounded-full w-20 h-20"></div>
-                                            </div>
-                                            <div className='flex flex-col items-center'>
-                                            {/* <p className={`text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p> */}
-                                                <p className={`text-xl font-semibold text-slate-800`}>{user.name} {user.surname}</p>
-                                                <p className={"text-lg text-slate-400"}>@{user.username}</p>
-                                            </div>
-                                        </div>
-                                        <div className="mr-10">
-                                            {
-                                                user.isFriend ? (
-                                                    <button className='border px-2 py-1 rounded-md'>Message</button>
-                                                ) : (
-                                                    <button className='border px-2 py-1 rounded-md'> Add Friend</button>
-                                                )
-                                            }
-                                        </div>
-                                    </div>
-                                    <div className="text-slate-800">
-                                        <MdKeyboardArrowRight size={40} />
-                                    </div>
-                                </Link>
+                                <UserCard {...user} />
                             ))
                         ) : (
                             <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-10 px-4 flex items-center rounded-lg">
