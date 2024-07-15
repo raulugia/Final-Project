@@ -12,6 +12,7 @@ import SearchResults from './pages/SearchResults'
 import { auth } from '../utils/firebase'
 import {Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
+import socket from "../utils/socket"
 
 
 function App() {
@@ -28,6 +29,21 @@ function App() {
 
     //cleanup method to prevent memory leaks
     return () => unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected to server")
+    })
+
+    socket.on("disconnect", () => {
+      console.log("disconnected from server")
+    })
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect")
+    }
   }, [])
 
   //set up the different routes users can access
