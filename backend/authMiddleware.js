@@ -8,7 +8,11 @@ const authenticateUser = async (req, res, next) => {
     
     //respond with a 401 status code if there is no token
     if(!token) {
-        return res.status(401).send({ error: "No token provided" });
+        if(res) {
+            return res.status(401).send({ error: "No token provided" });
+        }else {
+            return next(new Error("Authentication failed: no token provided"))
+        }
     }
 
     try {
@@ -20,8 +24,12 @@ const authenticateUser = async (req, res, next) => {
         next()
     } catch(err) {
         console.error("Error verifying token: ")
-        //respond with a 401 status if there was an error
-        res.status(401).send({ error: "Invalid token" });
+        if(res) {
+            //respond with a 401 status if there was an error
+            res.status(401).send({ error: "Invalid token" });
+        }else {
+            next(new Error("Authentication error: invalid token"))
+        }
     }
 }
 

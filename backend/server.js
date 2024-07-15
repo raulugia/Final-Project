@@ -410,6 +410,42 @@ app.get("/api/search", authenticateUser, async(req, res) => {
     }
 })
 
+//endpoint to handle friend requests
+app.post("/api/friend-request", authenticateUser, async(req, res) => {
+    const { recipientId } = req.body;
+
+    try{
+        const sender = await prisma.user.findUnique({
+            where: {
+                email: req.user.email
+            }
+        });
+
+        const recipient = await prisma.user.findUnique({
+            where: {
+                id: recipientId
+            }
+        });
+
+        if( !recipient) {
+            return res.status(404).json({error: "Recipient user not found"})
+        }
+
+        const friendRequest = await prisma.friendRequest.create({
+            data: {
+                sender: { connect: { id: sender.id }},
+                receiver: {connect: { id: recipient.id }},
+                status: "PENDING"
+            }
+        })
+
+        res.json(friendRequest)
+    } catch(err) {
+        console.log(err)
+        res.status(400).json({error: err.message})
+    }
+})
+
 //start express server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

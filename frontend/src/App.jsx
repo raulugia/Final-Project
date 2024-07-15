@@ -22,9 +22,16 @@ function App() {
   //get the current user once when the component mounts
   useEffect(() => {
     //set up a listener to check for authentication state changes
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged(async user => {
       //update the state with current user
       setUser(user)
+
+      if(user) {
+        const token = await user.getIdToken()
+        socket.auth = { token }
+        socket.connect()
+        socket.emit("getPendingFriendRequests")
+      }
     })
 
     //cleanup method to prevent memory leaks
@@ -40,9 +47,14 @@ function App() {
       console.log("disconnected from server")
     })
 
+    socket.on("pendingFriendRequests", requests => {
+      console.log("REQUESTS: ", requests)
+    })
+
     return () => {
       socket.off("connect");
       socket.off("disconnect")
+      socket.off("pendingFriendRequests")
     }
   }, [])
 

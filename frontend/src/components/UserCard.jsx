@@ -1,10 +1,35 @@
 import React, {useState} from 'react'
 import { Link } from 'react-router-dom'
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { auth } from '../../utils/firebase';
+import axiosInstance from '../../utils/axiosInstance';
 
 const UserCard = ({username, name, surname, isFriend}) => {
+    const user = auth.currentUser
     const [isHovered, setIsHovered] = useState(null)
+    const [requestSent, setRequestSent] = useState(false)
 
+    const sendFriendRequest = async(e) => {
+        e.preventDefault()
+
+        const token = await user.getIdToken();
+        try {
+            const response = await axiosInstance.post("/api/friend-request", 
+                { recipientId: id }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            )
+            
+            if(response.status === 200) {
+                setRequestSent(true)
+            }
+
+        } catch (err) {
+            console.error(err)
+        }
+    }
   return (
     <Link to={`/${username}`}
         onMouseEnter={() => setIsHovered(username)}
@@ -26,7 +51,7 @@ const UserCard = ({username, name, surname, isFriend}) => {
                     isFriend ? (
                         <button className='border px-2 py-1 rounded-md'>Message</button>
                     ) : (
-                        <button className='border px-2 py-1 rounded-md'> Add Friend</button>
+                        <button onClick={sendFriendRequest} className='border px-2 py-1 rounded-md'> Add Friend</button>
                     )
                 }
             </div>
