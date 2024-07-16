@@ -341,6 +341,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 },
             ]
             },
+            //this is needed to know if users are friends 
             include: {
                 friends: {
                     where: {
@@ -395,6 +396,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
         const userResults = users.map(user => {
             console.log(`User name: ${user.name} friends of ${JSON.stringify(user.friendOf)}`)
+            //if the length of friends or friendsOf is < 0, users are not friends
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
             return {
                 id: user.id,
