@@ -360,7 +360,25 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                     select: {
                         id: true,
                     }
-                }
+                },
+                sentRequests: {
+                    where: {
+                        receiverUid: req.user.uid,
+                        status: "PENDING"
+                    },
+                    select: {
+                        id: true
+                    }
+                },
+                receivedRequests: {
+                    where: {
+                        senderUid: req.user.uid,
+                        status: "PENDING"
+                    },
+                    select: {
+                        id: true
+                    }
+                },
             }
         })
 
@@ -400,6 +418,15 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             console.log(`User name: ${user.name} friends of ${JSON.stringify(user.friendOf)}`)
             //if the length of friends or friendsOf is < 0, users are not friends
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
+            
+            console.log(`User name: ${user.name} received requests ${JSON.stringify(user.receivedRequests)}`)
+            let friendRequestStatus = ""
+            if(user.sentRequests.length > 0) {
+                friendRequestStatus = "action"
+            } else if(user.receivedRequests.length > 0) {
+                friendRequestStatus = "pending"
+            }
+
             return {
                 id: user.id,
                 name: user.name,
@@ -408,6 +435,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 uid: user.uid,
                 type: "user",
                 isFriend,
+                friendRequestStatus,
             }
         })
         
@@ -422,6 +450,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
 //endpoint to handle friend requests
 app.post("/api/friend-request", authenticateUser, async(req, res) => {
+    console.log("HEREEEEE")
     const { recipientUid } = req.body;
 
     try{
