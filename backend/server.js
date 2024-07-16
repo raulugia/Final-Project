@@ -184,7 +184,7 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
 app.get("/api/friends", authenticateUser, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
-            where : { email: req.user.email},
+            where : { uid: req.user.uid },
             include: {
                 friends: {
                     include: {
@@ -266,8 +266,6 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
 
-    console.log("user id:", req.user.id)
-
     try{
         const meals = await prisma.meal.findMany({
             where: {
@@ -277,7 +275,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 },
                 logs: {
                     some: {
-                        userId: req.user.id
+                        userUid: req.user.uid
                     },
                 },
             },
@@ -285,7 +283,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 restaurant: true,
                 logs: {
                     where: {
-                        userId: req.user.id
+                        userUid: req.user.uid
                     },
                     orderBy: {
                         createdAt: "desc"
@@ -306,7 +304,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                     some: {
                         logs: {
                             some: {
-                                userId: req.user.id
+                                userUid: req.user.uid
                             },
                         },
                     },
@@ -346,7 +344,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             include: {
                 friends: {
                     where: {
-                        friendId: req.user.id
+                        friendUid: req.user.uid
                     },
                     select: {
                         id: true
@@ -354,7 +352,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 },
                 friendOf: {
                     where: {
-                        userId: req.user.id,
+                        userUid: req.user.uid,
                     },
                     select: {
                         id: true,
