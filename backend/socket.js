@@ -37,7 +37,7 @@ const initializeSocket = server => {
             try{
                 const pendingRequests = await prisma.friendRequest.findMany({
                     where: { 
-                        receiverId: user.id,
+                        receiverUid: user.uid,
                         status: "PENDING"
                     },
                     include: {
