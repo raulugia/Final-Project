@@ -4,7 +4,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
-const UserCard = ({username, name, surname, isFriend}) => {
+const UserCard = ({username, name, surname, isFriend, uid}) => {
     const user = auth.currentUser
     const [isHovered, setIsHovered] = useState(null)
     const [requestSent, setRequestSent] = useState(false)
@@ -15,13 +15,13 @@ const UserCard = ({username, name, surname, isFriend}) => {
         const token = await user.getIdToken();
         try {
             const response = await axiosInstance.post("/api/friend-request", 
-                { recipientId: id }, {
+                { recipientUid: uid }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 }
             )
-            
+
             if(response.status === 200) {
                 setRequestSent(true)
             }

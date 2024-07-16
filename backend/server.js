@@ -294,6 +294,8 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             }
         })
 
+        //get the restaurants that match the query and have at least one log from the current user
+        //this means that the user has been to that restaurant
         const restaurants = await prisma.restaurant.findMany({
             where: {
                 name: {
@@ -403,6 +405,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 name: user.name,
                 surname: user.surname,
                 username: user.username,
+                uid: user.uid,
                 type: "user",
                 isFriend,
             }
@@ -419,7 +422,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
 //endpoint to handle friend requests
 app.post("/api/friend-request", authenticateUser, async(req, res) => {
-    const { recipientId } = req.body;
+    const { recipientUid } = req.body;
 
     try{
         const sender = await prisma.user.findUnique({
@@ -430,7 +433,7 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
 
         const recipient = await prisma.user.findUnique({
             where: {
-                id: recipientId
+                uid: recipientUid
             }
         });
 
@@ -440,8 +443,8 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
 
         const friendRequest = await prisma.friendRequest.create({
             data: {
-                sender: { connect: { id: sender.id }},
-                receiver: {connect: { id: recipient.id }},
+                sender: { connect: { uid: sender.uid }},
+                receiver: {connect: { uid: recipient.uid }},
                 status: "PENDING"
             }
         })
