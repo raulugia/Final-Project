@@ -68,15 +68,15 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
     //extract the picture uploaded by the user
     const picture = req.file;
 
-    //find the user in the database and store it
-    const user = await prisma.user.findUnique({
-        where : { email: req.user.email }
-      })
+    // //find the user in the database and store it
+    // const user = await prisma.user.findUnique({
+    //     where : { email: req.user.email }
+    //   })
 
-    //throw an error if the user does not exist
-    if(!user) {
-    throw new Error("User not found")
-    }
+    // //throw an error if the user does not exist
+    // if(!user) {
+    // throw new Error("User not found")
+    // }
 
     try {
       //check if the restaurant already exists in the database using the restaurant name
@@ -121,7 +121,7 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
           description,
           rating,
           //associate the meal log with the authenticated user
-          user: { connect: { id: user.id } },
+          user: { connect: { uid: req.user.uid } },
           //placeholders - picture and thumbnail will be added in worker.js once 
           //they have been processed
           picture: "",
