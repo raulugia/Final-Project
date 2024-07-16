@@ -47,8 +47,8 @@ model Meal {
 
 model MealLog {
   id Int @id @default(autoincrement())
-  user User @relation(fields:[userId], references: [id])
-  userId Int
+  user User @relation(fields:[userUid], references: [uid])
+  userUid String
   meal Meal @relation(fields:[mealId], references: [id])
   mealId Int
   picture String
@@ -67,20 +67,20 @@ enum Rating {
 
 model Friendship {
   id Int @id @default(autoincrement())
-  user User @relation("UserFriends", fields: [userId], references: [id])
-  userId Int
-  friend User @relation("FriendFriends", fields: [friendId], references: [id])
-  friendId Int
+  user User @relation("UserFriends", fields: [userUid], references: [uid])
+  userUid String
+  friend User @relation("FriendFriends", fields: [friendUid], references: [uid])
+  friendUid String
 
-  @@unique([userId, friendId])
+  @@unique([userUid, friendUid])
 }
 
 model FriendRequest {
   id Int @id @default(autoincrement())
-  sender User @relation("SentRequests", fields: [senderId], references: [id])
-  senderId Int
-  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id])
-  receiverId Int
+  sender User @relation("SentRequests", fields: [senderUid], references: [uid])
+  senderUid String
+  receiver User @relation("ReceivedRequests", fields: [receiverUid], references: [uid])
+  receiverUid String
   status RequestStatus
   createdAt DateTime @default(now())
 }
@@ -93,10 +93,10 @@ enum RequestStatus {
 
 model Message {
   id Int @id @default(autoincrement())
-  sender User @relation("SentMessages", fields: [senderId], references: [id])
-  senderId Int
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  receiverId Int
+  sender User @relation("SentMessages", fields: [senderUid], references: [uid])
+  senderUid String
+  receiver User @relation("ReceivedMessages", fields: [receiverUid], references: [uid])
+  receiverUid String
   content String
   timestamp DateTime @default(now())
 }
