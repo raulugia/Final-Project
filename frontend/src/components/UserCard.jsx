@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import { Link } from 'react-router-dom'
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { auth } from '../../utils/firebase';
@@ -9,27 +9,44 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus})
     const [isHovered, setIsHovered] = useState(null)
     const [buttonMessage, setButtonMessage] = useState("")
     const [displayRequestOptions, setDisplayRequestOptions] = useState(false)
+    const [isDisabled, setIsDisabled] = useState(false)
 
+    //code to set the set of the card button
     useEffect(() => {
+        //case users are not friends and there are no friend requests between them
         if(!isFriend && !friendRequestStatus) {
+            //set button text to "Add Friend"
             setButtonMessage("Add Friend")
+        //case users are not friends and there is a pending friend request sent by current user    
         } else if(!isFriend && friendRequestStatus === "pending") {
+            //set button text to "Pending..." and siable it
             setButtonMessage("Pending...")
+            setIsDisabled(true)
+        //case users are not friends and there is a pending friend request received by current user    
         } else if(!isFriend && friendRequestStatus === "action") {
+            //display the action buttons to accept/reject the friend request
             setDisplayRequestOptions(true)
+        //case users are friends    
         } else {
             setButtonMessage("Message")
         }
     }, [isFriend, friendRequestStatus])
 
+    //method to handle button click
     const handleClick = async(e) => {
         e.preventDefault()
 
+        //case the user is not a friend
         if(buttonMessage === "Add Friend") {
-            console.log("trying to send request")
+            //get token for authentication in the server 
             const token = await user.getIdToken();
+
             try {
+                //update the button message to "Pending..." and disable it
                 setButtonMessage("Pending...")
+                setIsDisabled(true)
+
+                //send api call to create a friend request 
                 const response = await axiosInstance.post("/api/friend-request", 
                     { recipientUid: uid }, {
                         headers: {
@@ -37,13 +54,11 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus})
                         },
                     }
                 )
-    
-                if(response.status === 200) {
-                    console.log("done")
-                }
-    
+                
             } catch (err) {
+                //if there was an error, reset button to its original form
                 setButtonMessage("Add Friend")
+                setIsDisabled(false)
                 console.error(err)
             }
         }
@@ -66,14 +81,7 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus})
                 </Link>
             </div>
             <div className="mr-10">
-                <button onClick={handleClick} className='border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm'>{buttonMessage}</button>
-                {/* {
-                    isFriend ? (
-                        <button className='border px-2 py-1 rounded-md'>Message</button>
-                    ) : (
-                        <button onClick={sendFriendRequest} className='border px-2 py-1 rounded-md'> Add Friend</button>
-                    )
-                } */}
+                <button disabled={isDisabled} onClick={handleClick} className='border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm disabled:bg-gray-200'>{buttonMessage}</button>
             </div>
         </div>
         <Link to={`/${username}`} className="text-slate-800">
