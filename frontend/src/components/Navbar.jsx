@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Outlet, Link } from 'react-router-dom'
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,12 @@ import axiosInstance from '../../utils/axiosInstance';
 
 const Navbar = ({ name }) => {
     const [searchInput, setSearchInput] = useState("")
+    const [displayName, setDisplayName] = useState("")
     const navigate = useNavigate()
+
+    useEffect(() => {
+        setDisplayName(name)
+    }, [name])
 
     const handleSubmit = e => {
         e.preventDefault()
@@ -34,7 +39,7 @@ const Navbar = ({ name }) => {
             <button type="submit"><FaSearch color={"white"} className='hover:cursor-pointer'/></button>
         </form>
         <div>
-            <p className='text-sm text-white'>Hello, {name}</p>
+            <p className='text-sm text-black'>Hello, {displayName}</p>
         </div>
     </div>
     <Outlet />

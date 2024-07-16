@@ -236,7 +236,7 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
     try {
         const mealLogs = await prisma.mealLog.findMany({
             where: {
-                userId: req.user.uid
+                userUid: req.user.uid
             },
             include: {
                 meal: {
