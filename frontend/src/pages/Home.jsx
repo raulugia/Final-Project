@@ -37,7 +37,7 @@ const Home = () => {
     }).catch(e => console.error(e))
   }
   return (
-    <div>
+    <div className="pt-20">
       <p>Welcome Home</p>
       <p className="cursor-pointer font-semibold" onClick={handleClick}>Log Out</p>
     </div>

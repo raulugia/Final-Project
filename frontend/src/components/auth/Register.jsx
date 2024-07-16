@@ -42,18 +42,21 @@ const Register = () => {
     //if all the details were provided 
     if (newUser.name && newUser.surname && newUser.email && newUser.password) {
         try{
+            //create a new user with the email and password provided in the form - new user will be signed in
+            const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
+            //store new user
+            const user = userCredential.user;
+
             //send a POST request with the user's data so it can be saved in the database in Railway
             await axiosInstance.post("/api/register", {
               email: newUser.email,
               name: newUser.name,
               surname: newUser.surname,
               username: newUser.username,
+              uid: user.uid,
+              profilePicUrl: "",
             })
 
-            //create a new user with the email and password provided in the form - new user will be signed in
-            const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
-            //store new user
-            const user = userCredential.user;
             //update the user's name in Firebase
             await updateProfile(user, { displayName: newUser.name })
 
@@ -67,7 +70,7 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-full bg-slate-50">
+    <div className="flex justify-center items-center h-full bg-slate-50 min-h-screen">
       <div className="border py-5 px-3 rounded-lg shadow-md bg-white">
         <p className="mb-5 text-2xl font-semibold">Register Now!</p>
 
