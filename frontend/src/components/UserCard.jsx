@@ -65,13 +65,11 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
     }
 
     const handleRequest = async (action, requestId) => {
-        console.log(`action: ${action}`)
         //get token for authentication in the server 
         const token = await user.getIdToken();
 
         try{
-            console.log("trying: ", `api/friend-request/${action}/${requestId}`)
-            const response = axiosInstance.post(`api/friend-request/${action}/${requestId}`, {}, {
+            const response = await axiosInstance.post(`api/friend-request/${action}/${requestId}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
