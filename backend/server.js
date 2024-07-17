@@ -372,7 +372,9 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                     select: {
                         id: true,
                         status: true,
-                        createdAt: true
+                        createdAt: true,
+                        senderUid: true,
+                        receiverUid: true,
                     }
                 },
                 receivedRequests: {
@@ -386,7 +388,9 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                     select: {
                         id: true,
                         status: true,
-                        createdAt: true
+                        createdAt: true,
+                        senderUid: true,
+                        receiverUid: true,
                     }
                 },
             }
@@ -425,11 +429,11 @@ app.get("/api/search", authenticateUser, async(req, res) => {
         ]
 
         const userResults = users.map(user => {
-            console.log(`User name: ${user.name} friends of ${JSON.stringify(user)}`)
+            //console.log(`User name: ${user.name} friends of ${JSON.stringify(user)}`)
             //if the length of friends or friendsOf is < 0, users are not friends
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
             
-            console.log(`User name: ${user.name} received requests ${JSON.stringify(user.receivedRequests)}`)
+            //console.log(`User name: ${user.name} received requests ${JSON.stringify(user.receivedRequests)}`)
             let friendRequestStatus = ""
             let requestId = ""
 
@@ -437,6 +441,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
             if(combinedRequests.length > 0) {
                 const latestRequest = combinedRequests[0]
+                console.log("latest req: ", latestRequest)
 
                 if(latestRequest.senderUid === req.user.uid) {
                     friendRequestStatus = "pending"
