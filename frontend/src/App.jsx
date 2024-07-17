@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import Friends from './pages/Friends'
 import Profile from './pages/Profile'
 import Restaurants from './pages/Restaurants'
+import Meals from './pages/Meals'
 import SearchResults from './pages/SearchResults'
 import { auth } from '../utils/firebase'
 import {Routes, Route} from 'react-router-dom'
@@ -73,6 +74,7 @@ function App() {
         <Route path='/friends/:id' element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
         <Route path='/log-meal' element={<ProtectedRoute><LogMeal /></ProtectedRoute>}/>
         <Route path='/my-restaurants' element={<ProtectedRoute><Restaurants /></ProtectedRoute>}/>
+        <Route path='/my-meals' element={<ProtectedRoute><Meals /></ProtectedRoute>}/>
         <Route path='/search' element={<ProtectedRoute><SearchResults /></ProtectedRoute>}/>
       </Route>
 
