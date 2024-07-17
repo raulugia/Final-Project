@@ -13,7 +13,7 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
 
     //code to set the set of the card button
     useEffect(() => {
-        //case users are not friends and there are no friend requests between them
+        //case users are not friends and there are no friend requests between them or the friend request was rejected
         if(!isFriend && (!friendRequestStatus || friendRequestStatus === "rejected")) {
             //set button text to "Add Friend"
             setButtonMessage("Add Friend")
@@ -64,11 +64,13 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
         }
     }
 
+    //method to accept/reject a friend request
     const handleRequest = async (action, requestId) => {
         //get token for authentication in the server 
         const token = await user.getIdToken();
 
         try{
+            //api call to accept or reject a friend request passing the token for authentication in the server
             const response = await axiosInstance.post(`api/friend-request/${action}/${requestId}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -78,12 +80,16 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
             //hide the buttons to action the friend request and display the "Message" button if
             //the request was accepted successfully
             if(response.status === 200){
+                //case user accepted the friend request
                 if(action === "accept"){
+                    //display Message button
                     setButtonMessage("Message")
-                    
+                //case user rejected the friend request    
                 } else if(action === "reject") {
+                    //display Add Friend button
                     setButtonMessage("Add Friend")
                 }
+                //reset states
                 setDisplayRequestOptions(false)
                 setIsDisabled(false)
             }
