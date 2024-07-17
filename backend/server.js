@@ -206,7 +206,8 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
                             select: {
                                 id: true,
                                 name: true,
-                                surname: true
+                                surname: true,
+                                username: true,
                             },
                         },
                     },
@@ -221,7 +222,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
         //combine friends and friendsOf
         const friends = [
             ...user.friends.map(data => data.friend),
-            ...user.friendOf.map(data => data.friendOf),
+            ...user.friendOf.map(data => data.user),
         ]
 
         res.json(friends)
