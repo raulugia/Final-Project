@@ -4,7 +4,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
-const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus}) => {
+const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, requestId}) => {
     const user = auth.currentUser
     const [isHovered, setIsHovered] = useState(null)
     const [buttonMessage, setButtonMessage] = useState("")
@@ -64,6 +64,34 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus})
         }
     }
 
+    const handleRequest = async (action, requestId) => {
+        console.log(`action: ${action}`)
+        //get token for authentication in the server 
+        const token = await user.getIdToken();
+
+        try{
+            console.log("trying: ", `api/friend-request/${action}/${requestId}`)
+            const response = axiosInstance.post(`api/friend-request/${action}/${requestId}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            
+            //hide the buttons to action the friend request and display the "Message" button if
+            //the request was accepted successfully
+            if(response.statusCode === 200){
+                if(action === "accept"){
+                    setButtonMessage("Message")
+                    setDisplayRequestOptions(false)
+                } else if(action === "reject") {
+                    setDisplayRequestOptions(true)
+                }
+            }
+        }catch(err) {
+            console.error(err)
+        }
+    }
+
   return (
     <div
         onMouseEnter={() => setIsHovered(username)}
@@ -76,12 +104,21 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus})
                     <div className="bg-slate-500 rounded-full w-20 h-20"></div>
                 </div>
                 <Link to={`/${username}`} className='flex flex-col items-center'>
-                <p className={`text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p>
-                    <p className={"text-lg text-slate-400"}>@{username}</p>
+                <p className={`lg:text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p>
+                    <p className={"lg:text-lg text-slate-400"}>@{username}</p>
                 </Link>
             </div>
             <div className="mr-10">
-                <button disabled={isDisabled} onClick={handleClick} className='border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm disabled:bg-gray-200'>{buttonMessage}</button>
+                {
+                    displayRequestOptions ? (
+                        <div className="flex gap-3">
+                            <button onClick={() => handleRequest("accept", requestId)} className='text-md px-2 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-md'>Accept</button>
+                            <button onClick={() => handleRequest("reject", requestId)} className='text-md border px-2 rounded-md bg-slate-200 hover:bg-slate-100 hover:shadow-md'>Reject</button>
+                        </div>
+                    ) : (
+                        <button disabled={isDisabled} onClick={handleClick} className='text-md border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm disabled:bg-gray-200'>{buttonMessage}</button>
+                    )
+                }
             </div>
         </div>
         <Link to={`/${username}`} className="text-slate-800">

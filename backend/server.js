@@ -364,7 +364,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 sentRequests: {
                     where: {
                         receiverUid: req.user.uid,
-                        status: "PENDING"
+                        status: {in: ["PENDING", "REJECTED"]}
                     },
                     select: {
                         id: true
@@ -415,16 +415,19 @@ app.get("/api/search", authenticateUser, async(req, res) => {
         ]
 
         const userResults = users.map(user => {
-            console.log(`User name: ${user.name} friends of ${JSON.stringify(user.friendOf)}`)
+            console.log(`User name: ${user.name} friends of ${JSON.stringify(user)}`)
             //if the length of friends or friendsOf is < 0, users are not friends
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
             
             console.log(`User name: ${user.name} received requests ${JSON.stringify(user.receivedRequests)}`)
             let friendRequestStatus = ""
+            let requestId = ""
             if(user.sentRequests.length > 0) {
                 friendRequestStatus = "action"
+                requestId = user.sentRequests[0].id
             } else if(user.receivedRequests.length > 0) {
                 friendRequestStatus = "pending"
+                requestId = user.sentRequests[0].id
             }
 
             return {
@@ -436,6 +439,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 type: "user",
                 isFriend,
                 friendRequestStatus,
+                requestId,
             }
         })
         
@@ -450,7 +454,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
 //endpoint to handle friend requests
 app.post("/api/friend-request", authenticateUser, async(req, res) => {
-    console.log("HEREEEEE")
+    
     const { recipientUid } = req.body;
 
     try{
@@ -470,6 +474,20 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
             return res.status(404).json({error: "Recipient user not found"})
         }
 
+        //find existing friend request with the same sender and receiver with a pending or rejected status
+        const existingRequest = await prisma.friendRequest.findFirst({
+            where: {
+                senderUid: sender.uid,
+                receiverUid: recipient.uid,
+                status: "PENDING" || "REJECTED"
+            }
+        })
+
+        //prevent the creation of duplicated requests by returning an error
+        if(existingRequest) {
+            return res.status(400).json({ error: "Friend request already sent." })
+        }
+
         const friendRequest = await prisma.friendRequest.create({
             data: {
                 sender: { connect: { uid: sender.uid }},
@@ -482,6 +500,65 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
     } catch(err) {
         console.log(err)
         res.status(400).json({error: err.message})
+    }
+})
+
+app.post("/api/friend-request/accept/:requestId", authenticateUser, async(req, res) => {
+    const { requestId } = req.params;
+
+    try{
+        const friendRequest = await prisma.friendRequest.findUnique({
+            where: { id: Number(requestId) },
+            include: {sender: true, receiver: true},
+        })
+
+        if(!friendRequest || friendRequest.status !== "PENDING") {
+            return res.status(400).json({ error: "Invalid or already processed request."})
+        }
+
+        //await the friend request status to accepted
+        await prisma.friendRequest.update({
+            where: {id: Number(requestId)},
+            data: {status: "ACCEPTED"}
+        })
+
+        //create a new friendship
+        await prisma.friendship.create({
+            data: {
+                userUid: friendRequest.receiver.uid,
+                friendUid: friendRequest.sender.uid,
+            }
+        })
+
+        res.json({ message: "Friend request accepted,"})
+    } catch(err) {
+        console.log(err)
+        res.json({ error: err.message})
+    }
+})
+
+app.post("/api/friend-request/reject/:requestId", authenticateUser, async(req, res) => {
+    const { requestId } = req.params;
+
+    try{
+        const friendRequest = await prisma.friendRequest.findUnique({
+            where: { id: Number(requestId) },
+        })
+
+        if(!friendRequest || friendRequest.status !== "PENDING") {
+            return res.status(400).json({ error: "Invalid or already processed request."})
+        }
+
+        //await the friend request status to accepted
+        await prisma.friendRequest.update({
+            where: {id: Number(requestId)},
+            data: {status: "REJECTED"}
+        })
+
+        res.json({ message: "Friend request rejected,"})
+    } catch(err) {
+        console.log(err)
+        res.json({ error: err.message})
     }
 })
 
