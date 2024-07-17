@@ -366,17 +366,27 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                         receiverUid: req.user.uid,
                         status: {in: ["PENDING", "REJECTED"]}
                     },
+                    orderBy: {
+                        createdAt: "desc"
+                    },
                     select: {
-                        id: true
+                        id: true,
+                        status: true,
+                        createdAt: true
                     }
                 },
                 receivedRequests: {
                     where: {
                         senderUid: req.user.uid,
-                        status: "PENDING"
+                        status: {in: ["PENDING", "REJECTED"]}
+                    },
+                    orderBy: {
+                        createdAt: "desc"
                     },
                     select: {
-                        id: true
+                        id: true,
+                        status: true,
+                        createdAt: true
                     }
                 },
             }
@@ -422,13 +432,37 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             console.log(`User name: ${user.name} received requests ${JSON.stringify(user.receivedRequests)}`)
             let friendRequestStatus = ""
             let requestId = ""
-            if(user.sentRequests.length > 0) {
-                friendRequestStatus = "action"
-                requestId = user.sentRequests[0].id
-            } else if(user.receivedRequests.length > 0) {
-                friendRequestStatus = "pending"
-                requestId = user.sentRequests[0].id
+
+            const combinedRequests = [...user.sentRequests, ...user.receivedRequests].sort((a,b) => b.createdAt - a.createdAt)
+
+            if(combinedRequests.length > 0) {
+                const latestRequest = combinedRequests[0]
+
+                if(latestRequest.senderUid === req.user.uid) {
+                    friendRequestStatus = "pending"
+                    requestId = latestRequest.id
+                } else if(latestRequest.receiverUid === req.user.uid) {
+                    friendRequestStatus = latestRequest.status === "PENDING" ? "action" : "rejected"
+                    requestId = latestRequest.id 
+                }
             }
+            // //case user sent current user a friend request
+            // if(user.sentRequests.length > 0) {
+            //     const request = user.sentRequests[0]
+            //     //if the status is pending, the friend request will have to be actioned in the client
+            //     friendRequestStatus = request.status === "PENDING" ? "action" : "rejected"
+            //     requestId = request.id
+            // }
+            
+            // //case current user sent user a friend request
+            // if(user.receivedRequests.length > 0) {
+            //     const request = user.receivedRequests[0]
+            //     //users will not be notified when a friend request is rejected, it will be shown as pending in the client
+            //     if(request.status === "PENDING" || request.status === "REJECTED"){
+            //         friendRequestStatus = "pending"
+            //     }
+            //     requestId = request.id
+            // }
 
             return {
                 id: user.id,

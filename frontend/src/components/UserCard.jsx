@@ -14,7 +14,7 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
     //code to set the set of the card button
     useEffect(() => {
         //case users are not friends and there are no friend requests between them
-        if(!isFriend && !friendRequestStatus) {
+        if(!isFriend && (!friendRequestStatus || friendRequestStatus === "rejected")) {
             //set button text to "Add Friend"
             setButtonMessage("Add Friend")
         //case users are not friends and there is a pending friend request sent by current user    
