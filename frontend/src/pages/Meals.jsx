@@ -11,7 +11,7 @@ const Meals = () => {
     //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
-    const [hoveredMeal, setHoveredMeal] = useState(null)
+    //const [hoveredMeal, setHoveredMeal] = useState(null)
 
     useEffect(() => {
         (
@@ -42,7 +42,7 @@ const Meals = () => {
 
                       return 0;
                     });
-                    
+
                     setMeals(sortedData)
                     setFilteredMeals(sortedData)
                     setLoading(false)
