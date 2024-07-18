@@ -38,7 +38,6 @@ const LogMeal = () => {
     reader.onloadend = () => {
       //update state to store the image url
       setImagePreviewUrl(reader.result)
-      console.log("url: ", reader.result)
     }
 
     //case a file was chosen by the user
@@ -206,7 +205,7 @@ const LogMeal = () => {
 
           <button
             type="submit"
-            className="mt-5 py-2 border rounded-md text-lg font-semibold cursor-pointer"
+            className="mt-5 py-2 border rounded-md text-lg text-white bg-slate-700 hover:bg-slate-600 hover:shadow-sm font-semibold cursor-pointer"
           >
             Add Meal
           </button>

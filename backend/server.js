@@ -265,9 +265,27 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
 
 app.get("/api/meals", authenticateUser, async(req, res,) => {
     try{
-        const meals = await prisma.mealLog.findMany({
+        //get the most recent meal logs avoiding duplicates
+        const latestLogs = await prisma.mealLog.findMany({
             where: {
                 userUid: req.user.uid
+            },
+            //make sure only one entry per meal is returned
+            distinct: ["mealId"],
+            //order results by createdAt in descending order
+            orderBy: {
+                createdAt: "desc"
+            },
+            select: {
+                id: true,
+                mealId: true
+            }
+        })
+
+        //get the details needed by the client to display all the user's meals
+        const mealLogs = await prisma.mealLog.findMany({
+            where: {
+                id: { in: latestLogs.map(log => log.id)}
             },
             select: {
                 meal: {
@@ -275,12 +293,12 @@ app.get("/api/meals", authenticateUser, async(req, res,) => {
                         restaurant: true
                     }
                 },
-                picture: true,
-                thumbnail: true
+                thumbnail: true,
+                id: true,
             }
         })
 
-        res.json(meals)
+        res.json(mealLogs)
     } catch(err) {
         console.log(err)
     }
