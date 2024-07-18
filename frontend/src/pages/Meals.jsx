@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
-import { MdKeyboardArrowRight } from "react-icons/md";
+import MealCard from '../components/MealCard'
 
 const Meals = () => {
     const user = auth.currentUser
@@ -68,18 +68,7 @@ const Meals = () => {
             </div>
             {
                 filteredMeals.map(item => (
-                    <div className='shadow-md bg-slate-50 text-slate-800 w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg'>
-                        <div className='flex gap-10 justify-start'>
-                            <div className='border h-24 w-24 rounded-md overflow-hidden'>
-                                <img src={item.thumbnail} alt="" className='h-full'/>
-                            </div>
-                            <div className='flex flex-col mt-3'>
-                                <p className='text-lg font-semibold'>{item.meal.name}</p>
-                                <p className='text-md text-gray-400'>{item.meal.restaurant.name}</p>
-                            </div>
-                        </div>
-                        <MdKeyboardArrowRight size={40} />
-                    </div>
+                    <MealCard key={item.meal.id} id={item.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
                 ))
             }
         </div>
