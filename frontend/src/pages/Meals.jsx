@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import MealCard from '../components/MealCard'
+import SkeletonMealCard from '../components/SkeletonMealCard'
 
 const Meals = () => {
     const user = auth.currentUser
@@ -25,7 +26,7 @@ const Meals = () => {
                             Authorization: `Bearer ${token}`,
                         },
                     })
-                    console.log(data)
+
                     setMeals(data)
                     setFilteredMeals(data)
                     setLoading(false)
@@ -46,10 +47,9 @@ const Meals = () => {
         //if meals were found
         if(meals.length > 0) {
             //get the meals that match the search input
-            const filtered = meals.filter(restaurant => {
-                return meal.name.toLowerCase().includes(searchValue.toLowerCase())
+            const filtered = meals.filter(item=> {
+                return item.meal.name.toLowerCase().includes(searchValue.toLowerCase())
             })
-
             //update state so the filtered meals are displayed
             setFilteredMeals(filtered)
         }
@@ -66,10 +66,15 @@ const Meals = () => {
             </form>
             <div className='flex flex-col gap-4 mt-4'>
             </div>
-            {
-                filteredMeals.map(item => (
-                    <MealCard key={item.meal.id} id={item.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
-                ))
+            {   
+                loading ? (
+                    <SkeletonMealCard />
+                ) : (
+
+                    filteredMeals.map(item => (
+                        <MealCard key={item.meal.id} id={item.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
+                    ))
+                )
             }
         </div>
     </div>
