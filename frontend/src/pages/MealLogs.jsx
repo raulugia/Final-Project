@@ -2,8 +2,8 @@ import React, {useState, useEffect} from 'react'
 import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import { useParams } from 'react-router-dom'
-import { MdKeyboardArrowRight } from "react-icons/md";
 import MealLogCard from '../components/MealLogCard';
+import SkeletonMealLogCard from '../components/SkeletonMealLogCard';
 
 const MealLogs = () => {
     const user = auth.currentUser
@@ -54,11 +54,23 @@ const MealLogs = () => {
 
   return (
     <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
-        <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>My Meals</h1>
+        {
+            loading ? (
+                <div className='flex flex-col gap-4'>
+                    <div className="flex flex-col mt-20 animate-pulse-fast bg-slate-800 ml-[5%]  h-6 w-44"></div>
+                    <div className="flex flex-col animate-pulse-fast bg-slate-600 ml-[5%]  h-5 w-36"></div>
+                </div>
+            ) : (
+                <div className='mt-20'>
+                    <h1 className='text-2xl font-semibold  ml-[5%] text-slate-800'>Logs for {logs[0]?.meal.name}</h1>
+                    <h3 className='text-lg font-semibold ml-[5%] text-slate-600'>{logs[0]?.meal.restaurant.name}</h3>
+                </div>
+            )
+        }
         <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
             {   
                 loading ? (
-                    <div>Skeleton here</div>
+                    <SkeletonMealLogCard />
                 ) : (
                     logs.map(log => (
                         <MealLogCard key={log.id} {...log}/>

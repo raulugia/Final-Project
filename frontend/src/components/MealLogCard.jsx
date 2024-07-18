@@ -6,7 +6,7 @@ import Accuracy from './Accuracy';
 const MealLogCard = ({mealId, id, thumbnail, rating, createdAt, carbEstimate}) => {
   return (
     <Link to={`/my-meals/${mealId}/log/${id}`} className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg'>
-        <div className='flex gap-5 md:gap-8 justify-start'>
+        <div className='flex gap-5 md:gap-8 justify-start  items-center'>
             <div className='min-h-24 h-24 w-24 min-w-24 rounded-md overflow-hidden border'>
                 <img src={thumbnail} alt="" className='h-full w-full object-cover'/>
             </div>
