@@ -100,14 +100,15 @@ const LogMeal = () => {
       <div className="border mt-12 py-5 px-3 rounded-lg lg:w-[50%] md:w-1/3 shadow-md bg-white">
         <form action="" className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex items-center justify-center w-[50%] mx-auto mb-2">
-            {
-              imagePreviewUrl ? (
-                <img src={imagePreviewUrl} alt="food" className="h-fit"/>
-              ) : (
-                <label
-                  htmlFor="dropzone-file"
-                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 hover:bg-gray-100"
-                >
+            <label
+              htmlFor="dropzone-file"
+              className={`flex flex-col items-center justify-center w-full h-64 rounded-lg cursor-pointer overflow-hidden ${imagePreviewUrl ? "" : "border-2 border-gray-300 border-dashed bg-gray-50 dark:hover:bg-bray-800 hover:bg-gray-100"}`}
+            >
+              {
+                imagePreviewUrl ? (
+                  <img src={imagePreviewUrl} alt="food" />
+                ) : (
+
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <MdOutlineCameraAlt size={30} style={{ color: "gray" }} />
                   <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
@@ -117,17 +118,17 @@ const LogMeal = () => {
                     (MAX. 800x400px)
                   </p>
                 </div>
-                <input
-                  id="dropzone-file"
-                  type="file"
-                  className="hidden"
-                  accept=".jpg, .jpeg, .svg, .png, .bmp, .webp, .heic, .heif, .tiff"
-                  onChange={handleFileChange}
-                />
+                )
+              }
+              <input
+                id="dropzone-file"
+                type="file"
+                className="hidden"
+                accept=".jpg, .jpeg, .svg, .png, .bmp, .webp, .heic, .heif, .tiff"
+                onChange={handleFileChange}
+              />
             </label>
-              )
-            }
-            
+      
           </div>
 
           <input
