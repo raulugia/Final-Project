@@ -3,6 +3,7 @@ import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import { useParams } from 'react-router-dom'
 import { MdKeyboardArrowRight } from "react-icons/md";
+import MealLogCard from '../components/MealLogCard';
 
 const MealLogs = () => {
     const user = auth.currentUser
@@ -60,21 +61,7 @@ const MealLogs = () => {
                     <div>Skeleton here</div>
                 ) : (
                     logs.map(log => (
-                        <div className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg'>
-                        <div className='flex gap-5 md:gap-8 justify-start'>
-                            <div className='min-h-24 h-24 w-24 min-w-24 rounded-md overflow-hidden border'>
-                                <img src={log.thumbnail} alt="" className='h-full w-full object-cover'/>
-                            </div>
-                            <div className='flex flex-col mt-3 gap-2'>
-                                <p className='text-md md:text-md font-semibold leading-[18px]'>Carb estimation: {log.carbEstimate}g</p>
-                                <p className='text-sm md:text-md text-gray-400 leading-[18px]'>{log.rating}</p>
-                                <p className='text-sm md:text-md text-gray-400 leading-[18px]'>Created {log.createdAt}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <MdKeyboardArrowRight size={40} />
-                        </div>
-                    </div>
+                        <MealLogCard key={log.id} {...log}/>
                     ))
                 )   
             }
