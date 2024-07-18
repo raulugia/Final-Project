@@ -24,7 +24,7 @@ const Meals = () => {
                             Authorization: `Bearer ${token}`,
                         },
                     })
-
+                    console.log(data)
                     setMeals(data)
                     setFilteredMeals(data)
                     setLoading(false)

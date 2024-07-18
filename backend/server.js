@@ -263,6 +263,29 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
     }
 })
 
+app.get("/api/meals", authenticateUser, async(req, res,) => {
+    try{
+        const meals = await prisma.mealLog.findMany({
+            where: {
+                userUid: req.user.uid
+            },
+            select: {
+                meal: {
+                    include: {
+                        restaurant: true
+                    }
+                },
+                picture: true,
+                thumbnail: true
+            }
+        })
+
+        res.json(meals)
+    } catch(err) {
+        console.log(err)
+    }
+})
+
 //endpoint to get the restaurants and meals requested by the user
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
