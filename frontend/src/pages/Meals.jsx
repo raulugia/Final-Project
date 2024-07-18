@@ -26,9 +26,25 @@ const Meals = () => {
                             Authorization: `Bearer ${token}`,
                         },
                     })
+                    
+                    //sort data alphabetically by meal name
+                    const sortedData = data.sort((a, b) => {
+                      const mealNameA = a.meal.name.toLowerCase();
+                      const mealNameB = b.meal.name.toLowerCase();
 
-                    setMeals(data)
-                    setFilteredMeals(data)
+                      if (mealNameA < mealNameB) {
+                        return -1;
+                      }
+
+                      if (mealNameA < mealNameB) {
+                        return 1;
+                      }
+
+                      return 0;
+                    });
+                    
+                    setMeals(sortedData)
+                    setFilteredMeals(sortedData)
                     setLoading(false)
                 } catch(err) {
                     console.log(err)
