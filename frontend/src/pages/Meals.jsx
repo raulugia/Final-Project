@@ -42,7 +42,8 @@ const Meals = () => {
 
                       return 0;
                     });
-
+                    
+                    
                     setMeals(sortedData)
                     setFilteredMeals(sortedData)
                     setLoading(false)
@@ -86,7 +87,7 @@ const Meals = () => {
                 ) : (
 
                     filteredMeals.map(item => (
-                        <MealCard key={item.meal.id} id={item.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
+                        <MealCard key={item.id} id={item.meal.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
                     ))
                 )
             }

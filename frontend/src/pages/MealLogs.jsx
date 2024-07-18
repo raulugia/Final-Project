@@ -20,7 +20,7 @@ const MealLogs = () => {
                             Authorization: `Bearer ${token}`,
                         },
                     })
-
+                    console.log(data)
                     setLogs(data)
                     setLoading(false)
                 } catch(err) {
