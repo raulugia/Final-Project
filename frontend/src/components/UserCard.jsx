@@ -118,8 +118,8 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
                 {
                     displayRequestOptions ? (
                         <div className="flex gap-3">
-                            <button onClick={() => handleRequest("accept", requestId)} className='text-md px-2 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-sm'>Accept</button>
-                            <button onClick={() => handleRequest("reject", requestId)} className='text-md border px-2 rounded-md bg-slate-200 hover:bg-slate-300 hover:shadow-sm'>Reject</button>
+                            <button onClick={() => handleRequest("accept", requestId)} id="acceptBtn" className='text-md px-2 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-sm'>Accept</button>
+                            <button onClick={() => handleRequest("reject", requestId)} id="rejectBtn" className='text-md border px-2 rounded-md bg-slate-200 hover:bg-slate-300 hover:shadow-sm'>Reject</button>
                         </div>
                     ) : (
                         <button disabled={isDisabled} onClick={handleClick} className='text-md border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm disabled:bg-gray-200'>{buttonMessage}</button>
