@@ -22,10 +22,10 @@ const MealLogs = () => {
                             Authorization: `Bearer ${token}`,
                         },
                     })
-
+                    console.log(data)
                     //format the date of every log
                     const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
-                    console.log(displayData)
+                    //console.log(displayData)
                     setLogs(displayData)
                     setLoading(false)
                 } catch(err) {
