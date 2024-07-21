@@ -14,10 +14,15 @@ const initializeSocket = server => {
     });
 
     io.use((socket, next) => {
+        //retrieve the token from the client's request
         const token = socket.handshake.auth.token
+
+        //case token exists
         if(token) {
+            //verify the token
             authenticateUser({ headers: { authorization: `Bearer ${token}`}}, null, next)
                 .then(() => {
+                    //if the token is valid, the user information is attached to socket.request.user
                     socket.request.user = socket.request.user || {};
                     socket.request.user = socket.request.user;
                     next()

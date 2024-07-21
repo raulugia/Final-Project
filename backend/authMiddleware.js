@@ -20,8 +20,7 @@ const authenticateUser = async (req, res, next) => {
         const decodedToken = await admin.auth().verifyIdToken(token)
         //attach the decoded token to the request object
         req.user = decodedToken;
-        //console.log("TOKEN WAS DECODED", decodedToken);
-        //call the next middleware method
+        //call the next method
         next()
     } catch(err) {
         console.error("Error verifying token: ")

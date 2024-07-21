@@ -18,7 +18,9 @@ test("component renders correctly", () => {
 test("underline class is applied and removed correctly on hover", () => {
     const { getByText } = render(
         <MemoryRouter>
-            <FriendCard name="Ashley" surname="Smith" username="ashley.smith" imgUrl="https://example.com/thumbnail.jpg" />
+            <FriendCard name="Ashley" surname="Smith" 
+                username="ashley.smith" imgUrl="https://example.com/thumbnail.jpg" 
+            />
         </MemoryRouter>
     )
 

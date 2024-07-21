@@ -20,6 +20,7 @@ import socket from "../utils/socket"
 function App() {
   //state to store the current user
   const [user, setUser] = useState(null)
+  const [pendingRequests, setPendingRequests] = useState([])
 
   //get the current user once when the component mounts
   useEffect(() => {
@@ -28,10 +29,15 @@ function App() {
       //update the state with current user
       setUser(user)
 
+      //case user exists
       if(user) {
+        //get the token
         const token = await user.getIdToken()
+        //set the token in the socket authentication object
         socket.auth = { token }
+        //connect to the WebSocket
         socket.connect()
+        //send a request ti get the pending friend requests
         socket.emit("getPendingFriendRequests")
       }
     })
@@ -50,7 +56,7 @@ function App() {
     })
 
     socket.on("pendingFriendRequests", requests => {
-      console.log("REQUESTS: ", requests)
+      setPendingRequests(requests)
     })
 
     return () => {

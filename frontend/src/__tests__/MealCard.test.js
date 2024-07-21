@@ -6,7 +6,10 @@ import { MemoryRouter } from 'react-router-dom'
 test("renders MealCard component", () => {
     const { getByText } = render (
         <MemoryRouter>
-            <MealCard id="1" mealName= "Pasta" restaurantName= "italian Restaurant" thumbnailUrl="https://example.com/thumbnail.jpg" />
+            <MealCard 
+                id="1" mealName= "Pasta" 
+                restaurantName= "italian Restaurant" thumbnailUrl="https://example.com/thumbnail.jpg" 
+            />
         </MemoryRouter>
     )
 
@@ -19,7 +22,9 @@ test("renders MealCard component", () => {
 test("Link component has the right route", () => {
     const { container } = render(
         <MemoryRouter>
-            <MealCard id="1" mealName= "Pasta" restaurantName= "italian Restaurant" thumbnailUrl="https://example.com/thumbnail.jpg" />
+            <MealCard id="1" mealName= "Pasta" 
+                restaurantName= "italian Restaurant" thumbnailUrl="https://example.com/thumbnail.jpg" 
+            />
         </MemoryRouter>
     )
 
