@@ -7,7 +7,7 @@ const MealLogCard = ({mealId, id, thumbnail, rating, createdAt, carbEstimate, de
   return (
     <Link 
         to={`/my-meals/${mealId}/log/${id}`}
-        state={{thumbnail, rating, createdAt, carbEstimate, description, picture, mealName, restaurantName}} 
+        state={{thumbnail, rating, createdAt, carbEstimate, description, picture, mealName, restaurantName, id}} 
         className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg'
     >
         <div className='flex gap-5 md:gap-8 justify-start  items-center'>
