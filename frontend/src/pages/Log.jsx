@@ -5,39 +5,52 @@ import axiosInstance from '../../utils/axiosInstance'
 import Accuracy from "../components/Accuracy"
 import { IoMdClose } from "react-icons/io";
 
+//this component renders all the data linked to a particular meal log
+//in order to avoid redundant database queries, the data will only be fetched if it is not in the location object
 
 const Log = () => {
+    //get current user
     const user = auth.currentUser
+    //get location object
     const logLocation = useLocation()
+    //state to store the meal log data
     const [log, setLog] = useState(logLocation.state || {})
+    //get meal id and log id
     const { mealId, logId } = useParams()
+
+    //states to control when loading element and overlay should be displayed
     const [loading, setLoading] = useState(!logLocation.state)
     const [displayOverlay, setDisplayOverlay] = useState(false)
     
+    //request data from the server only if it was not passed in the location object
     useEffect(() => {
-        //    
+        //method to send a get request to fetch log data    
         const fetchLog = async() => {
+            //get user's id token for authorization in the server
             const token = await user.getIdToken()
-
             try{
+                //send a get request and store data from the request object
                 const { data } = await axiosInstance.get(`/api/my-meals/${mealId}/log/${logId}`, { 
                     headers: {
                         "Authorization": `Bearer ${token}`,
                     }
                 })
 
+                //format and store the date of the log
                 const displayData = {...data, createdAt: formatDate(data.createdAt)}
-                console.log(data)
+                
+                //update state so the log data is displayed
                 setLog(displayData)
+                //hide loading element
                 setLoading(false)
             }catch(err){
                 console.error(err)
             }
         }
 
-        //
+        //case location object does not have a state property with log data
         if(!logLocation.state){
-            console.log("no location")
+            //fetch data from the database
             fetchLog()
         }
 
