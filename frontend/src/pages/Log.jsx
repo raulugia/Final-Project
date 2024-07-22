@@ -111,7 +111,7 @@ const Log = () => {
     {
         displayOverlay && (
             <div className='flex justify-center items-center h-full bg-black/80 fixed z-50 inset-0'>
-                <div className='w-[80%] md:w-[50%] max-w-[500px] relative'>
+                <div className='w-[80%] md:w-[60%] lg:w-[50%] max-w-[500px] relative'>
                     <img src={log.picture} alt="" className='rounded-lg'/>
                     <button
                         onClick={() => setDisplayOverlay(false)} 
