@@ -3,6 +3,8 @@ import { useParams, useLocation, useFetcher } from 'react-router-dom'
 import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import Accuracy from "../components/Accuracy"
+import { IoMdClose } from "react-icons/io";
+
 
 const Log = () => {
     const user = auth.currentUser
@@ -10,7 +12,7 @@ const Log = () => {
     const [log, setLog] = useState(logLocation.state || {})
     const { mealId, logId } = useParams()
     const [loading, setLoading] = useState(!logLocation.state)
-    const [displayOverlay, setDisplayOverlay] = useState(true)
+    const [displayOverlay, setDisplayOverlay] = useState(false)
     
     useEffect(() => {
         //    
@@ -70,7 +72,10 @@ const Log = () => {
                     <div className='flex md:flex-row flex-col w-full'>
 
                         <div className='md:w-[50%] max-w-[280px] overflow-hidden rounded-md mx-auto md:mx-0'>
-                            <img src={log.picture} alt="" className='w-full h-full object-cover'/>
+                            <img src={log.picture} alt={log.mealName || log.meal?.name} 
+                                onClick={() => setDisplayOverlay(true)}
+                                className='w-full h-full object-cover hover:cursor-pointer'
+                            />
                         </div>
 
                         <div className='flex flex-col flex-grow md:ml-14 mt-5 md:mt-0 justify-between'>
@@ -105,10 +110,15 @@ const Log = () => {
     </div>
     {
         displayOverlay && (
-            <div className='flex justify-center items-center h-full bg-black/80 absolute z-100 inset-0'>
-                <div className='w-[50%] rounded-lg overflow-hidden relative'>
-                    <img src={log.picture} alt="" />
-                    <button className='bg-blue-300 px-2 rounded-full absolute'>X</button>
+            <div className='flex justify-center items-center h-full bg-black/80 fixed z-50 inset-0'>
+                <div className='w-[80%] md:w-[50%] max-w-[500px] relative'>
+                    <img src={log.picture} alt="" className='rounded-lg'/>
+                    <button
+                        onClick={() => setDisplayOverlay(false)} 
+                        className='bg-slate-400 px-1 py-1 hover:bg-slate-500 rounded-full absolute z-60 top-[-14px] right-[-10px]  text-2xl'
+                    >
+                        <IoMdClose />
+                    </button>
                 </div>
             </div>
         )
