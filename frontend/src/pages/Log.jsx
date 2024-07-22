@@ -4,6 +4,7 @@ import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import Accuracy from "../components/Accuracy"
 import { IoMdClose } from "react-icons/io";
+import EditLog from '../components/EditLog'
 
 //this component renders all the data linked to a particular meal log
 //in order to avoid redundant database queries, the data will only be fetched if it is not in the location object
@@ -21,6 +22,7 @@ const Log = () => {
     //states to control when loading element and overlay should be displayed
     const [loading, setLoading] = useState(!logLocation.state)
     const [displayOverlay, setDisplayOverlay] = useState(false)
+    const [edit, setEdit] = useState(false)
     
     //request data from the server only if it was not passed in the location object
     useEffect(() => {
@@ -74,9 +76,14 @@ const Log = () => {
         return `on ${day}/${month}/${year} at ${hours}:${minutes}`
     }
 
+    if(edit) {
+        return <EditLog mealName={log.mealName || log.meal?.name} restaurantName={log.restaurantName || log.meal?.restaurant?.name} {...log}/>
+    }
+
   return (
     <>
     <div className='flex justify-center items-start min-h-screen pb-16 gap-4 bg-slate-200 pt-20'>
+
         {
             loading ? (
                 <div>Loading...</div>
@@ -94,7 +101,15 @@ const Log = () => {
                         <div className='flex flex-col flex-grow md:ml-14 mt-5 md:mt-0 justify-between'>
                             <div>
                                 <div className='flex flex-col items-start mb-5'>
-                                    <h1 className='text-slate-800 md:text-2xl font-semibold'>{log.mealName || log.meal?.name}</h1>
+                                    <div className='flex justify-between items-center w-full'>
+                                        <h1 className='text-slate-800 md:text-2xl font-semibold'>{log.mealName || log.meal?.name}</h1>
+                                        <p 
+                                            onClick={() => setEdit(true)}
+                                            className='text-sm border border-slate-300 px-2 rounded-sm bg-slate-50 hover:cursor-pointer hover:bg-slate-200 hover:shadow-sm'
+                                        >
+                                            Edit Log
+                                        </p>
+                                    </div>
                                     <h3 className='text-slate-600 md:text-md'>{log.restaurantName || log.meal?.restaurant?.name}</h3>
                                 </div>
                                 <div className='flex flex-col items-start'>
