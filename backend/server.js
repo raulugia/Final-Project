@@ -329,6 +329,44 @@ app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
     }
 })
 
+app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
+    const { logId } = req.params
+
+    try{
+        const log = await prisma.mealLog.findUnique({
+            where: {
+                id: Number(logId),
+                userUid: req.user.uid
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        surname: true,
+                        username: true,
+                        profilePicUrl: true,
+                        uid: true
+                    }
+                },
+                meal: {
+                    select: {
+                        name: true,
+                        restaurant: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        res.json(log)
+    }catch(err){
+        console.error(err)
+    }
+})
+
 //endpoint to get the restaurants and meals requested by the user
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
