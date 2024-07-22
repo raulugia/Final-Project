@@ -43,6 +43,7 @@ const Meals = () => {
                       return 0;
                     });
                     
+                    console.log(sortedData)
                     setMeals(sortedData)
                     setFilteredMeals(sortedData)
                     setLoading(false)

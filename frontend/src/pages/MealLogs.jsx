@@ -73,7 +73,7 @@ const MealLogs = () => {
                     <SkeletonMealLogCard />
                 ) : (
                     logs.map(log => (
-                        <MealLogCard key={log.id} {...log}/>
+                        <MealLogCard key={log.id} {...log} mealName={log.meal.name} restaurantName={log.meal.restaurant.name}/>
                     ))
                 )   
             }
