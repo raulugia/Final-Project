@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { MdErrorOutline } from "react-icons/md";
 import { MdOutlineCameraAlt } from "react-icons/md";
-import ImageFormUI from './ImageFormUI';
+import axiosInstance from "../../utils/axiosInstance";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../utils/firebase";
 
 const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimate, picture, createdAt}) => {
     const [logData, setLogData] = useState({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt})
     const [imagePreviewUrl, setImagePreviewUrl] = useState(picture);
+    const [file, setFile] = useState("")
     const [error, setError] = useState()
+    const [displayOption, setDisplayOption] = useState(true)
     const inputRef = useRef(null)
 
     const handleInputChange = (e, key) => {
@@ -24,6 +28,35 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
         inputRef.current.focus()
     }, [])
 
+    //method to update the file state when the file input changes
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0]
+        setFile(selectedFile);
+
+        const reader = new FileReader();
+
+        //set up an event handler to be called when the reading process has finished
+        reader.onloadend = () => {
+        //update state to store the image url
+        setImagePreviewUrl(reader.result)
+        }
+
+        //case a file was chosen by the user
+        if(selectedFile) {
+        //read file and convert it to url
+        reader.readAsDataURL(selectedFile)
+        }
+
+        //hide the "click to upload" div
+        setDisplayOption(false)
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+
+
+    }
+
   return (
     <div className='flex flex-col items-center min-h-screen pb-16 bg-slate-200 pt-20'>
         {
@@ -36,10 +69,27 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
     <div className='border flex justify-start bg-white w-[85%] md:w-[75%] max-w-[790px] rounded-lg px-8 py-7 shadow-md mt-3'>
         <form className='flex md:flex-row flex-col w-full'>
 
-            <div className='md:w-[50%] max-w-[280px] max-h-[280px] overflow-hidden rounded-md mx-auto md:mx-0'>
-                <img src={picture} alt={mealName} 
-                    className='w-full h-full object-cover hover:cursor-pointer'
-                />
+            <div className='md:w-[50%] max-w-[280px] max-h-[280px] overflow-hidden rounded-md mx-auto md:mx-0 relative'>
+                <label htmlFor="dropzone-file">
+                    <img src={imagePreviewUrl} alt={mealName} 
+                        className='w-full h-full object-cover hover:cursor-pointer'
+                    />
+                    
+                    <div className={`flex flex-col items-center justify-center pt-5 pb-6 absolute bg-white/60  w-full h-full top-0 hover:cursor-pointer ${displayOption ? "" : "hidden"}`}>
+                        <MdOutlineCameraAlt size={30} className='text-slate-700' />
+                        <p className="mb-2 text-sm text-slate-700">
+                            <span className="font-semibold">Click to upload</span>
+                        </p>
+                    </div>
+
+                    <input
+                        id="dropzone-file"
+                        type="file"
+                        className="hidden"
+                        accept=".jpg, .jpeg, .svg, .png, .bmp, .webp, .heic, .heif, .tiff"
+                        onChange={handleFileChange}
+                    />
+                </label>
             </div>
 
             <div className='flex flex-col flex-grow md:ml-14 mt-5 md:mt-0 justify-between'>
