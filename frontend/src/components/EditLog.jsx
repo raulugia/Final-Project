@@ -159,7 +159,7 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                                 onClick={() => setLogData({...logData, rating: "SLIGHTLY_INACCURATE"})}
                                 className={`flex items-center justify-center px-2 py-1 rounded-md hover:shadow-md cursor-pointer ${logData.rating === "SLIGHTLY_INACCURATE" ? "bg-yellow-500 text-yellow-900 outline" : "bg-yellow-500/20 text-yellow-900/50"}`}
                             >
-                            <p>Slightly Inaccurate</p>
+                            <p>Almost</p>
                             </div>
                             <div
                                 onClick={() => setLogData({...logData, rating: "INACCURATE"})}
