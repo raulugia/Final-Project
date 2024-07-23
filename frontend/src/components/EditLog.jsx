@@ -58,16 +58,7 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
         console.log("submitting...")
         e.preventDefault()
 
-        //const formData = new FormData()
-
         const {mealName, restaurantName, rating, description, carbEstimate, picture} = logData
-        //append the form data to the FormData object
-        // formData.append("mealName", mealName);
-        // formData.append("restaurantName", restaurantName);
-        // formData.append("carbEstimate", carbEstimate);
-        // formData.append("description", description);
-        // formData.append("rating", rating);
-
         const formData = {mealName, restaurantName, rating, description, carbEstimate, picture}
         
         if(file){
@@ -76,15 +67,15 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
         try{
             const token = await user.getIdToken()
 
-            const response = await axiosInstance.put(`/api/my-meals/${mealId}/log/${logId}`, formData, {
+            await axiosInstance.put(`/api/my-meals/${mealId}/log/${logId}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
+            }).then(response => {
+                //refresh page to show the updated log
+                navigate(0)
             })
 
-            if(response) {
-                navigate(`/my-meals/${mealId}/log/${logId}`)
-            }
         }catch(err){
             console.log(err)
         }

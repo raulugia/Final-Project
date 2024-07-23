@@ -192,7 +192,7 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
             //add the meal id to updatedData
             updatedData.mealId = meal.id
         }
-        console.log("new carb estimate", carbEstimate)
+
         //case the new carb estimate is different
         if(carbEstimate && carbEstimate !== existingLog.carbEstimate.toString()) {
             console.log("new carb estimate")
@@ -203,13 +203,13 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
         //case the new description is different
         if(description && description !== existingLog.description.toString()) {
             //add the new description to updatedData
-            updatedData.carbEstimate = description
+            updatedData.description = description
         }
 
         //case the new rating is different
         if(rating && rating !== existingLog.rating.toString()) {
             //add the new rating to updatedData
-            updatedData.carbEstimate = rating
+            updatedData.rating = rating
         }
 
         //case the user uploaded a new picture
@@ -235,7 +235,9 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
         })
 
         res.json(updatedLog)
+        console.log("response sent")
     }catch(err) {
+        console.error(err)
         return res.status(500).json({ error: "Log could not be updated" })
     }
 })
