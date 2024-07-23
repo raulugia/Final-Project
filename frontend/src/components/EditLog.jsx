@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { MdErrorOutline } from "react-icons/md";
+import { MdOutlineCameraAlt } from "react-icons/md";
+import ImageFormUI from './ImageFormUI';
 
 const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimate, picture, createdAt}) => {
     const [logData, setLogData] = useState({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt})
+    const [imagePreviewUrl, setImagePreviewUrl] = useState(picture);
     const [error, setError] = useState()
     const inputRef = useRef(null)
 
@@ -44,7 +47,7 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
                     <div className='flex flex-col items-start mb-5 gap-2'>
                         <input 
                             type='text' 
-                            className='text-slate-800 md:text-2xl font-semibold bg-slate-100 rounded-sm px-3 border' 
+                            className='text-slate-800 md:text-2xl font-semibold bg-slate-100 rounded-sm px-3 border w-[70%]' 
                             value={logData.mealName}
                             onChange={(e) => handleInputChange(e, "mealName")}
                             ref={inputRef}
@@ -52,7 +55,7 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
                         </input>
                         <input 
                             type='text' 
-                            className='text-slate-600 md:text-md bg-slate-100 rounded-sm px-3 border' 
+                            className='text-slate-600 md:text-md bg-slate-100 rounded-sm px-3 border  w-[70%]' 
                             value={logData.restaurantName}
                             onChange={(e) => handleInputChange(e, "restaurantName")}
                         >
@@ -70,7 +73,6 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
                             <span className='font-normal'>g</span>
                         </p>
                         
-                        {/* <Accuracy accuracy={log.rating}/> */}
                         <p className='text-slate-700 font-semibold md:text-lg mt-4 mb-1'>Additional Information</p>
                         <textarea
                             name="description"
@@ -79,15 +81,15 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
                             cols="40"
                             value={logData.description}
                             onChange={(e) => handleInputChange(e, "description")}
-                            className="border py-2 px-3 rounded-md text-sm mb-5 leading-[16px]"
+                            className="border py-2 px-3 rounded-md text-sm mb-5 leading-[16px] bg-slate-100 text-slate-700"
                         ></textarea>
                     </div>
                 </div>
                 <div className='ml-auto mt-8 md:mt-0'>
                     <p className='text-sm text-slate-500'>Created {createdAt}</p>
                 </div>
+                    <button type='submit' className='border mt-5 py-1 rounded-md bg-slate-700 text-white font-semibold hover:shadow-md hover:bg-slate-800'>Update Log</button>
             </div>
-
         </form>
 
     </div>
