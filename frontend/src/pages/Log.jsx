@@ -77,7 +77,7 @@ const Log = () => {
     }
 
     if(edit) {
-        return <EditLog mealName={log.mealName || log.meal?.name} restaurantName={log.restaurantName || log.meal?.restaurant?.name} {...log}/>
+        return <EditLog mealName={log.mealName || log.meal?.name} restaurantName={log.restaurantName || log.meal?.restaurant?.name} {...log} mealId={mealId} logId={logId}/>
     }
 
   return (

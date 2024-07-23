@@ -5,7 +5,10 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../utils/firebase";
 
-const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimate, picture, createdAt}) => {
+const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt, mealId, logId}) => {
+    const user = auth.currentUser
+    //hook used for navigating withing the web app
+    const navigate = useNavigate();
     const [logData, setLogData] = useState({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt})
     const [imagePreviewUrl, setImagePreviewUrl] = useState(picture);
     const [file, setFile] = useState("")
@@ -51,10 +54,36 @@ const EditLog = ({mealName, restaurantName, rating, description, id, carbEstimat
         setDisplayOption(false)
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault()
 
+        const formData = new FormData()
+        const {mealName, restaurantName, rating, description, carbEstimate, picture} = logData
+        //append the form data to the FormData object
+        formData.append("mealName", mealName);
+        formData.append("restaurantName", restaurantName);
+        formData.append("carbEstimate", carbEstimate);
+        formData.append("description", description);
+        formData.append("rating", rating);
+        
+        if(file){
+            formData.append("picture", file);
+        }
 
+        try{
+            const token = await user.getIdToken()
+
+            await axiosInstance.put(`/api/my-meals/${mealId}/log/${logId}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }).then(response => {
+                navigate(`/my-meals/${mealId}/log/${logId}`)
+            })
+
+        }catch(err){
+            console.log(err)
+        }
     }
 
   return (

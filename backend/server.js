@@ -68,16 +68,6 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
     //extract the picture uploaded by the user
     const picture = req.file;
 
-    // //find the user in the database and store it
-    // const user = await prisma.user.findUnique({
-    //     where : { email: req.user.email }
-    //   })
-
-    // //throw an error if the user does not exist
-    // if(!user) {
-    // throw new Error("User not found")
-    // }
-
     try {
       //check if the restaurant already exists in the database using the restaurant name
       let restaurant = await prisma.restaurant.findUnique({
@@ -147,6 +137,91 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
   }
 );
 
+//endpoint for updating a log
+app.put("/api/my-meals/:mealId/log/:logId". authenticateUser, async(req, res) => {
+    const { mealId, logId } = req.params;
+    const { mealName, restaurantName, carbEstimate, description, rating} = req.body
+    const picture = req.file
+
+    try{
+        //find the existing meal log
+        const existingLog = await prisma.mealLog.findUnique({
+            where: {
+                id: Number(logId),
+            },
+            include: {
+                meal: true
+            }
+        })
+
+        if(!existingLog){
+            return res.status(404).json({ error: "Meal log not found" })
+        }
+
+        const updatedData = {}
+
+        if(mealName && mealName !== existingLog.meal.name){
+            //find the restaurant by name or create a new one
+            let restaurant = await prisma.restaurant.upsert({
+                where: {
+                    name: restaurantName
+                },
+                update: {},
+                create: { name: restaurantName }
+            })
+
+            //find the meal by name and restaurant id or create a new one
+            const meal = await prisma.meal.upsert({
+                where: {
+                    name_restaurantId: {
+                        name: mealName,
+                        restaurantId: restaurant.id
+                    }
+                },
+                update: {},
+                create: {
+                    name: mealName,
+                    restaurantId: restaurant.id
+                }
+            })
+
+            updatedData.mealId = meal.id
+        }
+
+        if(carbEstimate && carbEstimate !== existingLog.carbEstimate.toString()) {
+            updatedData.carbEstimate = Number(carbEstimate)
+        }
+
+        if(description && description !== existingLog.description.toString()) {
+            updatedData.carbEstimate = description
+        }
+
+        if(rating && rating !== existingLog.rating.toString()) {
+            updatedData.carbEstimate = rating
+        }
+
+        if(picture) {
+            await imageQueue.add({
+                filePath: picture.path,
+                mealId: existingLog.id
+            })
+
+            updatedData.picture = ""
+            updatedData.thumbnail = ""
+        }
+
+        const updatedLog = await prisma.mealLog.update({
+            where: {
+                id: Number(logId)
+            },
+            data: updatedData
+        })
+
+        res.json(updatedLog)
+    }catch(err) {
+        return res.status(500).json({ error: "Log could not be updated" })
+    }
+})
 
 app.get("/api/user-data", authenticateUser, async (req, res) => {
     try {
