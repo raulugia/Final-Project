@@ -138,8 +138,11 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
 );
 
 //endpoint for updating a log
-app.put("/api/my-meals/:mealId/log/:logId". authenticateUser, async(req, res) => {
+app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
+    console.log("updating...")
     const { mealId, logId } = req.params;
+    console.log("params", req.params)
+    console.log("body", req.body)
     const { mealName, restaurantName, carbEstimate, description, rating} = req.body
     const picture = req.file
 
@@ -157,9 +160,10 @@ app.put("/api/my-meals/:mealId/log/:logId". authenticateUser, async(req, res) =>
         if(!existingLog){
             return res.status(404).json({ error: "Meal log not found" })
         }
-
+        console.log("log found: ", existingLog)
         const updatedData = {}
 
+        //case the new meal name is different
         if(mealName && mealName !== existingLog.meal.name){
             //find the restaurant by name or create a new one
             let restaurant = await prisma.restaurant.upsert({
@@ -185,31 +189,44 @@ app.put("/api/my-meals/:mealId/log/:logId". authenticateUser, async(req, res) =>
                 }
             })
 
+            //add the meal id to updatedData
             updatedData.mealId = meal.id
         }
-
+        console.log("new carb estimate", carbEstimate)
+        //case the new carb estimate is different
         if(carbEstimate && carbEstimate !== existingLog.carbEstimate.toString()) {
+            console.log("new carb estimate")
+            //add the new carb estimate to updatedData
             updatedData.carbEstimate = Number(carbEstimate)
         }
 
+        //case the new description is different
         if(description && description !== existingLog.description.toString()) {
+            //add the new description to updatedData
             updatedData.carbEstimate = description
         }
 
+        //case the new rating is different
         if(rating && rating !== existingLog.rating.toString()) {
+            //add the new rating to updatedData
             updatedData.carbEstimate = rating
         }
 
+        //case the user uploaded a new picture
         if(picture) {
+            console.log("PICTURE IS NEW")
+            //add job to queue so a thumbnail is created, picture and thumbnail uploaded to cloudinary and database updated
             await imageQueue.add({
                 filePath: picture.path,
                 mealId: existingLog.id
             })
 
+            //set the new picture and thumbnail placeholders
             updatedData.picture = ""
             updatedData.thumbnail = ""
         }
 
+        //update the existing log using the data that was changed
         const updatedLog = await prisma.mealLog.update({
             where: {
                 id: Number(logId)

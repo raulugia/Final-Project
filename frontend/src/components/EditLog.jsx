@@ -55,32 +55,36 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
     };
 
     const handleSubmit = async(e) => {
+        console.log("submitting...")
         e.preventDefault()
 
-        const formData = new FormData()
+        //const formData = new FormData()
+
         const {mealName, restaurantName, rating, description, carbEstimate, picture} = logData
         //append the form data to the FormData object
-        formData.append("mealName", mealName);
-        formData.append("restaurantName", restaurantName);
-        formData.append("carbEstimate", carbEstimate);
-        formData.append("description", description);
-        formData.append("rating", rating);
+        // formData.append("mealName", mealName);
+        // formData.append("restaurantName", restaurantName);
+        // formData.append("carbEstimate", carbEstimate);
+        // formData.append("description", description);
+        // formData.append("rating", rating);
+
+        const formData = {mealName, restaurantName, rating, description, carbEstimate, picture}
         
         if(file){
             formData.append("picture", file);
         }
-
         try{
             const token = await user.getIdToken()
 
-            await axiosInstance.put(`/api/my-meals/${mealId}/log/${logId}`, formData, {
+            const response = await axiosInstance.put(`/api/my-meals/${mealId}/log/${logId}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
-            }).then(response => {
-                navigate(`/my-meals/${mealId}/log/${logId}`)
             })
 
+            if(response) {
+                navigate(`/my-meals/${mealId}/log/${logId}`)
+            }
         }catch(err){
             console.log(err)
         }
@@ -167,7 +171,7 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                 <div className='ml-auto mt-8 md:mt-0'>
                     <p className='text-sm text-slate-500'>Created {createdAt}</p>
                 </div>
-                    <button type='submit' className='border mt-5 py-1 rounded-md bg-slate-700 text-white font-semibold hover:shadow-md hover:bg-slate-800'>Update Log</button>
+                    <button onClick={handleSubmit} type='submit' className='border mt-5 py-1 rounded-md bg-slate-700 text-white font-semibold hover:shadow-md hover:bg-slate-800'>Update Log</button>
             </div>
         </form>
 
