@@ -136,6 +136,7 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                         </input>
                     </div>
                     <div className='flex flex-col items-start justify-start'>
+
                         <p className='text-slate-700 font-semibold md:text-lg'>Carb estimate: 
                             <input 
                                 type='text' 
@@ -146,16 +147,36 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                             </input>
                             <span className='font-normal'>g</span>
                         </p>
+
+                        <div className="flex justify-between items-center text-sm w-full mt-5 gap-2">
+                            <div
+                                onClick={() => setLogData({...logData, rating: "ACCURATE"})}
+                                className={`flex items-center justify-center px-2 py-1 rounded-md bg-green-500 hover:shadow-md cursor-pointer ${logData.rating === "ACCURATE" ? "bg-green-500 text-green-900 outline" : "bg-green-500/20 text-green-900/50"}`}
+                            >
+                            <p>Accurate</p>
+                            </div>
+                            <div
+                                onClick={() => setLogData({...logData, rating: "SLIGHTLY_INACCURATE"})}
+                                className={`flex items-center justify-center px-2 py-1 rounded-md hover:shadow-md cursor-pointer ${logData.rating === "SLIGHTLY_INACCURATE" ? "bg-yellow-500 text-yellow-900 outline" : "bg-yellow-500/20 text-yellow-900/50"}`}
+                            >
+                            <p>Slightly Inaccurate</p>
+                            </div>
+                            <div
+                                onClick={() => setLogData({...logData, rating: "INACCURATE"})}
+                                className={`flex items-center justify-center px-2 py-1 rounded-md bg-red-500 hover:shadow-md cursor-pointer ${logData.rating === "INACCURATE" ? "bg-red-500 text-red-900 outline" : "bg-red-500/20 text-red-900/50"}`}
+                            >
+                            <p>Inaccurate</p>
+                            </div>
+                        </div>
                         
                         <p className='text-slate-700 font-semibold md:text-lg mt-4 mb-1'>Additional Information</p>
                         <textarea
                             name="description"
                             id="description"
                             rows="4"
-                            cols="40"
                             value={logData.description}
                             onChange={(e) => handleInputChange(e, "description")}
-                            className="border py-2 px-3 rounded-md text-sm mb-5 leading-[16px] bg-slate-100 text-slate-700"
+                            className="border py-2 px-3 rounded-md text-sm mb-5 leading-[16px] bg-slate-100 text-slate-700 w-full"
                         ></textarea>
                     </div>
                 </div>
