@@ -14,6 +14,7 @@ const Log = () => {
     const user = auth.currentUser
     //get location object
     const logLocation = useLocation()
+    console.log("location", logLocation)
     //state to store the meal log data
     const [log, setLog] = useState(logLocation.state || {})
     //get meal id and log id
@@ -31,6 +32,7 @@ const Log = () => {
             //get user's id token for authorization in the server
             const token = await user.getIdToken()
             try{
+                console.log("getting data for: ", `/api/my-meals/${mealId}/log/${logId}`)
                 //send a get request and store data from the request object
                 const { data } = await axiosInstance.get(`/api/my-meals/${mealId}/log/${logId}`, { 
                     headers: {
@@ -40,7 +42,7 @@ const Log = () => {
 
                 //format and store the date of the log
                 const displayData = {...data, createdAt: formatDate(data.createdAt)}
-                
+                console.log(`log has been fetched: ${displayData}`)
                 //update state so the log data is displayed
                 setLog(displayData)
                 //hide loading element
@@ -77,7 +79,7 @@ const Log = () => {
     }
 
     if(edit) {
-        return <EditLog mealName={log.mealName || log.meal?.name} restaurantName={log.restaurantName || log.meal?.restaurant?.name} {...log} mealId={mealId} logId={logId}/>
+        return <EditLog mealName={log.mealName || log.meal?.name} restaurantName={log.restaurantName || log.meal?.restaurant?.name} {...log} mealId={mealId} logId={logId} setEdit={setEdit}/>
     }
 
   return (

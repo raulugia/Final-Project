@@ -5,7 +5,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../utils/firebase";
 
-const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt, mealId, logId}) => {
+const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt, mealId, logId, setEdit}) => {
     const user = auth.currentUser
     //hook used for navigating withing the web app
     const navigate = useNavigate();
@@ -72,8 +72,9 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                     Authorization: `Bearer ${token}`,
                 }
             }).then(response => {
-                //refresh page to show the updated log
-                navigate(0)
+                setEdit(false)
+                //navigate to the updated log and reset location state
+                navigate(`/my-meals/${response.data.mealId}/log/${response.data.id}`, { state: null, replace: true })
             })
 
         }catch(err){

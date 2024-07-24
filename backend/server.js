@@ -165,6 +165,7 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
 
         //case the new meal name is different
         if(mealName && mealName !== existingLog.meal.name){
+            console.log("new meal name: ", mealName)
             //find the restaurant by name or create a new one
             let restaurant = await prisma.restaurant.upsert({
                 where: {
@@ -173,6 +174,8 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
                 update: {},
                 create: { name: restaurantName }
             })
+
+            console.log("restaurant: ", restaurant)
 
             //find the meal by name and restaurant id or create a new one
             const meal = await prisma.meal.upsert({
@@ -191,6 +194,7 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
 
             //add the meal id to updatedData
             updatedData.mealId = meal.id
+            console.log("updated meal: ", updatedData)
         }
 
         //case the new carb estimate is different
@@ -233,6 +237,21 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
             },
             data: updatedData
         })
+
+        const remainingLogs = await prisma.mealLog.findMany({
+            where: {
+                mealId: Number(existingLog.mealId)
+            }
+        })
+
+        if(remainingLogs.length === 0) {
+            await prisma.meal.delete({
+                where: {
+                    id: Number(existingLog.mealId)
+                }
+            })
+            console.log("meal deleted", existingLog)
+        }
 
         res.json(updatedLog)
         console.log("response sent")
