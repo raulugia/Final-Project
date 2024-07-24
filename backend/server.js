@@ -223,12 +223,6 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
         //case the user uploaded a new picture
         if(picture) {
             console.log("PICTURE IS NEW")
-            //add job to queue so a thumbnail is created, picture and thumbnail uploaded to cloudinary and database updated
-            await imageQueue.add({
-                filePath: picture.path,
-                mealId: existingLog.id
-            })
-
             //set the new picture and thumbnail placeholders
             updatedData.picture = ""
             updatedData.thumbnail = ""
@@ -241,6 +235,16 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
             },
             data: updatedData
         })
+
+        //case the user uploaded a new picture - log has already been updated
+        if(picture) {
+            console.log("PICTURE IS NEW")
+            //add job to queue so a thumbnail is created, picture and thumbnail uploaded to cloudinary and database updated
+            await imageQueue.add({
+                filePath: picture.path,
+                mealId: updatedLog.id
+            })
+        }
 
         const remainingLogs = await prisma.mealLog.findMany({
             where: {
