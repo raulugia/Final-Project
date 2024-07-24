@@ -55,14 +55,25 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
     };
 
     const handleSubmit = async(e) => {
-        console.log("submitting...")
         e.preventDefault()
 
         const {mealName, restaurantName, rating, description, carbEstimate, picture} = logData
-        const formData = {mealName, restaurantName, rating, description, carbEstimate, picture}
+        // const formData = {mealName, restaurantName, rating, description, carbEstimate, picture}
         
-        if(file){
-            formData.append("picture", file);
+        // if(file){
+        //     formData.picture= file;
+        // }
+        const formData = new FormData()
+        formData.append("mealName", mealName)
+        formData.append("restaurantName", restaurantName)
+        formData.append("rating", rating)
+        formData.append("description", description)
+        formData.append("carbEstimate", carbEstimate)
+
+        if(file) {
+            formData.append("picture", file)
+        }else{
+            formData.append("picture", picture)
         }
         try{
             const token = await user.getIdToken()

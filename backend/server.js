@@ -6,7 +6,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const multer = require("multer");
-const { imageQueue } = require("./queue");
+const { imageQueue, imageUpdateQueue } = require("./queue");
 const authenticateUser = require("./authMiddleware");
 const { types } = require("pg");
 const http = require("http");
@@ -138,13 +138,14 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
 );
 
 //endpoint for updating a log
-app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
+app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("picture"),async(req, res) => {
     console.log("updating...")
     const { mealId, logId } = req.params;
     console.log("params", req.params)
     console.log("body", req.body)
     const { mealName, restaurantName, carbEstimate, description, rating} = req.body
     const picture = req.file
+    console.log(picture)
 
     try{
         //find the existing meal log
@@ -240,9 +241,12 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
         if(picture) {
             console.log("PICTURE IS NEW")
             //add job to queue so a thumbnail is created, picture and thumbnail uploaded to cloudinary and database updated
-            await imageQueue.add({
+            await imageUpdateQueue.add({
                 filePath: picture.path,
-                mealId: updatedLog.id
+                newLogId: updatedLog.id,
+                oldLogId: existingLog.id,
+                oldPictureUrl: existingLog.picture,
+                oldThumbnailUrl: existingLog.thumbnail,
             })
         }
 
