@@ -153,7 +153,11 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
                 id: Number(logId),
             },
             include: {
-                meal: true
+                meal: {
+                    include: {
+                        restaurant: true
+                    }
+                }
             }
         })
 
@@ -163,8 +167,8 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
         console.log("log found: ", existingLog)
         const updatedData = {}
 
-        //case the new meal name is different
-        if(mealName && mealName !== existingLog.meal.name){
+        //case the new meal name is different or the new restaurant is different
+        if((mealName && mealName !== existingLog.meal.name) || (restaurantName && restaurantName !== existingLog.meal.restaurant.name)){
             console.log("new meal name: ", mealName)
             //find the restaurant by name or create a new one
             let restaurant = await prisma.restaurant.upsert({
