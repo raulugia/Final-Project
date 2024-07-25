@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 
 const MealCard = ({id, mealName, restaurantName, thumbnailUrl}) => {
   return (
-    <Link to={`/my-meals/${id}`} className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg'>
-        <div className='flex gap-5 md:gap-10 justify-start'>
+    <Link to={`/my-meals/${id}`} className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between rounded-lg'>
+        <div className='flex gap-3 md:gap-10 justify-start items-center w-full'>
             <div className='min-h-24 h-24 w-24 min-w-24 rounded-md overflow-hidden border'>
                 <img src={thumbnailUrl} alt="" className='h-full w-full object-cover'/>
             </div>
-            <div className='flex flex-col mt-3 gap-2 border'>
+            <div className='flex flex-col justify-center gap-2'>
                 <p className='text-md md:text-lg font-semibold leading-[18px]'>{mealName}</p>
                 {
                   restaurantName&&(
@@ -18,7 +18,7 @@ const MealCard = ({id, mealName, restaurantName, thumbnailUrl}) => {
                 }
             </div>
         </div>
-        <div>
+        <div className='flex items-center'>
           <MdKeyboardArrowRight size={40} />
         </div>
     </Link>
