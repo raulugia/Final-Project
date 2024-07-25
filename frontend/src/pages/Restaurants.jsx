@@ -72,7 +72,7 @@ const Restaurants = () => {
         {   
             filteredRestaurants.length > 0 && !loading ? (
                 filteredRestaurants.map(restaurant => (
-                    <Link key={restaurant.id+restaurant.name}
+                    <Link to={`/my-restaurants/${restaurant.id}`} key={restaurant.id+restaurant.name}
                         onMouseEnter={() => setHoveredRestaurant(restaurant.id)} 
                         onMouseLeave={() => setHoveredRestaurant(null)} 
                         className={`shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer ${hoveredRestaurant === restaurant.id ? "underline" : ""}`}

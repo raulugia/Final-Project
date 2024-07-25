@@ -388,6 +388,53 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
     }
 })
 
+//endpoint for returning all the meals linked to a certain restaurant
+app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) => {
+    const { restaurantId } = req.params
+
+    try{
+        //get the meals logged by current user and linked to a certain restaurant id - include thumbnail of latest meal log
+        const meals = await prisma.meal.findMany({
+            where: {
+                restaurantId: Number(restaurantId),
+                logs: {
+                    some: {
+                        userUid: req.user.uid
+                    }
+                }
+            },
+            include: {
+                logs: {
+                    where: {
+                        userUid: req.user.uid
+                    },
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    take: 1,
+                    select: {
+                        thumbnail: true
+                    }
+                }
+            }
+        })
+
+        //object that will be returned to the client
+        const result = meals.map(meal => ({
+            mealId: meal.id,
+            mealName: meal.name,
+            thumbnail: meal.logs[0]?.thumbnail || "",
+        }))
+
+        //send response to client
+        res.json(result)
+
+        console.log("MEALS", meals)
+    }catch(err){
+        console.log(err)
+    }
+})
+
 app.get("/api/meals", authenticateUser, async(req, res,) => {
     try{
         //get the most recent meal logs avoiding duplicates
