@@ -75,7 +75,7 @@ const RestaurantMeals = () => {
     }
   return (
     <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
-        <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>My Meals</h1>
+        <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>{meals[0]?.restaurantName} Meals</h1>
         <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
             <form action="" className='absolute h-fit inset-0 mt-[-30px] mx-5 md:mx-10'>
                 <input type="search" name="" id="" value={searchInput} placeholder='Search for meals...' 
@@ -89,7 +89,7 @@ const RestaurantMeals = () => {
                 ) : (
 
                     filteredMeals.map(meal => (
-                        <MealCard key={meal.id} id={meal.id} mealName={meal.mealName} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
+                        <MealCard key={meal.id} id={meal.id} mealName={meal.mealName} thumbnailUrl={meal.thumbnail}/>
                     ))
                 )
             }

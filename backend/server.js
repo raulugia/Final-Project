@@ -415,6 +415,11 @@ app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) =
                     select: {
                         thumbnail: true
                     }
+                },
+                restaurant: {
+                    select: {
+                        name: true
+                    }
                 }
             }
         })
@@ -424,6 +429,7 @@ app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) =
             mealId: meal.id,
             mealName: meal.name,
             thumbnail: meal.logs[0]?.thumbnail || "",
+            restaurantName: meal.restaurant.name,
         }))
 
         //send response to client
