@@ -11,7 +11,11 @@ const MealCard = ({id, mealName, restaurantName, thumbnailUrl}) => {
             </div>
             <div className='flex flex-col mt-3 gap-2'>
                 <p className='text-md md:text-lg font-semibold leading-[18px]'>{mealName}</p>
-                <p className='text-sm md:text-md text-gray-400 leading-[18px]'>{restaurantName}</p>
+                {
+                  restaurantName&&(
+                    <p className='text-sm md:text-md text-gray-400 leading-[18px]'>{restaurantName}</p>
+                  )
+                }
             </div>
         </div>
         <div>

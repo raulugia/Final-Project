@@ -31,8 +31,8 @@ const RestaurantMeals = () => {
                     
                     //sort data alphabetically by meal name
                     const sortedData = data.sort((a, b) => {
-                      const mealNameA = a.meal.name.toLowerCase();
-                      const mealNameB = b.meal.name.toLowerCase();
+                      const mealNameA = a.mealName.toLowerCase();
+                      const mealNameB = b.mealName.toLowerCase();
 
                       if (mealNameA < mealNameB) {
                         return -1;
@@ -67,7 +67,7 @@ const RestaurantMeals = () => {
         if(meals.length > 0) {
             //get the meals that match the search input
             const filtered = meals.filter(item=> {
-                return item.meal.name.toLowerCase().includes(searchValue.toLowerCase())
+                return item.mealName.toLowerCase().includes(searchValue.toLowerCase())
             })
             //update state so the filtered meals are displayed
             setFilteredMeals(filtered)
@@ -88,8 +88,8 @@ const RestaurantMeals = () => {
                     <SkeletonMealCard />
                 ) : (
 
-                    filteredMeals.map(item => (
-                        <MealCard key={item.id} id={item.meal.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
+                    filteredMeals.map(meal => (
+                        <MealCard key={meal.id} id={meal.id} mealName={meal.mealName} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail}/>
                     ))
                 )
             }
