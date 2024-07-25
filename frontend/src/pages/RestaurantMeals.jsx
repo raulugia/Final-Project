@@ -5,9 +5,14 @@ import MealCard from '../components/MealCard'
 import SkeletonMealCard from '../components/SkeletonMealCard'
 import { useParams } from 'react-router-dom'
 
+//this component displays the meals linked to a certain restaurant
+//rendered by route "/my-restaurants/:restaurantId"
 const RestaurantMeals = () => {
+    //get current user
     const user = auth.currentUser
+    //state to hold all meals
     const [meals, setMeals] = useState([])
+    //state to display filtered meals
     const [filteredMeals, setFilteredMeals] = useState([])
     //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
@@ -15,6 +20,7 @@ const RestaurantMeals = () => {
     //const [hoveredMeal, setHoveredMeal] = useState(null)
     const { restaurantId } = useParams()
 
+    //fetch meals linked to a certain restaurant and display them
     useEffect(() => {
         (
             async() => {
@@ -31,23 +37,28 @@ const RestaurantMeals = () => {
                     
                     //sort data alphabetically by meal name
                     const sortedData = data.sort((a, b) => {
+                      //convert meal names to lowercase for case-insensitive comparison
                       const mealNameA = a.mealName.toLowerCase();
                       const mealNameB = b.mealName.toLowerCase();
-
+                      
+                      //case mealNameA comes before mealNameB
                       if (mealNameA < mealNameB) {
                         return -1;
                       }
 
+                      //case mealNameB comes before mealNameA
                       if (mealNameA < mealNameB) {
                         return 1;
                       }
 
+                      //case order does not change
                       return 0;
                     });
                     
-                    console.log(sortedData)
+                    //update states to display sorted meals
                     setMeals(sortedData)
                     setFilteredMeals(sortedData)
+                    //stop rendering loading component
                     setLoading(false)
                 } catch(err) {
                     console.log(err)
@@ -89,7 +100,7 @@ const RestaurantMeals = () => {
                 ) : (
 
                     filteredMeals.map(meal => (
-                        <MealCard key={meal.id} id={meal.id} mealName={meal.mealName} thumbnailUrl={meal.thumbnail}/>
+                        <MealCard key={meal.mealId} id={meal.mealId} mealName={meal.mealName} thumbnailUrl={meal.thumbnail}/>
                     ))
                 )
             }
