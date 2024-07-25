@@ -35,6 +35,44 @@ app.use(express.json());
 //configure multer for file uploads using "uploads/" as the destination directory
 const upload = multer({ dest: "uploads/" });
 
+//
+app.get("/api/home", authenticateUser, async(req, res) => {
+    try{
+        const logs = await prisma.mealLog.findMany({
+            where: { 
+                userUid: req.user.uid
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            take: 5,
+            include: {
+                meal: {
+                    include: {
+                        restaurant: true
+                    }
+                }
+            }
+
+        })
+
+        const response = logs.map(log => ({
+            logId: log.id,
+            mealId: log.meal.id,
+            mealName: log.meal.name,
+            restaurantName: log.meal.restaurant.name,
+            picture: log.picture,
+            carbEstimate: log.carbEstimate,
+            createdAt: log.createdAt
+        }))
+
+        console.log("logs", response)
+        res.json(response)
+    }catch(err){
+
+    }
+})
+
 //endpoint for user registration
 app.post("/api/register", async (req, res) => {
   //extract email, name and surname from the request body
