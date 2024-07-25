@@ -403,6 +403,7 @@ app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) =
                     }
                 }
             },
+            //include restaurant and the thumbnail of the most recent log
             include: {
                 logs: {
                     where: {
