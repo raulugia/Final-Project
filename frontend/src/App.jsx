@@ -71,7 +71,8 @@ function App() {
   //set up the different routes users can access
   //components rendered by protected routes will be wrapped by ProtectedRoute to ensure the user is authenticated
   return (
-    <div>
+    <div className='bg-slate-100'>
+    <div className='max-w-[1200px] mx-auto'>
      <Routes>
 
       <Route path='/' element={<Login />}/>
@@ -91,6 +92,7 @@ function App() {
       </Route>
 
      </Routes>
+    </div>
     </div>
   )
 }

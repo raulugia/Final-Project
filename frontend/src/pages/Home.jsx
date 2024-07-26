@@ -64,11 +64,11 @@ const Home = () => {
     //   <p className="cursor-pointer font-semibold" onClick={handleClick}>Log Out</p>
     // </div>
     <div className='flex justify-between min-h-screen pb-16 gap-4 bg-slate-200'>
-      <div className="border bg-red-300 mt-24 flex-grow">
+      <div className="border bg-red-300 mt-24 flex-grow hidden md:block">
         left
       </div>
 
-        <div className='flex-auto flex-col gap-4 py-3 px-5 mt-24 w-[85%] md:w-[25%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
+        <div className='flex-auto flex-col gap-4 py-3 px-5 mt-24 w-[85%] md:w-[25%]'>
           <h1 className='text-2xl font-bold text-slate-700 mb-5'>Your Recent Logs</h1>
           <div className='flex flex-col gap-5'>
             {   
@@ -83,7 +83,7 @@ const Home = () => {
         </div>
         </div>
 
-        <div className="border bg-red-300 mt-24 flex-grow">
+        <div className="border bg-red-300 mt-24 flex-grow hidden md:block">
             right
         </div>
     </div>

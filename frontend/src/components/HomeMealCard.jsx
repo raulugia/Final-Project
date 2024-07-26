@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 const HomeMealCard = ({mealName, restaurantName, logId, mealId, createdAt, rating, picture}) => {
     console.log(rating)
   return (
-    <Link to={`/my-meals/${mealId}/log/${logId}`} className='py-4 px-5 rounded-md border border-slate-200 shadow-md max-w-[456px] bg-slate-200'>
+    <Link to={`/my-meals/${mealId}/log/${logId}`} className='py-4 px-5 rounded-md border border-slate-200 shadow-md max-w-[456px] bg-white'>
         <div className='min-w-full max-w-[415px] min-h-[300px] rounded-md overflow-hidden'>
             <img className='w-full' src={picture} alt={mealName} />
         </div>
