@@ -38,6 +38,10 @@ const upload = multer({ dest: "uploads/" });
 //
 app.get("/api/home", authenticateUser, async(req, res) => {
     try{
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5
+        const offset = (page - 1) * limit
+
         const logs = await prisma.mealLog.findMany({
             where: { 
                 userUid: req.user.uid
@@ -45,7 +49,8 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             orderBy: {
                 createdAt: "desc"
             },
-            take: 5,
+            take: limit,
+            skip: offset,
             include: {
                 meal: {
                     include: {
