@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 
 const HomeMealCard = ({mealName, restaurantName, logId, mealId, createdAt, rating, picture}) => {
   return (
-    <Link to={`/my-meals/${mealId}/log/${logId}`} className='py-4 px-5 rounded-md border shadow-sm max-w-[456px] bg-slate-200'>
-        <div className='min-w-full max-w-[415px] min-h-[300px] border'>
+    <Link to={`/my-meals/${mealId}/log/${logId}`} className='py-4 px-5 rounded-md border shadow-sm max-w-[456px] bg-red-200'>
+        <div className='min-w-full max-w-[415px] min-h-[300px]'>
             <img className='w-full' src={picture} alt={mealName} />
         </div>
         
@@ -33,7 +33,7 @@ const HomeMealCard = ({mealName, restaurantName, logId, mealId, createdAt, ratin
             <p className='text-sm text-gray-400'>{createdAt}</p>
         </div>
 
-        </Link>
+    </Link>
   )
 }
 

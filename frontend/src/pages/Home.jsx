@@ -7,7 +7,7 @@ import HomeMealCard from '../components/HomeMealCard';
 
 const Home = () => {
   const user = auth.currentUser
-  const [userData, setUserData] = useState(null)
+  const [logs, setLogs] = useState([])
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
 
@@ -22,7 +22,7 @@ const Home = () => {
           },
         })
 
-        setUserData(data)
+        setLogs(data)
         console.log(data)
       } catch(err) {
         console.log(err)
@@ -50,34 +50,17 @@ const Home = () => {
 
         <div className='flex-auto flex-col gap-4 py-6 px-10 mt-24 w-[85%] md:w-[25%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
           <h1 className='text-2xl font-bold text-slate-700 mb-5'>Your Recent Logs</h1>
+          <div className='flex flex-col gap-5'>
             {   
                 loading ? (
                     <SkeletonMealCard />
                 ) : (
-                  <div className='py-4 px-5 rounded-md border shadow-sm max-w-[456px] bg-slate-200'>
-                    <div className='min-w-full max-w-[415px] min-h-[300px] border'>
-                        <img className='w-full' src="https://res.cloudinary.com/doqhgaraq/image/upload/v1721318652/hfmtoyfjuewrxac3b983.jpg" alt="" />
-                    </div>
-                    
-                    <div>
-                      <div className='flex justify-between items-center mt-2'>
-                        <div className='leading-[18px]'>
-                          <p className='text-md md:text-lg font-semibold'>Macarroni</p>
-                          <p className='text-sm md:text-md text-gray-400'>Italian Restaurant</p>
-                        </div>
-                        <div>
-                          <p>ACCURATE</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className='flex justify-end'>
-                      <p className='text-sm text-gray-400'>Created at on</p>
-                    </div>
-
-                  </div>
+                  logs.map(log => (
+                    <HomeMealCard {...log}/>
+                  ))
                 )
             }
+        </div>
         </div>
 
         <div className="border bg-red-300 mt-24 flex-grow">
