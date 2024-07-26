@@ -17,6 +17,7 @@ import { auth } from '../utils/firebase'
 import {Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
 import socket from "../utils/socket"
+import { Outlet } from 'react-router-dom'
 
 
 function App() {
@@ -71,24 +72,24 @@ function App() {
   //set up the different routes users can access
   //components rendered by protected routes will be wrapped by ProtectedRoute to ensure the user is authenticated
   return (
-    <div className='bg-slate-100'>
+    <div className='bg-slate-200'>
+      <Navbar name={user?.displayName}/>
     <div className='max-w-[1200px] mx-auto'>
      <Routes>
-
       <Route path='/' element={<Login />}/>
       <Route path='/register' element={<Register />}/>
 
-      <Route element={ <Navbar name={user?.displayName}/> }>
-        <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}/>
-        <Route path='/friends' element={<ProtectedRoute><Friends /></ProtectedRoute>}/>
-        <Route path='/friends/:id' element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
-        <Route path='/log-meal' element={<ProtectedRoute><LogMeal /></ProtectedRoute>}/>
-        <Route path='/my-restaurants' element={<ProtectedRoute><Restaurants /></ProtectedRoute>}/>
-        <Route path='/my-restaurants/:restaurantId' element={<ProtectedRoute><RestaurantMeals /></ProtectedRoute>}/>
-        <Route path='/my-meals' element={<ProtectedRoute><Meals /></ProtectedRoute>}/>
-        <Route path='/my-meals/:mealId' element={<ProtectedRoute><MealLogs /></ProtectedRoute>}/>
-        <Route path='/my-meals/:mealId/log/:logId' element={<ProtectedRoute><Log /></ProtectedRoute>}/>
-        <Route path='/search' element={<ProtectedRoute><SearchResults /></ProtectedRoute>}/>
+      <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
+        <Route path='/home' element={<Home />}/>
+        <Route path='/friends' element={<Friends />}/>
+        <Route path='/friends/:id' element={<Profile />}/>
+        <Route path='/log-meal' element={<LogMeal />}/>
+        <Route path='/my-restaurants' element={<Restaurants />}/>
+        <Route path='/my-restaurants/:restaurantId' element={<RestaurantMeals />}/>
+        <Route path='/my-meals' element={<Meals />}/>
+        <Route path='/my-meals/:mealId' element={<MealLogs />}/>
+        <Route path='/my-meals/:mealId/log/:logId' element={<Log />}/>
+        <Route path='/search' element={<SearchResults />}/>
       </Route>
 
      </Routes>

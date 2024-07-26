@@ -16,8 +16,8 @@ const Navbar = ({ name }) => {
     }
     
   return (
-    <>
-    <div className='py-2 px-6 flex justify-between items-center fixed z-10 w-full text-slate-800 backdrop-blur-[5px] bg-white/40 shadow-md'>
+ 
+    <div className='py-2 px-6 flex w-full justify-between items-center fixed z-10 text-slate-800 backdrop-blur-[5px] bg-white/40 shadow-md'>
         <div>
             <Link to="/home" className='text-2xl font-bold'>DiaMate</Link>
         </div>
@@ -27,20 +27,22 @@ const Navbar = ({ name }) => {
             <Link to="/my-restaurants" className=''>My Restaurants</Link>
             <Link to="/friends" className=''>Friends</Link>
         </div>
-        <form className='flex w-64 items-center gap-1' onSubmit={handleSubmit}>
-            <input type="search" name="" id="" placeholder="Search meals, restaurants"
-                value={searchInput} 
-                className='rounded-md w-full px-2'
-                onChange={e => setSearchInput(e.target.value)}
-            />
-            <button type="submit"><FaSearch color={"white"} className='hover:cursor-pointer'/></button>
-        </form>
-        <div>
-            <p className='text-sm text-black'>Hello, {name}</p>
+        <div className='flex gap-4'>
+            <form className='flex max-w-64 items-center gap-1' onSubmit={handleSubmit}>
+                <input type="search" name="" id="" placeholder="Search meals, restaurants"
+                    value={searchInput} 
+                    className='rounded-md w-full px-2'
+                    onChange={e => setSearchInput(e.target.value)}
+                />
+                <button type="submit"><FaSearch color={"white"} className='hover:cursor-pointer'/></button>
+            </form>
+            <div>
+                <p className='text-sm text-black'>Hello, {name}</p>
+            </div>
         </div>
     </div>
-    <Outlet />
-    </>
+
+
   )
 }
 
