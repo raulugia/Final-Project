@@ -11,6 +11,24 @@ const Home = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
 
+  //method to format the createdAt date
+  const formatDate = (dateString) => {
+    //create a new Date object
+    const date = new Date(dateString)
+
+    //get the day, month and year - padStart(2, "0") ensures that the elements have a least 2 digits (7 => 07)
+    const day = String(date.getDate()).padStart(2, "0")
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const year = date.getFullYear()
+
+    //get the hour and minutes
+    const hours = String(date.getHours()).padStart(2, "0")
+    const minutes = String(date.getMinutes()).padStart(2, "0")
+
+    //return the combined timestamp
+    return `Logged on ${day}/${month}/${year} at ${hours}:${minutes}`
+}
+
   useEffect(() => {
     (async() => {
       try {
@@ -22,7 +40,9 @@ const Home = () => {
           },
         })
 
-        setLogs(data)
+        //format date of every log
+        const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+        setLogs(displayData)
         console.log(data)
       } catch(err) {
         console.log(err)
@@ -48,7 +68,7 @@ const Home = () => {
         left
       </div>
 
-        <div className='flex-auto flex-col gap-4 py-6 px-10 mt-24 w-[85%] md:w-[25%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
+        <div className='flex-auto flex-col gap-4 py-3 px-5 mt-24 w-[85%] md:w-[25%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
           <h1 className='text-2xl font-bold text-slate-700 mb-5'>Your Recent Logs</h1>
           <div className='flex flex-col gap-5'>
             {   

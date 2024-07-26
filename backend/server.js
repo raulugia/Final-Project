@@ -63,7 +63,8 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             restaurantName: log.meal.restaurant.name,
             picture: log.picture,
             carbEstimate: log.carbEstimate,
-            createdAt: log.createdAt
+            createdAt: log.createdAt,
+            rating: log.rating,
         }))
 
         console.log("logs", response)
