@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import HomeMealCard from '../components/HomeMealCard';
 import SkeletonHomeMealCard from '../components/SkeletonHomeMealCard';
+import HomeFriendReqCard from '../components/HomeFriendReqCard';
 
 const Home = ({ pendingRequests }) => {
   //get current user
@@ -143,29 +144,16 @@ const Home = ({ pendingRequests }) => {
         </div>
         </div>
 
-        <div className="border bg-red-300 hidden md:block">
-        <div className='bg-white py-5 sticky top-32'>
-          {
-            pendingRequests.map(request => (
-              <div className='flex gap-4'>
-
-                <div>
-                  <div className="h-10 w-10 rounded-full bg-slate-700"></div>
-                </div>
-
-                <div className='flex gap-2 items-center'>
-                  <p>{request.sender.name}{request.sender.surname}</p>
-                  <p className='text-sm'>@{request.sender.username}</p>
-                </div>
-
-                <div>
-
-                </div>
-              </div>
-            ))
-          }
+        <div className="hidden md:block">
+          <div className='bg-white pt-1 sticky top-32 outline outline-[1px] rounded-md'>
+            <h1 className='text-lg text-slate-700 font-semibold mb-3 px-3'>Pending Friend Requests</h1>
+            {
+              pendingRequests.map(request => (
+                <HomeFriendReqCard name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id}/>
+              ))
+            }
+          </div>
           <p>This is goig to be updates</p>
-        </div>
       </div>
     </div>
   )
