@@ -126,7 +126,7 @@ const Home = () => {
           <div className='flex flex-col gap-5'>
             {   
                 loading ? (
-                    <div>Loading...</div>
+                  <SkeletonHomeMealCard />
                 ) : (
                   logs.map((log, index) => (
                     //ref will be assigned when the last HomeMealCard is rendered
