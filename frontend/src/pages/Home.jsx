@@ -6,12 +6,19 @@ import axiosInstance from '../../utils/axiosInstance';
 import HomeMealCard from '../components/HomeMealCard';
 
 const Home = () => {
+  //get current user
   const user = auth.currentUser
+  //stated used to hold the logs returned by the server
   const [logs, setLogs] = useState([])
   const navigate = useNavigate();
+  //state used to display Loading component when data is being fetched
   const [loading, setLoading] = useState(true)
+  //state needed to trigger data fetching (useEffect dependency)
+  //this state will be increase by 1 each time the last HomeMealCard intersects with the viewport (infinite scrolling) 
   const [page, setPage] = useState(1)
+  //ref to keep the intersection observer instance
   const observer = useRef()
+  //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
 
   //method to format the createdAt date
@@ -35,11 +42,14 @@ const Home = () => {
   useEffect(() => {
     //flag to avoid updating data twice on render due to strict mode
     let ignore = false;
+
+    //fetch meal logs and update states
     (async() => {
       try {
-        console.log("fetching data...", page)
         //get the id token
         const token = await user.getIdToken();
+
+        //fetch first 5 meal logs - page is needed to calculate the offset in the server
         const { data } = await axiosInstance.get("/api/home", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,12 +64,14 @@ const Home = () => {
         if(!ignore){
           //format date of every log
           const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+          //update logs state with formatted logs
           setLogs(prevLogs => [...prevLogs, ...displayData])
-          console.log(data)
+          //hide loading component
           setLoading(false)
         }
       } catch(err) {
         console.log(err)
+        //hide loading component
         setLoading(false)
       }
     })()
@@ -70,17 +82,22 @@ const Home = () => {
     }
   }, [page])
 
-  
+  //set up intersection observer and track last HomeMealCard
   useEffect(() => {
     if(loading) return
     if(observer.current) observer.current.disconnect()
     
+    //create a new intersection observer that will increase the page state 
+    //when the last HomeMealCard intersects with the viewport
     observer.current = new IntersectionObserver(entries => {
+      //case last HomeMealCard is intersecting with the viewport
       if(entries[0].isIntersecting) {
+        //update state
         setPage(prevPage => prevPage + 1)
       }
     })
 
+    //make the observer watch the last HomeMealCard, referenced by lastLogRef
     if(lastLogRef.current) observer.current.observe(lastLogRef.current)
   }, [loading])
 
