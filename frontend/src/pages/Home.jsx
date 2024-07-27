@@ -117,8 +117,10 @@ const Home = () => {
     // </div>
     // <div className='flex justify-between min-h-screen pb-16 gap-4 bg-slate-200'>
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
-      <div className="border bg-red-300 mt-20 md:sticky top-0 hidden md:block">
-        left
+      <div className="border bg-red-300 hidden md:block">
+        <div className='bg-white py-5 sticky top-32'>
+          <p>This is goig to be updates</p>
+        </div>
       </div>
 
         <div className='flex flex-col gap-4 px-5 mt-20'>
@@ -137,9 +139,11 @@ const Home = () => {
         </div>
         </div>
 
-        <div className="border bg-red-300 mt-20 flex-grow hidden md:block">
-            right
+        <div className="border bg-red-300 hidden md:block">
+        <div className='bg-white py-5 sticky top-32'>
+          <p>This is goig to be updates</p>
         </div>
+      </div>
     </div>
   )
 }
