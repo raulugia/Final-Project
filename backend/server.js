@@ -10,7 +10,7 @@ const { imageQueue, imageUpdateQueue } = require("./queue");
 const authenticateUser = require("./authMiddleware");
 const { types } = require("pg");
 const http = require("http");
-const { initializeSocket } = require("./socket");
+const { initializeSocket, notifyUserNewReq } = require("./socket");
 
 //initialize the Prisma client
 const prisma = new PrismaClient();
@@ -860,9 +860,23 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
                 sender: { connect: { uid: sender.uid }},
                 receiver: {connect: { uid: recipient.uid }},
                 status: "PENDING"
+            },
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        name: true,
+                        surname: true,
+                        username: true,
+                    }
+                }
             }
         })
 
+        //send a notification to the recipient
+        notifyUserNewReq(recipient.uid, friendRequest)
+
+        //send the response to the client
         res.json(friendRequest)
     } catch(err) {
         console.log(err)

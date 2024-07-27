@@ -65,10 +65,16 @@ function App() {
       setPendingRequests(requests)
     })
 
+    socket.on("newFriendRequest", request => {
+      console.log("new req: ", request)
+      setPendingRequests(prevRequests => [...prevRequests, request])
+    })
+
     return () => {
       socket.off("connect");
       socket.off("disconnect")
       socket.off("pendingFriendRequests")
+      socket.off("newFriendRequest")
     }
   }, [])
 
