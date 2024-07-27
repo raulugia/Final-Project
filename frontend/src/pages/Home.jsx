@@ -6,6 +6,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import HomeMealCard from '../components/HomeMealCard';
 import SkeletonHomeMealCard from '../components/SkeletonHomeMealCard';
 import HomeFriendReqCard from '../components/HomeFriendReqCard';
+import { FaUserFriends } from "react-icons/fa";
 
 const Home = ({ pendingRequests }) => {
   //get current user
@@ -145,15 +146,17 @@ const Home = ({ pendingRequests }) => {
         </div>
 
         <div className="hidden md:block">
-          <div className='bg-white pt-1 sticky top-32 outline outline-[1px] rounded-md'>
-            <h1 className='text-lg text-slate-700 font-semibold mb-3 px-3'>Pending Friend Requests</h1>
+          <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
+            <div className='flex gap-2 items-center px-3'>
+              <FaUserFriends size={20} className='text-slate-800'/>
+              <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
+            </div>
             {
               pendingRequests.map(request => (
-                <HomeFriendReqCard name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id}/>
+                <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id}/>
               ))
             }
           </div>
-          <p>This is goig to be updates</p>
       </div>
     </div>
   )

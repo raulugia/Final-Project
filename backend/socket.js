@@ -70,5 +70,17 @@ const initializeSocket = server => {
         })
     })
 }
+
+const notifyUserNewReq = (recipientUid, friendRequest) => {
+    //loop through all the connected sockets
+    for(let [id, socket] of io.of("/").sockets) {
+        //check if the socket's user matches the recipient of the friend request
+        if(socket.request.user && socket.request.user.uid === recipientUid ) {
+            //send a notification to recipient
+            socket.emit("newFriendRequest", friendRequest);
+            break
+        }
+    }
+}
 //
-module.exports = { initializeSocket, io}
+module.exports = { initializeSocket, notifyUserNewReq,io}

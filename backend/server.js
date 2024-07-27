@@ -73,7 +73,6 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             rating: log.rating,
         }))
 
-        console.log("logs", response)
         res.json(response)
     }catch(err){
 
