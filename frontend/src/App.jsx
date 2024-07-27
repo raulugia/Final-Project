@@ -61,6 +61,7 @@ function App() {
     })
 
     socket.on("pendingFriendRequests", requests => {
+      console.log("REQS: ", requests)
       setPendingRequests(requests)
     })
 
@@ -82,7 +83,7 @@ function App() {
       <Route path='/register' element={<Register />}/>
 
       <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
-        <Route path='/home' element={<Home />}/>
+        <Route path='/home' element={<Home pendingRequests={pendingRequests} />}/>
         <Route path='/friends' element={<Friends />}/>
         <Route path='/friends/:id' element={<Profile />}/>
         <Route path='/log-meal' element={<LogMeal />}/>

@@ -6,13 +6,14 @@ const prisma = new PrismaClient();
 let io;
 
 const initializeSocket = server => {
+    console.log("running-1")
     io = new Server(server, {
         cors: {
             origin: "http://localhost:5173",
             methods: ["GET", "POST"],
         },
     });
-
+    console.log("running-2")
     io.use((socket, next) => {
         //retrieve the token from the client's request
         const token = socket.handshake.auth.token
@@ -39,6 +40,7 @@ const initializeSocket = server => {
         const user = socket.request.user;
 
         socket.on("getPendingFriendRequests", async() => {
+            console.log("running-3")
             try{
                 const pendingRequests = await prisma.friendRequest.findMany({
                     where: { 
@@ -56,7 +58,7 @@ const initializeSocket = server => {
                         }
                     }
                 })
-
+                console.log("requests", pendingRequests)
                 socket.emit("pendingFriendRequests", pendingRequests)
             } catch(err) {
                 console.log(err)
@@ -68,5 +70,5 @@ const initializeSocket = server => {
         })
     })
 }
-
+//
 module.exports = { initializeSocket, io}

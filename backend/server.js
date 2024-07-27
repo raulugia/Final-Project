@@ -42,7 +42,6 @@ app.get("/api/home", authenticateUser, async(req, res) => {
         const limit = parseInt(req.query.limit) || 5
         const offset = (page - 1) * limit
 
-        console.log(`page: ${page}, limit: ${limit}, offset: ${offset}`)
 
         const logs = await prisma.mealLog.findMany({
             where: { 

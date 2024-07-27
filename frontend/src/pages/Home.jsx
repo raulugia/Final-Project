@@ -6,7 +6,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import HomeMealCard from '../components/HomeMealCard';
 import SkeletonHomeMealCard from '../components/SkeletonHomeMealCard';
 
-const Home = () => {
+const Home = ({ pendingRequests }) => {
   //get current user
   const user = auth.currentUser
   //stated used to hold the logs returned by the server
@@ -21,7 +21,7 @@ const Home = () => {
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
-
+  
   //method to format the createdAt date
   const formatDate = (dateString) => {
     //create a new Date object
@@ -102,6 +102,10 @@ const Home = () => {
     if(lastLogRef.current) observer.current.observe(lastLogRef.current)
   }, [loading])
 
+  useEffect(() => {
+    console.log("requests:", pendingRequests)
+  }, [pendingRequests])
+
   //method to redirect user to "/" when they click on "log out" button
   // const handleClick = () => {
   //   //sign out user
@@ -141,6 +145,25 @@ const Home = () => {
 
         <div className="border bg-red-300 hidden md:block">
         <div className='bg-white py-5 sticky top-32'>
+          {
+            pendingRequests.map(request => (
+              <div className='flex gap-4'>
+
+                <div>
+                  <div className="h-10 w-10 rounded-full bg-slate-700"></div>
+                </div>
+
+                <div className='flex gap-2 items-center'>
+                  <p>{request.sender.name}{request.sender.surname}</p>
+                  <p className='text-sm'>@{request.sender.username}</p>
+                </div>
+
+                <div>
+
+                </div>
+              </div>
+            ))
+          }
           <p>This is goig to be updates</p>
         </div>
       </div>
