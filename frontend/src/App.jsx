@@ -27,6 +27,7 @@ function App() {
 
   //get the current user once when the component mounts
   useEffect(() => {
+    console.log("app component mounted")
     //set up a listener to check for authentication state changes
     const unsubscribe = auth.onAuthStateChanged(async user => {
       //update the state with current user
@@ -50,6 +51,7 @@ function App() {
   }, [])
 
   useEffect(() => {
+    console.log("app socket listeners added")
     socket.on("connect", () => {
       console.log("Connected to server")
     })

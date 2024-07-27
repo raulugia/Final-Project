@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import { signOut } from "firebase/auth";
 import {auth} from '../../utils/firebase'
 import { useNavigate } from 'react-router-dom';
@@ -33,8 +33,11 @@ const Home = () => {
 }
 
   useEffect(() => {
+    //flag to avoid updating data twice on render due to strict mode
+    let ignore = false;
     (async() => {
       try {
+        console.log("fetching data...", page)
         //get the id token
         const token = await user.getIdToken();
         const { data } = await axiosInstance.get("/api/home", {
@@ -47,15 +50,24 @@ const Home = () => {
           }
         })
 
-        //format date of every log
-        const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
-        setLogs(prevLogs => [...prevLogs, ...displayData])
-        console.log(data)
-        setLoading(false)
+        //only update states if ignore is false
+        if(!ignore){
+          //format date of every log
+          const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+          setLogs(prevLogs => [...prevLogs, ...displayData])
+          console.log(data)
+          setLoading(false)
+        }
       } catch(err) {
         console.log(err)
+        setLoading(false)
       }
     })()
+
+    //cleanup function used to ignore the response when fetching is duplicated (strict mode)
+    return () => {
+      ignore = true
+    }
   }, [page])
 
   
@@ -64,7 +76,7 @@ const Home = () => {
     if(observer.current) observer.current.disconnect()
     
     observer.current = new IntersectionObserver(entries => {
-      if(entries[0].isInteracting) {
+      if(entries[0].isIntersecting) {
         setPage(prevPage => prevPage + 1)
       }
     })
@@ -96,10 +108,10 @@ const Home = () => {
           <div className='flex flex-col gap-5'>
             {   
                 loading ? (
-                    <SkeletonMealCard />
+                    <div>Loading...</div>
                 ) : (
                   logs.map((log, index) => (
-                    <HomeMealCard {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
+                    <HomeMealCard key={log.logId} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
                   ))
                 )
             }
