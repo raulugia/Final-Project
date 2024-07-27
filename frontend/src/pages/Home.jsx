@@ -4,6 +4,7 @@ import {auth} from '../../utils/firebase'
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import HomeMealCard from '../components/HomeMealCard';
+import SkeletonHomeMealCard from '../components/SkeletonHomeMealCard';
 
 const Home = () => {
   //get current user
@@ -128,6 +129,7 @@ const Home = () => {
                     <div>Loading...</div>
                 ) : (
                   logs.map((log, index) => (
+                    //ref will be assigned when the last HomeMealCard is rendered
                     <HomeMealCard key={log.logId} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
                   ))
                 )
