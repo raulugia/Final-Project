@@ -7,8 +7,9 @@ import HomeMealCard from '../components/HomeMealCard';
 import SkeletonHomeMealCard from '../components/SkeletonHomeMealCard';
 import HomeFriendReqCard from '../components/HomeFriendReqCard';
 import { FaUserFriends } from "react-icons/fa";
+import { useStateContext } from '../context/ContextProvider'
 
-const Home = ({ pendingRequests }) => {
+const Home = () => {
   //get current user
   const user = auth.currentUser
   //stated used to hold the logs returned by the server
@@ -23,6 +24,8 @@ const Home = ({ pendingRequests }) => {
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
+  //get pending requests from context
+  const { pendingRequests } = useStateContext()
   
   //method to format the createdAt date
   const formatDate = (dateString) => {

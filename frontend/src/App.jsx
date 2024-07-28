@@ -18,12 +18,14 @@ import {Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
 import socket from "../utils/socket"
 import { Outlet } from 'react-router-dom'
+import { useStateContext } from './context/ContextProvider'
 
 
 function App() {
   //state to store the current user
   const [user, setUser] = useState(null)
-  const [pendingRequests, setPendingRequests] = useState([])
+  //const [pendingRequests, setPendingRequests] = useState([])
+  const { pendingRequests, setPendingRequests } = useStateContext()
 
   //get the current user once when the component mounts
   useEffect(() => {
@@ -89,7 +91,7 @@ function App() {
       <Route path='/register' element={<Register />}/>
 
       <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
-        <Route path='/home' element={<Home pendingRequests={pendingRequests} setPendingRequests={setPendingRequests}/>}/>
+        <Route path='/home' element={<Home />}/>
         <Route path='/friends' element={<Friends />}/>
         <Route path='/friends/:id' element={<Profile />}/>
         <Route path='/log-meal' element={<LogMeal />}/>
