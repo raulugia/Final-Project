@@ -4,8 +4,14 @@ import { TiTick } from "react-icons/ti";
 import { MdOutlineClose } from "react-icons/md";
 import axiosInstance from '../../utils/axiosInstance';
 import { auth } from '../../utils/firebase';
+import { useStateContext } from '../context/ContextProvider'
 
 const HomeFriendReqCard = ({name, surname, username, image, userId, requestId}) => {
+    //get current user
+    const user = auth.currentUser
+    //get method from context  to update state containing friend requests
+    const { setPendingRequests } = useStateContext()
+
     //method to accept/reject a friend request
     const handleRequest = async (action, requestId) => {
         //get token for authentication in the server 
@@ -18,10 +24,16 @@ const HomeFriendReqCard = ({name, surname, username, image, userId, requestId}) 
                     Authorization: `Bearer ${token}`,
                 },
             })
+
+            //case request handled successfully - remove it from the array of friend requests so it is not displayed
+            if(response.status === 200) {
+                setPendingRequests(prevPendingRequests => prevPendingRequests.filter(req => req.id !== requestId ))
+            }
         }catch(err) {
             console.error(err)
         }
     }
+
   return (
     <Link to={`/user/${userId}`} className='flex gap-4 border-y border-slate-200 w-full px-3 py-1'>
 
@@ -36,11 +48,11 @@ const HomeFriendReqCard = ({name, surname, username, image, userId, requestId}) 
 
         <div className='flex gap-2 items-center'>
             <TiTick 
-                size={25} className='border bg-blue-600 text-white rounded-md'
+                size={25} className='border bg-blue-600 text-white rounded-md hover:bg-blue-800 hover:shadow-sm'
                 onClick={() => handleRequest("accept", requestId)}
             />
             <MdOutlineClose 
-                size={25} className='border bg-red-500 text-white rounded-md'
+                size={25} className='border bg-red-500 text-white rounded-md hover:bg-red-700 hover:shadow-sm'
                 onClick={() => handleRequest("reject", requestId)}
             />
         </div>
