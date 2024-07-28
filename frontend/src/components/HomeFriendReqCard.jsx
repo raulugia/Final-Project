@@ -35,28 +35,28 @@ const HomeFriendReqCard = ({name, surname, username, image, userId, requestId}) 
     }
 
   return (
-    <Link to={`/user/${userId}`} className='flex gap-4 border-y border-slate-200 w-full px-3 py-1'>
+    <div className='flex gap-4 border-y border-slate-200 w-full px-3 py-1'>
 
-        <div>
+        <Link to={`/user/${userId}`}>
             <div className="h-10 w-10 rounded-full bg-slate-700"></div>
-        </div>
+        </Link>
 
-        <div className='flex gap-2 items-center'>
-        <p>{name}{surname}</p>
-        <p className='text-sm'>@{username}</p>
-        </div>
+        <Link to={`/user/${userId}`} className='flex gap-2 items-center'>
+            <p>{name}{surname}</p>
+            <p className='text-sm'>@{username}</p>
+        </Link>
 
         <div className='flex gap-2 items-center'>
             <TiTick 
-                size={25} className='border bg-blue-600 text-white rounded-md hover:bg-blue-800 hover:shadow-sm'
+                size={25} className='border bg-blue-600 text-white rounded-md hover:bg-blue-800 hover:shadow-sm hover:cursor-pointer'
                 onClick={() => handleRequest("accept", requestId)}
             />
             <MdOutlineClose 
-                size={25} className='border bg-red-500 text-white rounded-md hover:bg-red-700 hover:shadow-sm'
+                size={25} className='border bg-red-500 text-white rounded-md hover:bg-red-700 hover:shadow-sm hover:cursor-pointer'
                 onClick={() => handleRequest("reject", requestId)}
             />
         </div>
-    </Link>
+    </div>
   )
 }
 
