@@ -76,7 +76,7 @@ const SearchResults = () => {
                     {   
                         users.length > 0 ? (
                             users.map(user => (
-                                <UserCard {...user} />
+                                <UserCard key={user.uid} {...user} />
                             ))
                         ) : (
                             <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-10 px-4 flex items-center rounded-lg">
