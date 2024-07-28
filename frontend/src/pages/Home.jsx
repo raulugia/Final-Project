@@ -149,17 +149,22 @@ const Home = () => {
         </div>
 
         <div className="hidden md:block">
-          <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
-            <div className='flex gap-2 items-center px-3'>
-              <FaUserFriends size={20} className='text-slate-800'/>
-              <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
-            </div>
-            {
-              pendingRequests.map(request => (
-                <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id}/>
-              ))
-            }
-          </div>
+          {
+            pendingRequests.length > 0 && (
+
+              <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
+                <div className='flex gap-2 items-center px-3'>
+                  <FaUserFriends size={20} className='text-slate-800'/>
+                  <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
+                </div>
+                {
+                  pendingRequests.map(request => (
+                    <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id}/>
+                  ))
+                }
+              </div>
+            )
+          }
       </div>
     </div>
   )
