@@ -89,7 +89,7 @@ function App() {
       <Route path='/register' element={<Register />}/>
 
       <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
-        <Route path='/home' element={<Home pendingRequests={pendingRequests} />}/>
+        <Route path='/home' element={<Home pendingRequests={pendingRequests} setPendingRequests={setPendingRequests}/>}/>
         <Route path='/friends' element={<Friends />}/>
         <Route path='/friends/:id' element={<Profile />}/>
         <Route path='/log-meal' element={<LogMeal />}/>
