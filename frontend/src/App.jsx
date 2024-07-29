@@ -27,6 +27,16 @@ function App() {
   //const [pendingRequests, setPendingRequests] = useState([])
   const { pendingRequests, setPendingRequests } = useStateContext()
 
+  //method to ensure no expired tokens are used
+  const refreshToken = async() => {
+    const user = auth.currentUser
+    if(user){
+      return await user.getIdToken()
+    }
+
+    throw new Error("User not authenticated")
+  }
+
   //get the current user once when the component mounts
   useEffect(() => {
     console.log("app component mounted")
@@ -38,7 +48,7 @@ function App() {
       //case user exists
       if(user) {
         //get the token
-        const token = await user.getIdToken()
+        const token = await refreshToken()
         //set the token in the socket authentication object
         socket.auth = { token }
         //connect to the WebSocket

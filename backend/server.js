@@ -35,6 +35,49 @@ app.use(express.json());
 //configure multer for file uploads using "uploads/" as the destination directory
 const upload = multer({ dest: "uploads/" });
 
+const isFriend = async(currentUserUid, otherUserUsername) => {
+    try{
+        const otherUser = await prisma.user.findUnique({
+            where: {
+                username: otherUserUsername
+            },
+            select: {
+                uid: true
+            }
+        })
+
+    
+        if(otherUser) {
+            const friendship = await prisma.friendship.findFirst({
+                where: {
+                    OR: [
+                        {
+                            userUid: currentUserUid,
+                            friendUid: otherUser.uid
+                        },
+                        {
+                            userUid: otherUser.uid,
+                            friendUid: currentUserUid
+                        }
+                    ]
+                }
+            })
+    
+            if(friendship) {
+                return { areFriends: true, otherUserUid: otherUser.uid }
+            }else{
+                return { areFriends: false, otherUserUid: otherUser.uid }
+            }
+        }else{
+            return { areFriends: false, otherUserUid: null}
+        }
+        
+    }catch(err){
+        throw new Error(err)
+    }
+    
+}
+
 //
 app.get("/api/home", authenticateUser, async(req, res) => {
     try{
@@ -154,6 +197,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                     surname: otherUserAndMeals.surname,
                     username: otherUserAndMeals.username,
                     profilePicUrl: otherUserAndMeals.profilePicUrl,
+                    uid: otherUserAndMeals.uid,
                 },
                 logs: otherUserAndMeals.meals,
                 commonRestaurants,
@@ -167,6 +211,53 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
     }
     
 
+})
+
+app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
+    const { username } = req.params
+    
+    try{
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+        console.log("here", areFriends, otherUserUid)
+        if(areFriends){
+            //get the most recent meal logs avoiding duplicates
+            const latestLogs = await prisma.mealLog.findMany({
+                where: {
+                    userUid: otherUserUid
+                },
+                //make sure only one entry per meal is returned
+                distinct: ["mealId"],
+                //order results by createdAt in descending order
+                orderBy: {
+                    createdAt: "desc"
+                },
+                select: {
+                    id: true,
+                    mealId: true
+                }
+            })
+
+            //get the details needed by the client to display all the user's meals
+            const mealLogs = await prisma.mealLog.findMany({
+                where: {
+                    id: { in: latestLogs.map(log => log.id)}
+                },
+                select: {
+                    meal: {
+                        include: {
+                            restaurant: true
+                        }
+                    },
+                    thumbnail: true,
+                    id: true,
+                }
+            })
+
+            res.json(mealLogs)
+            }
+    }catch(err){
+        console.log(err)
+    }
 })
 
 //endpoint for user registration
