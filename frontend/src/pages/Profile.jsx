@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef } from 'react'
 import {auth} from '../../utils/firebase'
 import CommonRestaurantCard from '../components/CommonRestaurantCard'
 import axiosInstance from '../../utils/axiosInstance';
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import HomeMealCard from '../components/HomeMealCard';
+import ProfileCard from '../components/ProfileCard';
 
 const Profile = () => {
   const user = auth.currentUser
@@ -115,36 +116,11 @@ const Profile = () => {
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
       <div className="md:flex md:flex-col border hidden">
-
-        <div className='flex flex-col bg-white py-5 sticky px-5 top-[138px] rounded-lg'>
-          <div className='flex gap-10 items-center'>
-          <div className='bg-slate-700 w-24 h-24 rounded-full'>
-          </div>
-          <div>
-            <p className='text-2xl text-slate-700 font-semibold'>{otherUser.name} {otherUser.surname}</p>
-            <p className='text-slate-400'>@{otherUser.username}</p>
-          </div>
-          </div>
-
-          <div className='flex flex-col gap-3 mt-16 text-xl'>
-            <div>
-              <Link>Meals</Link>
-            </div>
-            <div>
-              <Link>Restaurants</Link>
-            </div>
-            <div>
-              <Link>Friends</Link>
-            </div>
-          </div>
-
-          <div className='mt-16 w-full'>
-              <div className='w-full flex justify-center items-center border rounded-md bg-blue-600 py-1'>
-                <p className='text-xl text-white font-semibold'>Message</p>
-              </div>
-          </div>
-        </div>
-
+        {
+          otherUser && (
+            <ProfileCard {...otherUser} />
+          )
+        }
       </div>
 
         <div className='flex flex-col gap-4 px-5 mt-20'>
