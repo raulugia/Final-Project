@@ -93,7 +93,7 @@ function App() {
       <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
         <Route path='/home' element={<Home />}/>
         <Route path='/friends' element={<Friends />}/>
-        <Route path='/friends/:id' element={<Profile />}/>
+        <Route path='/user/:username' element={<Profile />}/>
         <Route path='/log-meal' element={<LogMeal />}/>
         <Route path='/my-restaurants' element={<Restaurants />}/>
         <Route path='/my-restaurants/:restaurantId' element={<RestaurantMeals />}/>

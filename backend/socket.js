@@ -24,7 +24,7 @@ const initializeSocket = server => {
         if(token) {
             const decodedToken = await admin.auth().verifyIdToken(token)
             socket.request.user = decodedToken
-            console.log("socker req user", socket.request.user)
+            //console.log("socker req user", socket.request.user)
             next()
         }else{
             next(new Error("Authentication failed"))
@@ -32,12 +32,12 @@ const initializeSocket = server => {
     });
 
     io.on("connection", socket => {
-        console.log("USER CONNECTED")
+        //console.log("USER CONNECTED")
 
         const user = socket.request.user;
 
         socket.on("getPendingFriendRequests", async() => {
-            console.log("running-3")
+            //console.log("running-3")
             try{
                 const pendingRequests = await prisma.friendRequest.findMany({
                     where: { 
@@ -55,7 +55,7 @@ const initializeSocket = server => {
                         }
                     }
                 })
-                console.log("requests", pendingRequests)
+                //console.log("requests", pendingRequests)
                 socket.emit("pendingFriendRequests", pendingRequests)
             } catch(err) {
                 console.log(err)
@@ -69,13 +69,13 @@ const initializeSocket = server => {
 }
 
 const notifyUserNewReq = (recipientUid, friendRequest) => {
-    console.log("notifying user...", recipientUid, friendRequest)
+    //console.log("notifying user...", recipientUid, friendRequest)
     //loop through all the connected sockets
     for(let [id, socket] of io.of("/").sockets) {
-        console.log(`Socket id: ${id}, user id: ${socket.request.user} and rest: ${socket.request.user.uid}`)
+        //console.log(`Socket id: ${id}, user id: ${socket.request.user} and rest: ${socket.request.user.uid}`)
         //check if the socket's user matches the recipient of the friend request
         if(socket.request.user && socket.request.user.uid === recipientUid ) {
-            console.log("socket found")
+            //console.log("socket found")
             //send a notification to recipient
             socket.emit("newFriendRequest", friendRequest);
             break

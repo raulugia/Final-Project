@@ -79,6 +79,65 @@ app.get("/api/home", authenticateUser, async(req, res) => {
     }
 })
 
+//endpoint for displaying data linked to a certain user
+app.get("/api/user/:username", authenticateUser, async(req, res) => {
+    try{
+        const { username } = req.params
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5
+        const offset = (page - 1) * limit
+
+        const userAndMeals = await prisma.user.findUnique({
+            where: {
+                username: username
+            },
+            include: {
+                meals: {
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    take: limit,
+                    skip: offset,
+                    include: {
+                        meal: {
+                            include: {
+                                restaurant: true
+                            }
+                        }
+                    }
+                },
+            }
+        })
+
+        let friendship
+        if(userAndMeals){
+            friendship = await prisma.friendship.findFirst({
+                where: {
+                    OR: [
+                        {
+                            userUid: req.user.uid,
+                            friendUid: userAndMeals.uid
+                        },
+                        {
+                            userUid: userAndMeals.uid,
+                            friendUid: req.user.uid
+                        }
+                    ]
+                }
+            })
+        }
+
+        if(friendship){
+            console.log(userAndMeals)
+            res.json(userAndMeals)
+    }
+    }catch(err){
+        console.log(err)
+    }
+    
+
+})
+
 //endpoint for user registration
 app.post("/api/register", async (req, res) => {
   //extract email, name and surname from the request body

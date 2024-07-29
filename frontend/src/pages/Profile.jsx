@@ -1,10 +1,88 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {auth} from '../../utils/firebase'
 import CommonRestaurantCard from '../components/CommonRestaurantCard'
+import axiosInstance from '../../utils/axiosInstance';
+import { useParams } from 'react-router-dom'
 
 const Profile = () => {
-  const user = auth.current
+  const user = auth.currentUser
+  //state used to hold the logs returned by the server
+  const [logs, setLogs] = useState([])
+  //state to hold the restaurants in common between current user and user
   const [restaurantsInCommon, setRestaurantsInCommon] = useState([])
+  //state used to display Loading component when data is being fetched
+  const [loading, setLoading] = useState(true)
+  //state needed to trigger data fetching (useEffect dependency)
+  //this state will be increase by 1 each time the last HomeMealCard intersects with the viewport (infinite scrolling) 
+  const [page, setPage] = useState(1)
+  //ref to keep the intersection observer instance
+  const observer = useRef()
+  //ref to keep a reference to the last HomeMealCard
+  const lastLogRef = useRef()
+  //
+  const { username } = useParams()
+
+  useEffect(() => {
+    //flag to avoid updating data twice on render due to strict mode
+    let ignore = false;
+
+    //fetch meal logs and update states
+    (async() => {
+      try {
+        //get the id token
+        const token = await user.getIdToken();
+
+        //fetch first 5 meal logs - page is needed to calculate the offset in the server
+        const { data } = await axiosInstance.get(`/api/user/${username}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            page,
+            limit: 5
+          }
+        })
+
+        //only update states if ignore is false
+        if(!ignore){
+          //format date of every log
+          const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+          //update logs state with formatted logs
+          setLogs(prevLogs => [...prevLogs, ...displayData])
+          //hide loading component
+          setLoading(false)
+        }
+      } catch(err) {
+        console.log(err)
+        //hide loading component
+        setLoading(false)
+      }
+    })()
+
+    //cleanup function used to ignore the response when fetching is duplicated (strict mode)
+    return () => {
+      ignore = true
+    }
+  }, [page])
+
+  //set up intersection observer and track last HomeMealCard
+  useEffect(() => {
+    if(loading) return
+    if(observer.current) observer.current.disconnect()
+    
+    //create a new intersection observer that will increase the page state 
+    //when the last HomeMealCard intersects with the viewport
+    observer.current = new IntersectionObserver(entries => {
+      //case last HomeMealCard is intersecting with the viewport
+      if(entries[0].isIntersecting) {
+        //update state
+        setPage(prevPage => prevPage + 1)
+      }
+    })
+
+    //make the observer watch the last HomeMealCard, referenced by lastLogRef
+    if(lastLogRef.current) observer.current.observe(lastLogRef.current)
+  }, [loading])
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
@@ -19,7 +97,7 @@ const Profile = () => {
           <div className='flex flex-col gap-5'>
             {   
                 loading ? (
-                  <SkeletonHomeMealCard />
+                  <div>Loading...</div>
                 ) : (
                   logs.map((log, index) => (
                     //ref will be assigned when the last HomeMealCard is rendered

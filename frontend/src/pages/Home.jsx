@@ -12,7 +12,7 @@ import { useStateContext } from '../context/ContextProvider'
 const Home = () => {
   //get current user
   const user = auth.currentUser
-  //stated used to hold the logs returned by the server
+  //state used to hold the logs returned by the server
   const [logs, setLogs] = useState([])
   const navigate = useNavigate();
   //state used to display Loading component when data is being fetched
