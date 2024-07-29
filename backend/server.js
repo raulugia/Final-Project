@@ -35,8 +35,10 @@ app.use(express.json());
 //configure multer for file uploads using "uploads/" as the destination directory
 const upload = multer({ dest: "uploads/" });
 
+//method to check if current user and other user are friends
 const isFriend = async(currentUserUid, otherUserUsername) => {
     try{
+        //get the other user
         const otherUser = await prisma.user.findUnique({
             where: {
                 username: otherUserUsername
@@ -46,8 +48,9 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
             }
         })
 
-    
+        //case the other user exists
         if(otherUser) {
+            //get the friendship between current user and other user
             const friendship = await prisma.friendship.findFirst({
                 where: {
                     OR: [
@@ -62,12 +65,15 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
                     ]
                 }
             })
-    
+            
+            //case users are friends
             if(friendship) {
                 return { areFriends: true, otherUserUid: otherUser.uid }
+            //case users are not friends
             }else{
                 return { areFriends: false, otherUserUid: otherUser.uid }
             }
+        //case other user is not found    
         }else{
             return { areFriends: false, otherUserUid: null}
         }
@@ -213,12 +219,16 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
 
 })
 
+//endpoint for displaying other users' meals
 app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
+    //get the other user's username
     const { username } = req.params
     
     try{
+        //find out if users are friends and get the other user's uid
         const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
-        console.log("here", areFriends, otherUserUid)
+        
+        //case users are friends
         if(areFriends){
             //get the most recent meal logs avoiding duplicates
             const latestLogs = await prisma.mealLog.findMany({
@@ -237,7 +247,7 @@ app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
                 }
             })
 
-            //get the details needed by the client to display all the user's meals
+            //get the details needed by the client to display all the other user's meals
             const mealLogs = await prisma.mealLog.findMany({
                 where: {
                     id: { in: latestLogs.map(log => log.id)}
@@ -253,6 +263,7 @@ app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
                 }
             })
 
+            //send meals to the client
             res.json(mealLogs)
             }
     }catch(err){

@@ -29,12 +29,15 @@ function App() {
 
   //method to ensure no expired tokens are used
   const refreshToken = async() => {
-    const user = auth.currentUser
-    if(user){
-      return await user.getIdToken()
+    try{
+      const user = auth.currentUser
+      if(user){
+        console.log(await user.getIdToken())
+        return await user.getIdToken()
+      }
+    }catch(err){
+      console.log(err)
     }
-
-    throw new Error("User not authenticated")
   }
 
   //get the current user once when the component mounts
