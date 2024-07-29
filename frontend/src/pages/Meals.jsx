@@ -3,6 +3,7 @@ import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import MealCard from '../components/MealCard'
 import SkeletonMealCard from '../components/SkeletonMealCard'
+import { useParams } from 'react-router-dom'
 
 const Meals = () => {
     const user = auth.currentUser
@@ -12,6 +13,7 @@ const Meals = () => {
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
     //const [hoveredMeal, setHoveredMeal] = useState(null)
+    const { username } = useParams()
 
     useEffect(() => {
         (
@@ -21,7 +23,7 @@ const Meals = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get("/api/meals", {
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/meals` : "/api/meals"}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },

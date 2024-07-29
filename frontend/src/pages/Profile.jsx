@@ -132,7 +132,7 @@ const Profile = () => {
                 ) : (
                   logs.map((log, index) => (
                     //ref will be assigned when the last HomeMealCard is rendered
-                    <HomeMealCard key={log.logId} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
+                    <HomeMealCard key={log.logId} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
                   ))
                 )
             }

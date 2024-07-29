@@ -19,24 +19,24 @@ const ProfileCard = ({name, surname, username}) => {
         </div>
 
         <div className='flex flex-col mt-16 text-xl text-slate-700'>
-        <Link className='flex items-start gap-2 border-y-2 border-slate-200 py-2'>
+        <Link to={`/user/${username}/meals`} className='flex items-start gap-2 border-y-2 border-slate-200 py-2'>
             <GiHotMeal />
             <p>Meals</p>
         </Link>
-        <Link className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
+        <Link to={`/user/${username}/restaurants`} className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
             <MdOutlineRestaurant />
             <p>Restaurants</p>
         </Link>
-        <Link className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
+        <Link to={`/user/${username}/friends`} className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
             <FaUserFriends />
             <p>Friends</p>
         </Link>
         </div>
 
         <div className='mt-16 w-full'>
-            <Link className='w-full flex gap-2 justify-center items-center border rounded-md bg-blue-600 hover:bg-blue-700 py-1'>
-            <RiMessage2Line className='text-white' size={24}/>
-            <p className='text-xl text-white font-semibold'>Message</p>
+            <Link to={`chats/${username}`} className='w-full flex gap-2 justify-center items-center border rounded-md bg-blue-600 hover:bg-blue-700 py-1'>
+                <RiMessage2Line className='text-white' size={24}/>
+                <p className='text-xl text-white font-semibold'>Message</p>
             </Link>
         </div>
     </div>

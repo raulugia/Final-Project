@@ -3,7 +3,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 
 const CommonRestaurantCard = ({ name }) => {
   return (
-    <div className="flex w-full border pl-3 pr-1">
+    <div className="flex w-full border pl-3 pr-1 py-2">
         <p className="text-md">{name}</p>
         <div className="ml-auto">
             <MdKeyboardArrowRight size={25}/>
