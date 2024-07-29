@@ -25,6 +25,9 @@ const authenticateUser = async (req, res, next) => {
     } catch(err) {
         console.error("Error verifying token: ")
         if(res) {
+            if(err.code === "auth/id-token-expired") {
+                return res.status(401).send({ error: "Token has expired" });
+            }
             //respond with a 401 status if there was an error
             res.status(401).send({ error: "Invalid token" });
         }else {
