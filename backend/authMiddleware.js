@@ -5,7 +5,7 @@ const admin = require('./firebaseAdmin');
 const authenticateUser = async (req, res, next) => {
     //extract the token from the header
     const token = req.headers.authorization?.split("Bearer ")[1]
-    console.log("token", token)
+
     //respond with a 401 status code if there is no token
     if(!token) {
         if(res) {

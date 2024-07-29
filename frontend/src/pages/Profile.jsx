@@ -3,9 +3,11 @@ import {auth} from '../../utils/firebase'
 import CommonRestaurantCard from '../components/CommonRestaurantCard'
 import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom'
+import HomeMealCard from '../components/HomeMealCard';
 
 const Profile = () => {
   const user = auth.currentUser
+  const [otherUser, setOtherUser] = useState({})
   //state used to hold the logs returned by the server
   const [logs, setLogs] = useState([])
   //state to hold the restaurants in common between current user and user
@@ -15,12 +17,32 @@ const Profile = () => {
   //state needed to trigger data fetching (useEffect dependency)
   //this state will be increase by 1 each time the last HomeMealCard intersects with the viewport (infinite scrolling) 
   const [page, setPage] = useState(1)
+  //
+  const [hasMoreLogs, setHasMoreLogs] = useState(true)
   //ref to keep the intersection observer instance
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
   //
   const { username } = useParams()
+
+  //method to format the createdAt date
+  const formatDate = (dateString) => {
+  //create a new Date object
+  const date = new Date(dateString)
+
+  //get the day, month and year - padStart(2, "0") ensures that the elements have a least 2 digits (7 => 07)
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const year = date.getFullYear()
+
+  //get the hour and minutes
+  const hours = String(date.getHours()).padStart(2, "0")
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+
+  //return the combined timestamp
+  return `Logged on ${day}/${month}/${year} at ${hours}:${minutes}`
+}
 
   useEffect(() => {
     //flag to avoid updating data twice on render due to strict mode
@@ -31,7 +53,6 @@ const Profile = () => {
       try {
         //get the id token
         const token = await user.getIdToken();
-
         //fetch first 5 meal logs - page is needed to calculate the offset in the server
         const { data } = await axiosInstance.get(`/api/user/${username}`, {
           headers: {
@@ -42,15 +63,22 @@ const Profile = () => {
             limit: 5
           }
         })
-
+        console.log("DATA", data)
         //only update states if ignore is false
         if(!ignore){
+          setOtherUser({name: data.user.name, surname: data.user.surname, username: data.user.username, profilePicUrl: data.user.profilePicUrl})
           //format date of every log
-          const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+          const displayData = data.logs.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+
           //update logs state with formatted logs
           setLogs(prevLogs => [...prevLogs, ...displayData])
+          setRestaurantsInCommon([...data.commonRestaurants])
           //hide loading component
           setLoading(false)
+
+          if(data.logs.length < 5) {
+            setHasMoreLogs(false)
+          }
         }
       } catch(err) {
         console.log(err)
@@ -74,7 +102,7 @@ const Profile = () => {
     //when the last HomeMealCard intersects with the viewport
     observer.current = new IntersectionObserver(entries => {
       //case last HomeMealCard is intersecting with the viewport
-      if(entries[0].isIntersecting) {
+      if(entries[0].isIntersecting && hasMoreLogs) {
         //update state
         setPage(prevPage => prevPage + 1)
       }
@@ -82,7 +110,7 @@ const Profile = () => {
 
     //make the observer watch the last HomeMealCard, referenced by lastLogRef
     if(lastLogRef.current) observer.current.observe(lastLogRef.current)
-  }, [loading])
+  }, [loading, hasMoreLogs])
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
@@ -93,7 +121,7 @@ const Profile = () => {
       </div>
 
         <div className='flex flex-col gap-4 px-5 mt-20'>
-          <h1 className='text-2xl font-bold text-slate-700 mb-2'>Your Recent Logs</h1>
+          <h1 className='text-2xl font-bold text-slate-700 mb-2'>{otherUser.name}'s Recent Logs</h1>
           <div className='flex flex-col gap-5'>
             {   
                 loading ? (
@@ -118,7 +146,7 @@ const Profile = () => {
                 </div>
                 {
                   restaurantsInCommon.map(restaurant => (
-                    <CommonRestaurantCard />
+                    <CommonRestaurantCard key={restaurant.id} {...restaurant} />
                   ))
                 }
               </div>

@@ -87,7 +87,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
         const limit = parseInt(req.query.limit) || 5
         const offset = (page - 1) * limit
 
-        const userAndMeals = await prisma.user.findUnique({
+        const otherUserAndMeals = await prisma.user.findUnique({
             where: {
                 username: username
             },
@@ -110,16 +110,16 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
         })
 
         let friendship
-        if(userAndMeals){
+        if(otherUserAndMeals){
             friendship = await prisma.friendship.findFirst({
                 where: {
                     OR: [
                         {
                             userUid: req.user.uid,
-                            friendUid: userAndMeals.uid
+                            friendUid: otherUserAndMeals.uid
                         },
                         {
-                            userUid: userAndMeals.uid,
+                            userUid: otherUserAndMeals.uid,
                             friendUid: req.user.uid
                         }
                     ]
@@ -128,8 +128,39 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
         }
 
         if(friendship){
-            console.log(userAndMeals)
-            res.json(userAndMeals)
+            const currentUserMeals = await prisma.mealLog.findMany({
+                where: {
+                    userUid: req.user.uid
+                },
+                include: {
+                    meal: {
+                        include: {
+                            restaurant: true
+                        }
+                    }
+                }
+            })
+
+            //get restaurant ids discarding duplicated ids with Set
+            const currentUserRestaurantIds = new Set(currentUserMeals.map(log => log.meal.restaurant.id))
+
+            const commonRestaurants = otherUserAndMeals.meals
+                .map(log => log.meal.restaurant)
+                .filter(restaurant => currentUserRestaurantIds.has(restaurant.id))
+
+            const response = {
+                user: {
+                    name: otherUserAndMeals.name,
+                    surname: otherUserAndMeals.surname,
+                    username: otherUserAndMeals.username,
+                    profilePicUrl: otherUserAndMeals.profilePicUrl,
+                },
+                logs: otherUserAndMeals.meals,
+                commonRestaurants,
+            }    
+            console.log(response)
+            console.log("RESPONSE SENT")
+            res.json(response)
     }
     }catch(err){
         console.log(err)

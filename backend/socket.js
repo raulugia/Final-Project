@@ -8,14 +8,14 @@ const admin = require('./firebaseAdmin');
 let io;
 
 const initializeSocket = server => {
-    console.log("running-1")
+
     io = new Server(server, {
         cors: {
             origin: "http://localhost:5173",
             methods: ["GET", "POST"],
         },
     });
-    console.log("running-2")
+
     io.use(async(socket, next) => {
         //retrieve the token from the client's request
         const token = socket.handshake.auth.token
@@ -23,6 +23,7 @@ const initializeSocket = server => {
         //case token exists
         if(token) {
             const decodedToken = await admin.auth().verifyIdToken(token)
+            //console.log("here token", token)
             socket.request.user = decodedToken
             //console.log("socker req user", socket.request.user)
             next()
