@@ -20,22 +20,22 @@ const SkeletonProfile = () => {
             </div>
 
             <div className='flex flex-col mt-16 text-xl text-slate-700'>
-                <div className='flex items-start gap-2 border-y-2 border-slate-200 py-2'>
+                <div className='flex items-start gap-3 border-y-2 border-slate-200 py-2'>
                     <GiHotMeal />
-                    <div className="flex flex-col animate-pulse-fast bg-slate-300  h-4 w-16"></div>
+                    <div className="flex flex-col animate-pulse-fast bg-slate-300  h-6 w-16"></div>
                 </div>
                 <div className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
                     <MdOutlineRestaurant />
-                    <div className="flex flex-col animate-pulse-fast bg-slate-300  h-4 w-16"></div>
+                    <div className="flex flex-col animate-pulse-fast bg-slate-300  h-6 w-24"></div>
                 </div>
                 <div className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
                     <FaUserFriends />
-                    <div className="flex flex-col animate-pulse-fast bg-slate-300  h-4 w-16"></div>
+                    <div className="flex flex-col animate-pulse-fast bg-slate-300  h-6 w-16"></div>
                 </div>
             </div>
 
             <div className='mt-16 w-full'>
-                <div className='w-full h-8 flex gap-2 justify-center items-center border rounded-md bg-slate-700'></div>
+                <div className='w-full h-8 flex gap-2 justify-center items-center border rounded-md bg-slate-700 animate-pulse-fast'></div>
             </div>
         </div>
 
@@ -50,22 +50,22 @@ const SkeletonProfile = () => {
 
         <div className="hidden md:block">
             <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
-                <div className='flex gap-2 items-center px-3'>
-                <div className="flex flex-col animate-pulse-fast bg-slate-500  h-4 w-20"></div>
+                <div className='flex gap-2 items-center px-3 py-2'>
+                    <div className="flex flex-col animate-pulse-fast bg-slate-400  h-6 w-32"></div>
                 </div>
-                <div className="flex w-full border pl-3 pr-1 py-2">
+                <div className="flex items-center w-full border pl-3 pr-1 py-1">
                     <div className="flex flex-col animate-pulse-fast bg-slate-300  h-3 w-16"></div>
                     <div className="ml-auto">
                         <MdKeyboardArrowRight size={25}/>
                     </div>
                 </div>
-                <div className="flex w-full border pl-3 pr-1 py-2">
+                <div className="flex items-center w-full border pl-3 pr-1 py-1">
                     <div className="flex flex-col animate-pulse-fast bg-slate-300  h-3 w-16"></div>
                     <div className="ml-auto">
                         <MdKeyboardArrowRight size={25}/>
                     </div>
                 </div>
-                <div className="flex w-full border pl-3 pr-1 py-2">
+                <div className="flex items-center w-full border pl-3 pr-1 py-1">
                     <div className="flex flex-col animate-pulse-fast bg-slate-300  h-3 w-16"></div>
                     <div className="ml-auto">
                         <MdKeyboardArrowRight size={25}/>
