@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import axiosInstance from '../../utils/axiosInstance'
 import { auth } from '../../utils/firebase'
 import FriendCard from '../components/FriendCard'
+import { useParams } from 'react-router-dom'
 
 
 const Friends = () => {
@@ -15,6 +16,9 @@ const Friends = () => {
     const [searchInput, setSearchInput] = useState("")
     //state to track when content is being loaded
     const [loading, setLoading] = useState(true)
+    //get username - if it exists, other user's friends will be rendered
+    //if it does not exist, current user's friends will be rendered
+    const { username } = useParams()
 
     //get the user's friends
     useEffect(() => {
@@ -24,8 +28,8 @@ const Friends = () => {
                     //get the id token
                     const token = await user.getIdToken();
 
-                    //make a get request to get the users friends passing the id token for verification
-                    const { data } = await axiosInstance.get("/api/friends", {
+                    //make a get request to get current user's/other user's friends passing the id token for verification
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/friends` : "/api/friends"}`, {
                         headers: {
                         Authorization: `Bearer ${token}`,
                         },

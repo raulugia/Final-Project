@@ -106,9 +106,12 @@ function App() {
       <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
         <Route path='/home' element={<Home />}/>
         <Route path='/friends' element={<Friends />}/>
+
         <Route path='/user/:username' element={<Profile />}/>
         <Route path='/user/:username/meals' element={<Meals />}/>
         <Route path='/user/:username/restaurants' element={<Restaurants />}/>
+        <Route path='/user/:username/friends' element={<Friends />}/>
+
         <Route path='/log-meal' element={<LogMeal />}/>
         <Route path='/my-restaurants' element={<Restaurants />}/>
         <Route path='/my-restaurants/:restaurantId' element={<RestaurantMeals />}/>
