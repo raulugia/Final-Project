@@ -44,7 +44,9 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
                 username: otherUserUsername
             },
             select: {
-                uid: true
+                uid: true,
+                name: true,
+                surname: true
             }
         })
 
@@ -71,7 +73,7 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
                 return { areFriends: true, otherUserUid: otherUser.uid }
             //case users are not friends
             }else{
-                return { areFriends: false, otherUserUid: otherUser.uid }
+                return { areFriends: false, otherUserUid: otherUser.uid, name: otherUser.name, surname: otherUser.surname}
             }
         //case other user is not found    
         }else{
@@ -133,7 +135,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
     try{
         const { username } = req.params
         //find out if users are friends and get the other user's uid
-        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+        const { areFriends, otherUserUid, name, surname } = await isFriend(req.user.uid, username)
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5
@@ -202,7 +204,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
             //send response to client
             res.json(response)
         }else{
-            res.json({ error: "Users are not friends" })
+            res.json({ error: "Users are not friends", name, surname })
         }
     }catch(err){
         console.log(err)

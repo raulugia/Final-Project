@@ -28,21 +28,20 @@ function App() {
   const { pendingRequests, setPendingRequests } = useStateContext()
 
   //method to ensure no expired tokens are used
-  const refreshToken = async() => {
-    try{
-      const user = auth.currentUser
-      if(user){
-        console.log(await user.getIdToken())
-        return await user.getIdToken()
-      }
-    }catch(err){
-      console.log(err)
-    }
-  }
+  // const refreshToken = async() => {
+  //   try{
+  //     const user = auth.currentUser
+  //     if(user){
+  //       //console.log(await user.getIdToken())
+  //       return await user.getIdToken()
+  //     }
+  //   }catch(err){
+  //     console.log(err)
+  //   }
+  // }
 
   //get the current user once when the component mounts
   useEffect(() => {
-    console.log("app component mounted")
     //set up a listener to check for authentication state changes
     const unsubscribe = auth.onAuthStateChanged(async user => {
       //update the state with current user
@@ -51,7 +50,7 @@ function App() {
       //case user exists
       if(user) {
         //get the token
-        const token = await refreshToken()
+        const token = await user.getIdToken()
         console.log(token)
         //set the token in the socket authentication object
         socket.auth = { token }

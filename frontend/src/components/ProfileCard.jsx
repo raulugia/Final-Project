@@ -10,11 +10,11 @@ const ProfileCard = ({name, surname, username}) => {
   return (
     <div className='flex flex-col bg-white py-5 sticky px-5 top-[138px] rounded-lg shadow-md'>
         <div className='flex gap-10 items-center'>
-        <div className='bg-slate-700 w-24 h-24 rounded-full'></div>
-        <div>
-            <p className='text-2xl text-slate-700 font-semibold'>{name} {surname}</p>
-            <p className='text-slate-400'>@{username}</p>
-        </div>
+            <div className='bg-slate-700 w-24 h-24 rounded-full'></div>
+            <div>
+                <p className='text-2xl text-slate-700 font-semibold'>{name} {surname}</p>
+                <p className='text-slate-400'>@{username}</p>
+            </div>
         </div>
 
         <div className='flex flex-col mt-16 text-xl text-slate-700'>
