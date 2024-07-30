@@ -271,6 +271,51 @@ app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
     }
 })
 
+//endpoint for displaying other users' restaurants
+app.get("/api/user/:username/restaurants", authenticateUser, async(req, res) => {
+     //get the other user's username
+     const { username } = req.params
+
+    try{
+        //find out if users are friends and get the other user's uid
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+
+        //case users are friends
+        if(areFriends){
+            //get the meal logs logged by other user
+            const mealLogs = await prisma.mealLog.findMany({
+                where: {
+                    userUid: otherUserUid
+                },
+                include: {
+                    meal: {
+                        include: {
+                            restaurant: true
+                        }
+                    }
+                }
+            })
+    
+            //create a new map
+            const restaurantsMap = new Map()
+            
+            //add the restaurants to the map avoiding duplicates
+            mealLogs.forEach(log => {
+                restaurantsMap.set(log.meal.restaurant.id, log.meal.restaurant)
+            })
+            
+            //convert map into an array
+            const uniqueRestaurants = Array.from(restaurantsMap.values())
+            
+            //return array with other user's restaurants
+            res.json(uniqueRestaurants)
+        }
+
+    }catch(err){
+        console.log(err)
+    }
+})
+
 //endpoint for user registration
 app.post("/api/register", async (req, res) => {
   //extract email, name and surname from the request body
