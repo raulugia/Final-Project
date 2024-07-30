@@ -143,14 +143,10 @@ const Profile = () => {
               <h1 className='text-2xl font-bold text-slate-700 mb-2'>Recent Logs</h1>
               <div className='flex flex-col gap-5'>
                 {   
-                    loading ? (
-                      <div>Loading...</div>
-                    ) : (
-                      logs.map((log, index) => (
-                        //ref will be assigned when the last HomeMealCard is rendered
-                        <HomeMealCard key={log.logId} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
-                      ))
-                    )
+                  logs.map((log, index) => (
+                    //ref will be assigned when the last HomeMealCard is rendered
+                    <HomeMealCard key={log.logId} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
+                  ))
                 }
             </div>
             </div>
