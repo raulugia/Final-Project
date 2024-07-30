@@ -316,6 +316,69 @@ app.get("/api/user/:username/restaurants", authenticateUser, async(req, res) => 
     }
 })
 
+//endpoint for displaying other users' friends
+app.get("/api/user/:username/friends", authenticateUser, async(req, res) => {
+    //get the other user's username
+    const { username } = req.params
+
+    try{
+        //find out if users are friends and get the other user's uid
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+
+        //case users are friends
+        if(areFriends){
+            const otherUserFriends = await prisma.user.findUnique({
+                where : { 
+                    uid: otherUserUid,
+                },
+                select: {
+                    friends: {
+                        include: {
+                            friend: {
+                                //only return id, name, surname and username - email should not be returned
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    surname: true,
+                                    username: true,
+                                },
+                            },
+                        },
+                    },
+                    friendOf: {
+                        include: {
+                            user: {
+                                //only return id, name and surname
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    surname: true,
+                                    username: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+    
+            if(!otherUserFriends) {
+                return res.status(404).json({ error: "User not found" })
+            }
+
+            //combine friends and friendsOf
+            const friends = [
+                ...otherUserFriends.friends.map(data => data.friend),
+                ...otherUserFriends.friendOf.map(data => data.user),
+            ]
+            
+            //return array containing other user's friends
+            res.json(friends)
+        }
+    }catch(err){
+        console.error(err)
+    }
+})
+
 //endpoint for user registration
 app.post("/api/register", async (req, res) => {
   //extract email, name and surname from the request body
