@@ -108,6 +108,7 @@ function App() {
         <Route path='/friends' element={<Friends />}/>
         <Route path='/user/:username' element={<Profile />}/>
         <Route path='/user/:username/meals' element={<Meals />}/>
+        <Route path='/user/:username/restaurants' element={<Restaurants />}/>
         <Route path='/log-meal' element={<LogMeal />}/>
         <Route path='/my-restaurants' element={<Restaurants />}/>
         <Route path='/my-restaurants/:restaurantId' element={<RestaurantMeals />}/>

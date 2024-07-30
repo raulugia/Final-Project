@@ -3,7 +3,7 @@ import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import SkeletonRestaurantCard from '../components/SkeletonRestaurantCard';
 import { MdKeyboardArrowRight } from "react-icons/md";
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 
 const Restaurants = () => {
     const user = auth.currentUser
@@ -13,6 +13,9 @@ const Restaurants = () => {
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
     const [hoveredRestaurant, setHoveredRestaurant] = useState(null)
+    //get username - if it exists, other user's restaurants will be rendered
+    //if it does not exist, current user's restaurants will be rendered
+    const { username } = useParams()
 
     useEffect(() => {
         (
@@ -22,7 +25,7 @@ const Restaurants = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get("/api/restaurants", {
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/restaurants` : "/api/restaurants"}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
