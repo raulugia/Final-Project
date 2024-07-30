@@ -132,51 +132,37 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 app.get("/api/user/:username", authenticateUser, async(req, res) => {
     try{
         const { username } = req.params
+        //find out if users are friends and get the other user's uid
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5
         const offset = (page - 1) * limit
 
-        const otherUserAndMeals = await prisma.user.findUnique({
-            where: {
-                username: username
-            },
-            include: {
-                meals: {
-                    orderBy: {
-                        createdAt: "desc"
-                    },
-                    take: limit,
-                    skip: offset,
-                    include: {
-                        meal: {
-                            include: {
-                                restaurant: true
+        if(areFriends){
+            const otherUserAndMeals = await prisma.user.findUnique({
+                where: {
+                    username: username
+                },
+                include: {
+                    meals: {
+                        orderBy: {
+                            createdAt: "desc"
+                        },
+                        take: limit,
+                        skip: offset,
+                        include: {
+                            meal: {
+                                include: {
+                                    restaurant: true
+                                }
                             }
                         }
-                    }
-                },
-            }
-        })
-
-        let friendship
-        if(otherUserAndMeals){
-            friendship = await prisma.friendship.findFirst({
-                where: {
-                    OR: [
-                        {
-                            userUid: req.user.uid,
-                            friendUid: otherUserAndMeals.uid
-                        },
-                        {
-                            userUid: otherUserAndMeals.uid,
-                            friendUid: req.user.uid
-                        }
-                    ]
+                    },
                 }
             })
-        }
 
-        if(friendship){
+            //get current user meals to find common restaurants
             const currentUserMeals = await prisma.mealLog.findMany({
                 where: {
                     userUid: req.user.uid
@@ -190,13 +176,17 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                 }
             })
 
-            //get restaurant ids discarding duplicated ids with Set
+            //create a set of restaurant ids discarding duplicated ids (sets do not allow duplicates)
             const currentUserRestaurantIds = new Set(currentUserMeals.map(log => log.meal.restaurant.id))
 
+            //get common restaurants
             const commonRestaurants = otherUserAndMeals.meals
+                //create an array with the other user's restaurants
                 .map(log => log.meal.restaurant)
+                //create an array of the restaurants that both users have in common
                 .filter(restaurant => currentUserRestaurantIds.has(restaurant.id))
 
+            //create the response object    
             const response = {
                 user: {
                     name: otherUserAndMeals.name,
@@ -208,10 +198,10 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                 logs: otherUserAndMeals.meals,
                 commonRestaurants,
             }    
-            console.log(response)
-            console.log("RESPONSE SENT")
+
+            //send response to client
             res.json(response)
-    }
+        }
     }catch(err){
         console.log(err)
     }
