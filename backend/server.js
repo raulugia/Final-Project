@@ -201,6 +201,8 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
 
             //send response to client
             res.json(response)
+        }else{
+            res.json({ error: "Users are not friends" })
         }
     }catch(err){
         console.log(err)

@@ -5,6 +5,8 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom'
 import HomeMealCard from '../components/HomeMealCard';
 import ProfileCard from '../components/ProfileCard';
+import NotFriendsProfile from '../components/NotFriendsProfile';
+import SkeletonProfile from '../components/SkeletonProfile';
 
 const Profile = () => {
   const user = auth.currentUser
@@ -24,6 +26,8 @@ const Profile = () => {
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
+  //
+  const [displayPartialProfile, setDisplayPartialProfile] = useState(false)
   //
   const { username } = useParams()
 
@@ -64,6 +68,12 @@ const Profile = () => {
             limit: 5
           }
         })
+
+        if(data.error) {
+          if(data.error === "Users are not friends"){
+            console.log("error")
+          }
+        }
         console.log("DATA", data)
         //only update states if ignore is false
         if(!ignore){
@@ -114,49 +124,58 @@ const Profile = () => {
   }, [loading, hasMoreLogs])
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
-      <div className="md:flex md:flex-col border hidden">
-        {
-          otherUser && (
-            <ProfileCard {...otherUser} />
-          )
-        }
-      </div>
+    <>
+      {
+        loading ? (
+          <SkeletonProfile />
+        ) : (
 
-        <div className='flex flex-col gap-4 px-5 mt-20'>
-          <h1 className='text-2xl font-bold text-slate-700 mb-2'>Recent Logs</h1>
-          <div className='flex flex-col gap-5'>
-            {   
-                loading ? (
-                  <div>Loading...</div>
-                ) : (
-                  logs.map((log, index) => (
-                    //ref will be assigned when the last HomeMealCard is rendered
-                    <HomeMealCard key={log.logId} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
-                  ))
-                )
+        <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
+          <div className="md:flex md:flex-col border hidden">
+            {
+              otherUser && (
+                <ProfileCard {...otherUser} />
+              )
             }
-        </div>
-        </div>
+          </div>
 
-        <div className="hidden md:block">
-          {
-            restaurantsInCommon.length > 0 && (
-
-              <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
-                <div className='flex gap-2 items-center px-3'>
-                  <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Restaurants in common</h1>
-                </div>
-                {
-                  restaurantsInCommon.map(restaurant => (
-                    <CommonRestaurantCard key={restaurant.id} {...restaurant} />
-                  ))
+            <div className='flex flex-col gap-4 px-5 mt-20'>
+              <h1 className='text-2xl font-bold text-slate-700 mb-2'>Recent Logs</h1>
+              <div className='flex flex-col gap-5'>
+                {   
+                    loading ? (
+                      <div>Loading...</div>
+                    ) : (
+                      logs.map((log, index) => (
+                        //ref will be assigned when the last HomeMealCard is rendered
+                        <HomeMealCard key={log.logId} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
+                      ))
+                    )
                 }
-              </div>
-            )
-          }
-      </div>
-    </div>
+            </div>
+            </div>
+
+            <div className="hidden md:block">
+              {
+                restaurantsInCommon.length > 0 && (
+
+                  <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
+                    <div className='flex gap-2 items-center px-3'>
+                      <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Restaurants in common</h1>
+                    </div>
+                    {
+                      restaurantsInCommon.map(restaurant => (
+                        <CommonRestaurantCard key={restaurant.id} {...restaurant} />
+                      ))
+                    }
+                  </div>
+                )
+              }
+          </div>
+        </div>
+        )
+      }
+    </>
   )
 }
 
