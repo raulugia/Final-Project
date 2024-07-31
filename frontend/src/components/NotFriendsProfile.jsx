@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { MdKeyboardArrowRight } from "react-icons/md";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
-const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus}) => {
+const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestId}) => {
     const user = auth.currentUser
     const { username } = useParams()
     const [buttonMessage, setButtonMessage] = useState(requestStatus === "pending" ? "Pending..." : "Add Friend")
     const [isDisabled, setIsDisabled] = useState(requestStatus === "pending")
+    const navigate = useNavigate()
 
     //method to handle button click
     const handleClick = async(e) => {
@@ -33,10 +34,44 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus}) => {
         } catch (err) {
             //if there was an error, reset button to its original form
             setButtonMessage("Add Friend")
-            setIsDisabled(false)
             console.error(err)
         }
     }
+
+    //method to accept/reject a friend request
+    const handleRequest = async (action, requestId) => {
+        //get token for authentication in the server 
+        const token = await user.getIdToken();
+
+        try{
+            //api call to accept or reject a friend request passing the token for authentication in the server
+            const response = await axiosInstance.post(`api/friend-request/${action}/${requestId}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            
+            //hide the buttons to action the friend request and display the "Message" button if
+            //the request was accepted successfully
+            if(response.status === 200){
+                //case user accepted the friend request
+                if(action === "accept"){
+                    //display Message button
+                    //setButtonMessage("Message")
+                    navigate(0)
+                //case user rejected the friend request    
+                } else if(action === "reject") {
+                    //display Add Friend button
+                    setButtonMessage("Add Friend")
+                }
+                //reset states
+                setIsDisabled(false)
+            }
+        }catch(err) {
+            console.error(err)
+        }
+    }
+
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
       <div className="md:flex md:flex-col border hidden">
@@ -50,18 +85,27 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus}) => {
                 </div>
             </div>
 
-            <div className='flex items-center justify-center py-5 outline-[p] bg-slate-200 mt-16 rounded-md'>
+            <div className='flex items-center justify-center py-8 px-2 outline bg-slate-200 mt-16 rounded-md'>
                 <p className='text-sm font-semibold'>Befriend <span className='underline'>@{username}</span> to view their profile</p>
             </div>
 
             <div className='mt-16 w-full'>
-                <button 
-                    onClick={handleClick}
-                    className={`w-full flex gap-2 justify-center items-center border rounded-md py-1 ${isDisabled ? "bg-gray-300 text-black" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
-                    disabled={isDisabled}
-                >
-                    <p className='text-xl font-semibold'>{buttonMessage}</p>
-                </button>
+                 {
+                    requestStatus === "action" ? (
+                        <div className="flex flex-col gap-3">
+                            <button onClick={() => handleRequest("accept", requestId)} id="acceptBtn" className='text-lg px-2 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-sm'>Accept</button>
+                            <button onClick={() => handleRequest("reject", requestId)} id="rejectBtn" className='text-lg border px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 hover:shadow-sm'>Reject</button>
+                        </div>
+                    ) : (
+                        <button 
+                            onClick={handleClick}
+                            className={`w-full flex gap-2 justify-center items-center text-xl font-semibold border rounded-md py-1 ${isDisabled ? "bg-gray-300 text-black" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
+                            disabled={isDisabled}
+                        >
+                            {buttonMessage}
+                        </button>
+                    )
+                }
             </div>
         </div>
 

@@ -71,7 +71,7 @@ const Profile = () => {
 
         if(data.error) {
           if(data.error === "Users are not friends"){
-            setOtherUser({name: data.name, surname: data.surname, otherUserUid: data.otherUserUid, requestStatus: data.requestStatus})
+            setOtherUser({name: data.name, surname: data.surname, otherUserUid: data.otherUserUid, requestStatus: data.requestStatus, requestId: data.requestId})
             setDisplayPartialProfile(true)
           }
         }

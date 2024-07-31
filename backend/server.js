@@ -232,7 +232,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
 
             console.log(isRequestPending)
 
-            res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus })
+            res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending.id })
         }
     }catch(err){
         console.log(err)
