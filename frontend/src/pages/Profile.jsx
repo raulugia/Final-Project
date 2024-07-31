@@ -156,7 +156,12 @@ const Profile = () => {
 
                       logs.map((log, index) => (
                         //ref will be assigned when the last HomeMealCard is rendered
-                        <HomeMealCard key={log.logId} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
+                        <HomeMealCard 
+                          key={log.logId} mealName={log.meal.name} 
+                          isOtherUser={true} user={otherUser} logId={log.id}
+                          restaurantName={log.meal.restaurant.name} {...log} 
+                          ref={index === logs.length - 1 ? lastLogRef: null}
+                        />
                       ))
                     ) : (
                       <div className='flex justify-center items-center bg-white rounded-lg h-[445px] shadow-md'>

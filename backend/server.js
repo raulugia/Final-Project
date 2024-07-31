@@ -188,6 +188,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                 //create an array of the restaurants that both users have in common
                 .filter(restaurant => currentUserRestaurantIds.has(restaurant.id))
 
+                console.log(otherUserAndMeals.meals)
             //create the response object    
             const response = {
                 user: {

@@ -2,9 +2,14 @@ import React from 'react'
 import Accuracy from './Accuracy'
 import { Link } from 'react-router-dom'
 
-const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId, createdAt, rating, picture, carbEstimate}, ref) => {
+const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId, createdAt, rating, picture, carbEstimate, isOtherUser, user}, ref) => {
   return (
-    <Link ref={ref} to={`/my-meals/${mealId}/log/${logId}`} className='py-4 px-5 rounded-md border border-slate-200 shadow-md max-w-[456px] bg-white'>
+    <Link 
+        ref={ref}
+        //route changes based on whose logs are being rendered (current user vs other user) 
+        to={`${isOtherUser ? `/user/${user.username}/meals/${mealId}/log/${logId}` : `/my-meals/${mealId}/log/${logId}`}`} 
+        className='py-4 px-5 rounded-md border border-slate-200 shadow-md max-w-[456px] bg-white'
+    >
         <div className='min-w-full max-w-[415px] min-h-[300px] rounded-md overflow-hidden'>
             <img className='w-full' src={picture} alt={mealName} />
         </div>
