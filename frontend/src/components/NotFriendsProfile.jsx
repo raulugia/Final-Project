@@ -1,9 +1,42 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useParams } from 'react-router-dom';
+import { auth } from '../../utils/firebase';
+import axiosInstance from '../../utils/axiosInstance';
 
-const NotFriendsProfile = ({name, surname}) => {
+const NotFriendsProfile = ({name, surname, otherUserUid}) => {
+    const user = auth.currentUser
     const { username } = useParams()
+    const [buttonMessage, setButtonMessage] = useState("Add Friend")
+    const [isDisabled, setIsDisabled] = useState(false)
+
+    //method to handle button click
+    const handleClick = async(e) => {
+        e.preventDefault()
+        //get token for authentication in the server 
+        const token = await user.getIdToken();
+
+        try {
+            //update the button message to "Pending..." and disable it
+            setButtonMessage("Pending...")
+            setIsDisabled(true)
+
+            //send api call to create a friend request 
+            const response = await axiosInstance.post("/api/friend-request", 
+                { recipientUid: otherUserUid }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            )
+            
+        } catch (err) {
+            //if there was an error, reset button to its original form
+            setButtonMessage("Add Friend")
+            setIsDisabled(false)
+            console.error(err)
+        }
+    }
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
       <div className="md:flex md:flex-col border hidden">
@@ -22,8 +55,12 @@ const NotFriendsProfile = ({name, surname}) => {
             </div>
 
             <div className='mt-16 w-full'>
-                <button className='w-full flex gap-2 justify-center items-center border rounded-md bg-blue-600 hover:bg-blue-700 py-1'>
-                    <p className='text-xl text-white font-semibold'>Add Friend</p>
+                <button 
+                    onClick={handleClick}
+                    className={`w-full flex gap-2 justify-center items-center border rounded-md py-1 ${isDisabled ? "bg-gray-200 text-black" : "bg-blue-600 hover:bg-blue-700"}`}
+                    disabled={isDisabled}
+                >
+                    <p className='text-xl text-white font-semibold'>{buttonMessage}</p>
                 </button>
             </div>
         </div>

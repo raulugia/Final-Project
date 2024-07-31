@@ -204,7 +204,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
             //send response to client
             res.json(response)
         }else{
-            res.json({ error: "Users are not friends", name, surname })
+            res.json({ error: "Users are not friends", name, surname, otherUserUid })
         }
     }catch(err){
         console.log(err)
@@ -1121,9 +1121,10 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
     try{
         const sender = await prisma.user.findUnique({
             where: {
-                email: req.user.email
+                uid: req.user.uid
             }
         });
+
 
         const recipient = await prisma.user.findUnique({
             where: {

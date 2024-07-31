@@ -51,7 +51,7 @@ function App() {
       if(user) {
         //get the token
         const token = await user.getIdToken()
-        console.log(token)
+        console.log("CLIENT TOKEN LOGGED",token)
         //set the token in the socket authentication object
         socket.auth = { token }
         //connect to the WebSocket

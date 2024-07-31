@@ -19,17 +19,24 @@ const initializeSocket = server => {
     io.use(async(socket, next) => {
         //retrieve the token from the client's request
         const token = socket.handshake.auth.token
-
-        //case token exists
-        if(token) {
-            const decodedToken = await admin.auth().verifyIdToken(token)
-            //console.log("here token", token)
-            socket.request.user = decodedToken
-            //console.log("socker req user", socket.request.user)
-            next()
-        }else{
-            next(new Error("Authentication failed"))
+        console.log("LOGGING TOKEN SERVER...")
+        console.log("SERVER TOKEN: ", token);
+        console.log("TOKEN LOGGED SERVER...")
+        try{
+            //case token exists
+            if(token) {
+                const decodedToken = await admin.auth().verifyIdToken(token)
+                //console.log("here token", token)
+                socket.request.user = decodedToken
+                //console.log("socker req user", socket.request.user)
+                next()
+            }else{
+                next(new Error("Authentication failed"))
+            }
+        }catch(err){
+            console.log(err)
         }
+        
     });
 
     io.on("connection", socket => {
