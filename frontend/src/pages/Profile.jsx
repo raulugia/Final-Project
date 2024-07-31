@@ -20,7 +20,9 @@ const Profile = () => {
   //state needed to trigger data fetching (useEffect dependency)
   //this state will be increase by 1 each time the last HomeMealCard intersects with the viewport (infinite scrolling) 
   const [page, setPage] = useState(1)
-  //
+  //state to detect if there are any logs left to fetch
+  //since the system fetches 5 logs every time te infinite scrolling logic is triggered,
+  //if the length of the returned logs is < 5, there are no more logs to fetch
   const [hasMoreLogs, setHasMoreLogs] = useState(true)
   //ref to keep the intersection observer instance
   const observer = useRef()
@@ -88,6 +90,7 @@ const Profile = () => {
           //hide loading component
           setLoading(false)
 
+          //update state if there are no more logs left to fetch
           if(data.logs.length < 5) {
             setHasMoreLogs(false)
           }
@@ -113,7 +116,7 @@ const Profile = () => {
     //create a new intersection observer that will increase the page state 
     //when the last HomeMealCard intersects with the viewport
     observer.current = new IntersectionObserver(entries => {
-      //case last HomeMealCard is intersecting with the viewport
+      //case last HomeMealCard is intersecting with the viewport and there are more logs to fetch
       if(entries[0].isIntersecting && hasMoreLogs) {
         //update state
         setPage(prevPage => prevPage + 1)

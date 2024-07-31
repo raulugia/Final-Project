@@ -24,6 +24,10 @@ const Home = () => {
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
+  //state to detect if there are any logs left to fetch
+  //since the system fetches 5 logs every time te infinite scrolling logic is triggered,
+  //if the length of the returned logs is < 5, there are no more logs to fetch
+  const [hasMoreLogs, setHasMoreLogs] = useState(true)
   //get pending requests from context
   const { pendingRequests } = useStateContext()
   
@@ -74,6 +78,11 @@ const Home = () => {
           setLogs(prevLogs => [...prevLogs, ...displayData])
           //hide loading component
           setLoading(false)
+
+          //update state if there are no more logs left to fetch
+          if(data.logs.length < 5) {
+            setHasMoreLogs(false)
+          }
         }
       } catch(err) {
         console.log(err)
@@ -96,8 +105,8 @@ const Home = () => {
     //create a new intersection observer that will increase the page state 
     //when the last HomeMealCard intersects with the viewport
     observer.current = new IntersectionObserver(entries => {
-      //case last HomeMealCard is intersecting with the viewport
-      if(entries[0].isIntersecting) {
+      //case last HomeMealCard is intersecting with the viewport and there are more logs to fetch
+      if(entries[0].isIntersecting && hasMoreLogs) {
         //update state
         setPage(prevPage => prevPage + 1)
       }
@@ -105,11 +114,7 @@ const Home = () => {
 
     //make the observer watch the last HomeMealCard, referenced by lastLogRef
     if(lastLogRef.current) observer.current.observe(lastLogRef.current)
-  }, [loading])
-
-  useEffect(() => {
-    console.log("requests:", pendingRequests)
-  }, [pendingRequests])
+  }, [loading, hasMoreLogs])
 
   //method to redirect user to "/" when they click on "log out" button
   // const handleClick = () => {
