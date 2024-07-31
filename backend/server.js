@@ -221,18 +221,19 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                     ]
                 }
             })
-
+            console.log(req.user)
             let requestStatus = ""
-            
-            if(isRequestPending.senderUid === req.user.uid){
-                requestStatus = "pending"
-            }else if(isRequestPending.receiverUid === req.user.uid){
-                requestStatus = "action"
+            if(isRequestPending){
+                if(isRequestPending.senderUid === req.user.uid){
+                    requestStatus = "pending"
+                }else if(isRequestPending.receiverUid === req.user.uid){
+                    requestStatus = isRequestPending.status === "PENDING" ? "action" : "rejected"
+                }
             }
 
             console.log(isRequestPending)
 
-            res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending.id })
+            res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending?.id })
         }
     }catch(err){
         console.log(err)

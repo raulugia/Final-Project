@@ -8,6 +8,7 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
     const user = auth.currentUser
     const { username } = useParams()
     const [buttonMessage, setButtonMessage] = useState(requestStatus === "pending" ? "Pending..." : "Add Friend")
+    const [friendRequest, setFriendRequest] = useState(requestStatus)
     const [isDisabled, setIsDisabled] = useState(requestStatus === "pending")
     const navigate = useNavigate()
 
@@ -61,6 +62,7 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
                     navigate(0)
                 //case user rejected the friend request    
                 } else if(action === "reject") {
+                    setFriendRequest("rejected")
                     //display Add Friend button
                     setButtonMessage("Add Friend")
                 }
@@ -91,7 +93,7 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
 
             <div className='mt-16 w-full'>
                  {
-                    requestStatus === "action" ? (
+                    friendRequest === "action" ? (
                         <div className="flex flex-col gap-3">
                             <button onClick={() => handleRequest("accept", requestId)} id="acceptBtn" className='text-lg px-2 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-sm'>Accept</button>
                             <button onClick={() => handleRequest("reject", requestId)} id="rejectBtn" className='text-lg border px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-300 hover:shadow-sm'>Reject</button>
