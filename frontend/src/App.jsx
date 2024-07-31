@@ -109,6 +109,7 @@ function App() {
 
         <Route path='/user/:username' element={<Profile />}/>
         <Route path='/user/:username/meals' element={<Meals />}/>
+        <Route path='/user/:username/meals/:mealId/log/:logId' element={<Log />}/>
         <Route path='/user/:username/restaurants' element={<Restaurants />}/>
         <Route path='/user/:username/friends' element={<Friends />}/>
 

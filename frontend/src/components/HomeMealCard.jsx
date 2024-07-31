@@ -3,7 +3,7 @@ import Accuracy from './Accuracy'
 import { Link } from 'react-router-dom'
 
 const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId, createdAt, rating, picture, carbEstimate, isOtherUser, user}, ref) => {
-  return (
+    return (
     <Link 
         ref={ref}
         //route changes based on whose logs are being rendered (current user vs other user) 

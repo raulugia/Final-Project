@@ -146,7 +146,11 @@ const Home = () => {
                 ) : (
                   logs.map((log, index) => (
                     //ref will be assigned when the last HomeMealCard is rendered
-                    <HomeMealCard key={log.logId} {...log} ref={index === logs.length - 1 ? lastLogRef: null}/>
+                    <HomeMealCard 
+                      key={log.logId} {...log} 
+                      isOtherUser={false} 
+                      ref={index === logs.length - 1 ? lastLogRef: null}
+                    />
                   ))
                 )
             }

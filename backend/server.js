@@ -244,14 +244,14 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
 })
 
 //endpoint for displaying other users' meals
-app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
+app.get("/api/user/:username/meals", authenticateUser, async(req, res) => {
     //get the other user's username
     const { username } = req.params
     
     try{
         //find out if users are friends and get the other user's uid
         const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
-        
+
         //case users are friends
         if(areFriends){
             //get the most recent meal logs avoiding duplicates
@@ -292,6 +292,39 @@ app.get("/api/user/:username/meals", authenticateUser, async(req, res,) => {
             }
     }catch(err){
         console.log(err)
+    }
+})
+
+//endpoint for displaying other user's log details
+app.get("/user/:username/meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
+    try{
+        const { username, mealId, logId } = req.params
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+
+        if(areFriends){
+            const log = await prisma.mealLog.findUnique({
+                where: {
+                    id: Number(logId),
+                    userUid: otherUserUid
+                },
+                include: {
+                    meal: {
+                        select: {
+                            name: true,
+                            restaurant: {
+                                select: {
+                                    name: true
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+            console.log("LOG", log)
+            res.json(log)
+        }
+    }catch(err){
+
     }
 })
 

@@ -18,7 +18,9 @@ const Log = () => {
     //state to store the meal log data
     const [log, setLog] = useState(logLocation.state || {})
     //get meal id and log id
-    const { mealId, logId } = useParams()
+    const { username, mealId, logId } = useParams()
+    //const params = useParams()
+    console.log("PARAMS", username, mealId, logId)
 
     //states to control when loading element and overlay should be displayed
     const [loading, setLoading] = useState(!logLocation.state)
@@ -32,9 +34,9 @@ const Log = () => {
             //get user's id token for authorization in the server
             const token = await user.getIdToken()
             try{
-                console.log("getting data for: ", `/api/my-meals/${mealId}/log/${logId}`)
+                console.log("getting data for: ", )
                 //send a get request and store data from the request object
-                const { data } = await axiosInstance.get(`/api/my-meals/${mealId}/log/${logId}`, { 
+                const { data } = await axiosInstance.get(username ? `/user/${username}/meals/${mealId}/log/${logId}` : `/api/my-meals/${mealId}/log/${logId}`, { 
                     headers: {
                         "Authorization": `Bearer ${token}`,
                     }
@@ -105,12 +107,16 @@ const Log = () => {
                                 <div className='flex flex-col items-start mb-5'>
                                     <div className='flex justify-between items-center w-full'>
                                         <h1 className='text-slate-800 md:text-2xl font-semibold'>{log.mealName || log.meal?.name}</h1>
-                                        <p 
-                                            onClick={() => setEdit(true)}
-                                            className='text-sm border border-slate-300 px-2 rounded-sm bg-slate-50 hover:cursor-pointer hover:bg-slate-200 hover:shadow-sm'
-                                        >
-                                            Edit Log
-                                        </p>
+                                        {
+                                            !username && (
+                                                <button 
+                                                    onClick={() => setEdit(true)}
+                                                    className='text-sm border border-slate-300 px-2 rounded-sm bg-slate-50 hover:cursor-pointer hover:bg-slate-200 hover:shadow-sm'
+                                                >
+                                                    Edit Log
+                                                </button>
+                                            )
+                                        }
                                     </div>
                                     <h3 className='text-slate-600 md:text-md'>{log.restaurantName || log.meal?.restaurant?.name}</h3>
                                 </div>
