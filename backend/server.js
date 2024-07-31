@@ -204,7 +204,35 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
             //send response to client
             res.json(response)
         }else{
-            res.json({ error: "Users are not friends", name, surname, otherUserUid })
+
+            const isRequestPending = await prisma.friendRequest.findFirst({
+                where: {
+                    OR: [
+                        {
+                            senderUid: req.user.uid,
+                            receiverUid: otherUserUid,
+                            status: "PENDING" || "REJECTED"
+                        },
+                        {
+                            senderUid: otherUserUid,
+                            receiverUid: req.user.uid,
+                            status: "PENDING" || "REJECTED"
+                        }
+                    ]
+                }
+            })
+
+            let requestStatus = ""
+            
+            if(isRequestPending.senderUid === req.user.uid){
+                requestStatus = "pending"
+            }else if(isRequestPending.receiverUid === req.user.uid){
+                requestStatus = "action"
+            }
+
+            console.log(isRequestPending)
+
+            res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus })
         }
     }catch(err){
         console.log(err)

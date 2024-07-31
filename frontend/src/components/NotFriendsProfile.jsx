@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom';
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
-const NotFriendsProfile = ({name, surname, otherUserUid}) => {
+const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus}) => {
     const user = auth.currentUser
     const { username } = useParams()
-    const [buttonMessage, setButtonMessage] = useState("Add Friend")
-    const [isDisabled, setIsDisabled] = useState(false)
+    const [buttonMessage, setButtonMessage] = useState(requestStatus === "pending" ? "Pending..." : "Add Friend")
+    const [isDisabled, setIsDisabled] = useState(requestStatus === "pending")
 
     //method to handle button click
     const handleClick = async(e) => {
@@ -57,10 +57,10 @@ const NotFriendsProfile = ({name, surname, otherUserUid}) => {
             <div className='mt-16 w-full'>
                 <button 
                     onClick={handleClick}
-                    className={`w-full flex gap-2 justify-center items-center border rounded-md py-1 ${isDisabled ? "bg-gray-200 text-black" : "bg-blue-600 hover:bg-blue-700"}`}
+                    className={`w-full flex gap-2 justify-center items-center border rounded-md py-1 ${isDisabled ? "bg-gray-300 text-black" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
                     disabled={isDisabled}
                 >
-                    <p className='text-xl text-white font-semibold'>{buttonMessage}</p>
+                    <p className='text-xl font-semibold'>{buttonMessage}</p>
                 </button>
             </div>
         </div>
