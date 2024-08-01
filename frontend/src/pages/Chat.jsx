@@ -29,19 +29,24 @@ const Chat = () => {
     //
     const chatWindowRef = useRef()
 
+    //get user's friends so user can message them
     useEffect(() => {
         (
             async() => {
                 try{
+                    //get id token
                     const token = await user.getIdToken()
+                    //make api call to fetch all friends passing the token for authentication
                     const { data } = await axiosInstance.get("/api/friends", { 
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     })
 
+                    //case server responds
                     if(data){
                         console.log(data)
+                        //update states to display friends
                         setFriends(data)
                         setFilteredFriends(data)
                     }
@@ -51,9 +56,10 @@ const Chat = () => {
             }
         )()
 
+        //listener used to add the latest message to the "message" state so it can be displayed
         socket.on("receiveMessage", message => {
+            //add new message to state
             setMessages(prevMessages => [...prevMessages, message])
-            console.log("received message:", message)
         })
 
         return () => {
@@ -62,11 +68,14 @@ const Chat = () => {
 
     },[])
 
+    //fetch messages between current user and selected friend (currentChat)
     useEffect(() => {
         (
             async() => {
                 try{
+                    //get id token
                     const token = await user.getIdToken()
+                    //make api call to fetch the firsy 20 messages between current user and other user
                     const { data } = await axiosInstance.get(`/api/chat/${currentChat.username}/messages`, { 
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -77,9 +86,14 @@ const Chat = () => {
                         }
                     })
 
+                    //case the server responds
                     if(data){
+                        //update state with all messages
                         setMessages(data)
+
+                        //case the array of messages has a length less than 20
                         if(data.length < 20){
+                            //update state to stop infinite scrolling as there are no more messages to fetch
                             setHasMoreMessages(false)
                         }
                     }
@@ -99,16 +113,22 @@ const Chat = () => {
         }
     },[messages])
 
+    //set up intersection observer and track the oldest message
     useEffect(() => {
         if(loading) return
+        //prevent more than one observer from being active
         if(observer.current) observer.current.disconnect()
-
+        
+        //create a new intersection observer that will increase the page state
+        //when the oldest message intersects with the viewport
         observer.current = new IntersectionObserver( entries => {
             if(entries[0].isIntersecting && hasMoreMessages) {
+                //update state
                 setPage(prevPage => prevPage + 1)
             }
         })
 
+        //make the observer watch the oldest message
         if(oldestMessageRef.current) observer.current.observe(oldestMessageRef.current)
     })
 
@@ -117,24 +137,20 @@ const Chat = () => {
         socket.emit("joinRoom", friend.uid)
     }
 
+    //method used to create a new message in db and send it to users
     const sendMessage = () => {
+        //case there is a message and the user has selected a chat room
         if(newMessage.trim() && currentChat) {
+            //create the message object
             const message = {
                 content: newMessage,
                 receiverUid: currentChat.uid,
             }
 
-            // const newMessageObj = {
-            //     content: newMessage,
-            //     senderUid: user.uid,
-            //     receiverUid: currentChat,
-            //     timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute:"2-digit"})
-            // }
-
+            //emit message
             socket.emit("sendMessage", message)
-            console.log("new message emitted")
+            //update state so the old message is deleted
             setNewMessage("")
-            //setMessages(prevMessages => [...prevMessages, newMessageObj])
         }
     }
 
