@@ -1347,7 +1347,7 @@ app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
     const { username } = req.params
     console.log(username)
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10
+    const limit = parseInt(req.query.limit) || 20
     const offset = (page - 1) * limit
     const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
 

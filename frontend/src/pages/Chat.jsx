@@ -21,11 +21,13 @@ const Chat = () => {
     //state to detect if there are any logs left to fetch
     //since the system fetches 5 logs every time te infinite scrolling logic is triggered,
     //if the length of the returned logs is < 5, there are no more logs to fetch
-    const [hasMoreLogs, setHasMoreLogs] = useState(true)
+    const [hasMoreMessages, setHasMoreMessages] = useState(true)
     //ref to keep the intersection observer instance
     const observer = useRef()
     //ref to keep a reference to the last HomeMealCard
-    const lastLogRef = useRef()
+    const oldestMessageRef = useRef()
+    //
+    const chatWindowRef = useRef()
 
     useEffect(() => {
         (
@@ -69,12 +71,17 @@ const Chat = () => {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
+                        params: {
+                            page,
+                            limit: 20
+                        }
                     })
 
                     if(data){
-                        console.log(data)
-                        setFriends(data)
-                        setFilteredFriends(data)
+                        setMessages(data)
+                        if(data.length < 20){
+                            setHasMoreMessages(false)
+                        }
                     }
                 }catch(err){
                     console.log(err)
@@ -82,6 +89,28 @@ const Chat = () => {
             }
         )()
     }, [currentChat])
+
+    //scroll to the bottom every time a new message appears
+    useEffect(() => {
+        //if the div containing the messages is rendered
+        if(chatWindowRef.current){
+            //scroll to the bottom
+            chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
+        }
+    },[messages])
+
+    useEffect(() => {
+        if(loading) return
+        if(observer.current) observer.current.disconnect()
+
+        observer.current = new IntersectionObserver( entries => {
+            if(entries[0].isIntersecting && hasMoreMessages) {
+                setPage(prevPage => prevPage + 1)
+            }
+        })
+
+        if(oldestMessageRef.current) observer.current.observe(oldestMessageRef.current)
+    })
 
     const joinRoom = (friend) => {
         setCurrentChat({username: friend.username, uid: friend.uid})
@@ -112,20 +141,20 @@ const Chat = () => {
   return (
     <div className="flex min-h-screen pb-28 justify-center">
         <div className="mt-28 flex flex-col border rounded-lg bg-white w-1/2 max-w-[395px]">
-        <div className="w-full flex items-center justify-center border-2 min-h-[75px]">
-            <input type="text" className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
-        </div>
-        <div className="w-full h-full flex flex-col overflow-scroll no-scrollbar">
-            {
-                filteredFriends.length > 0 && (
-                    filteredFriends.map(friend => (
-                        <ChatFriendCard {...friend} key={friend.uid} 
-                            joinRoom={() => joinRoom(friend)}
-                        />
-                    ))
-                )
-            }
-        </div>
+            <div className="w-full flex items-center justify-center border-2 min-h-[75px]">
+                <input type="text" className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
+            </div>
+            <div className="w-full h-full flex flex-col overflow-scroll no-scrollbar">
+                {
+                    filteredFriends.length > 0 && (
+                        filteredFriends.map((friend, index) => (
+                            <ChatFriendCard {...friend} key={friend.uid + index} 
+                                joinRoom={() => joinRoom(friend)}
+                            />
+                        ))
+                    )
+                }
+            </div>
         </div>
 
         <div className="mt-28 flex flex-col bg-white border w-full max-w-[680px]">
@@ -133,10 +162,10 @@ const Chat = () => {
 
             </div>
 
-            <div className='h-full w-full flex flex-col justify-end items-start px-5 py-3 overflow-scroll no-scrollbar gap-3'>
+            <div ref={chatWindowRef}  className='h-full md:h-[586px] md:max-h-[586px] w-full flex flex-col items-start px-5 py-3 overflow-auto no-scrollbar gap-3'>
                 {
-                    messages.map(message => (
-                        <ChatMessageBubble {...message} sender={message.senderUid === user.uid ? "currentUser" : "otherUser"}/>
+                    messages.map((message, index) => (
+                        <ChatMessageBubble {...message} key={message.id+index} sender={message.senderUid === user.uid ? "currentUser" : "otherUser"}/>
                     ))
                 }
             </div>
