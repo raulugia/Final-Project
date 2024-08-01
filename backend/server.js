@@ -1343,6 +1343,39 @@ app.post("/api/friend-request/reject/:requestId", authenticateUser, async(req, r
     }
 })
 
+app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
+    const { username } = req.params
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10
+    const { otherUserUid } = req.query
+    const offset = (page - 1) * limit
+
+    try{
+        const messages = await prisma.message.findMany({
+            where: {
+                OR: [
+                    {
+                        senderUid: req.user.uid,
+                        receiverUid: otherUserUid,
+                    },
+                    {
+                        receiverUid: req.user.uid,
+                        senderUid: otherUserUid,
+                    }
+                ],
+                orderBy: {
+                    timestamp: "desc"
+                },
+            }
+        })
+
+        console.log(messages)
+        
+    }catch(err){
+        console.log(err)
+    }
+})
+
 //start express server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
