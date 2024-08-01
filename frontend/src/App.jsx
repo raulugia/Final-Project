@@ -13,6 +13,7 @@ import Meals from './pages/Meals'
 import MealLogs from './pages/MealLogs'
 import Log from './pages/Log'
 import SearchResults from './pages/SearchResults'
+import Chat from './pages/Chat'
 import { auth } from '../utils/firebase'
 import {Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
@@ -109,6 +110,7 @@ function App() {
 
         <Route path='/user/:username' element={<Profile />}/>
         <Route path='/user/:username/meals' element={<Meals />}/>
+        <Route path='/user/:username/meals/:mealId' element={<MealLogs />}/>
         <Route path='/user/:username/meals/:mealId/log/:logId' element={<Log />}/>
         <Route path='/user/:username/restaurants' element={<Restaurants />}/>
         <Route path='/user/:username/friends' element={<Friends />}/>
@@ -120,6 +122,7 @@ function App() {
         <Route path='/my-meals/:mealId' element={<MealLogs />}/>
         <Route path='/my-meals/:mealId/log/:logId' element={<Log />}/>
         <Route path='/search' element={<SearchResults />}/>
+        <Route path='/chats' element={<Chat />}/>
       </Route>
 
      </Routes>

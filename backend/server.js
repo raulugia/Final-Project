@@ -295,13 +295,50 @@ app.get("/api/user/:username/meals", authenticateUser, async(req, res) => {
     }
 })
 
+//endpoint for displaying other user's logs linked to a specific meal
+app.get("/api/user/:username/meals/:mealId", authenticateUser, async(req, res) => {
+    try{
+        //extract username, meal id and log id
+        const { username, mealId } = req.params
+        //find out of users are friends and the other user uid
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+
+        //case users are friends
+        if(areFriends){
+            const logs = await prisma.mealLog.findMany({
+                where: {
+                    mealId: Number(mealId),
+                    userUid: otherUserUid
+                },
+                include: {
+                    meal: {
+                        include: {
+                            restaurant: true
+                        }
+                    }
+                }
+            })
+
+            res.json(logs)
+        } else {
+            return res.json( {error: "Users are not friends"})
+        }
+    }catch(err){
+        console.log(err)
+    }
+})
+
 //endpoint for displaying other user's log details
 app.get("/user/:username/meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
     try{
+        //extract username, meal id and log id
         const { username, mealId, logId } = req.params
+        //find out of users are friends and the other user uid
         const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
 
+        //case users are friends
         if(areFriends){
+            //find the log
             const log = await prisma.mealLog.findUnique({
                 where: {
                     id: Number(logId),
@@ -320,7 +357,8 @@ app.get("/user/:username/meals/:mealId/log/:logId", authenticateUser, async(req,
                     }
                 }
             })
-            console.log("LOG", log)
+            
+            //return log to the client
             res.json(log)
         }
     }catch(err){

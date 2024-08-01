@@ -26,6 +26,7 @@ const Navbar = ({ name }) => {
             <Link to="/my-meals" className=''>My Meals</Link>
             <Link to="/my-restaurants" className=''>My Restaurants</Link>
             <Link to="/friends" className=''>Friends</Link>
+            <Link to="/chats" className=''>Chats</Link>
         </div>
         <div className='flex gap-4'>
             <form className='flex max-w-64 items-center gap-1' onSubmit={handleSubmit}>

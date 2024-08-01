@@ -17,11 +17,8 @@ const Log = () => {
     console.log("location", logLocation)
     //state to store the meal log data
     const [log, setLog] = useState(logLocation.state || {})
-    //get meal id and log id
+    //get username, meal id and log id
     const { username, mealId, logId } = useParams()
-    //const params = useParams()
-    console.log("PARAMS", username, mealId, logId)
-
     //states to control when loading element and overlay should be displayed
     const [loading, setLoading] = useState(!logLocation.state)
     const [displayOverlay, setDisplayOverlay] = useState(false)
@@ -34,8 +31,8 @@ const Log = () => {
             //get user's id token for authorization in the server
             const token = await user.getIdToken()
             try{
-                console.log("getting data for: ", )
                 //send a get request and store data from the request object
+                //route will vary based on whose data the system is fetching (current user vs other user)
                 const { data } = await axiosInstance.get(username ? `/user/${username}/meals/${mealId}/log/${logId}` : `/api/my-meals/${mealId}/log/${logId}`, { 
                     headers: {
                         "Authorization": `Bearer ${token}`,

@@ -3,10 +3,10 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from 'react-router-dom';
 import Accuracy from './Accuracy';
 
-const MealLogCard = ({mealId, id, thumbnail, rating, createdAt, carbEstimate, description, picture, mealName, restaurantName}) => {
+const MealLogCard = ({mealId, id, thumbnail, rating, createdAt, carbEstimate, description, picture, mealName, restaurantName, username}) => {
   return (
     <Link 
-        to={`/my-meals/${mealId}/log/${id}`}
+        to={username ? `/user/${username}/meals/${mealId}/log/${id}` : `/my-meals/${mealId}/log/${id}`}
         state={{thumbnail, rating, createdAt, carbEstimate, description, picture, mealName, restaurantName, id}} 
         className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg'
     >

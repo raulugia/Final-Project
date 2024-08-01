@@ -9,7 +9,7 @@ const MealLogs = () => {
     const user = auth.currentUser
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(true)
-    const { mealId }= useParams()
+    const { username, mealId }= useParams()
 
     useEffect(() => {
         (
@@ -17,12 +17,12 @@ const MealLogs = () => {
                 try{
                     const token = await user.getIdToken()
 
-                    const { data } = await axiosInstance.get(`/api/meals/${mealId}`, { 
+                    const { data } = await axiosInstance.get(username ? `/api/user/${username}/meals/${mealId}` : `/api/meals/${mealId}`, { 
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     })
-                    console.log(data)
+
                     //format the date of every log
                     const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
                     //console.log(displayData)
@@ -73,7 +73,7 @@ const MealLogs = () => {
                     <SkeletonMealLogCard />
                 ) : (
                     logs.map(log => (
-                        <MealLogCard key={log.id} {...log} mealName={log.meal.name} restaurantName={log.meal.restaurant.name}/>
+                        <MealLogCard key={log.id} {...log} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} username={ username}/>
                     ))
                 )   
             }
