@@ -753,12 +753,13 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
                 friends: {
                     include: {
                         friend: {
-                            //only return id, name, surname and username - email should not be returned
+                            //only return id, name, surname, username and profilePicUrl - email should not be returned
                             select: {
                                 id: true,
                                 name: true,
                                 surname: true,
                                 username: true,
+                                profilePicUrl: true,
                             },
                         },
                     },
@@ -766,12 +767,13 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
                 friendOf: {
                     include: {
                         user: {
-                            //only return id, name and surname
+                            //only return id, name,  surname, username and profilePicUrl
                             select: {
                                 id: true,
                                 name: true,
                                 surname: true,
                                 username: true,
+                                profilePicUrl: true.valueOf,
                             },
                         },
                     },
