@@ -44,6 +44,14 @@ const initializeSocket = server => {
 
         const user = socket.request.user;
 
+        //join user to a room
+        socket.join(user.uid)
+
+        socket.on("joinRoom", roomId => {
+            socket.join(roomId)
+            console.log("room joined", roomId)
+        })
+
         socket.on("getPendingFriendRequests", async() => {
             //console.log("running-3")
             try{
