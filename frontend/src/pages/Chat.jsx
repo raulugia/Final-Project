@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react'
+import React, { useState, useEffect, useRef} from 'react'
 import { auth } from '../../utils/firebase'
 import axiosInstance from '../../utils/axiosInstance'
 import ChatFriendCard from '../components/ChatFriendCard'
@@ -13,6 +13,19 @@ const Chat = () => {
     const [newMessage, setNewMessage] = useState("")
     const [filteredFriends, setFilteredFriends] = useState(friends)
     const [currentChat, setCurrentChat] = useState()
+    //state used to display Loading component when data is being fetched
+    const [loading, setLoading] = useState(true)
+    //state needed to trigger data fetching (useEffect dependency)
+    //this state will be increase by 1 each time the last HomeMealCard intersects with the viewport (infinite scrolling) 
+    const [page, setPage] = useState(1)
+    //state to detect if there are any logs left to fetch
+    //since the system fetches 5 logs every time te infinite scrolling logic is triggered,
+    //if the length of the returned logs is < 5, there are no more logs to fetch
+    const [hasMoreLogs, setHasMoreLogs] = useState(true)
+    //ref to keep the intersection observer instance
+    const observer = useRef()
+    //ref to keep a reference to the last HomeMealCard
+    const lastLogRef = useRef()
 
     useEffect(() => {
         (
@@ -47,16 +60,39 @@ const Chat = () => {
 
     },[])
 
-    const joinRoom = (friendUid) => {
-        setCurrentChat(friendUid)
-        socket.emit("joinRoom", friendUid)
+    useEffect(() => {
+        (
+            async() => {
+                try{
+                    const token = await user.getIdToken()
+                    const { data } = await axiosInstance.get(`/api/chat/${currentChat.username}/messages`, { 
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+
+                    if(data){
+                        console.log(data)
+                        setFriends(data)
+                        setFilteredFriends(data)
+                    }
+                }catch(err){
+                    console.log(err)
+                }
+            }
+        )()
+    }, [currentChat])
+
+    const joinRoom = (friend) => {
+        setCurrentChat({username: friend.username, uid: friend.uid})
+        socket.emit("joinRoom", friend.uid)
     }
 
     const sendMessage = () => {
         if(newMessage.trim() && currentChat) {
             const message = {
                 content: newMessage,
-                receiverUid: currentChat,
+                receiverUid: currentChat.uid,
             }
 
             // const newMessageObj = {
@@ -84,7 +120,7 @@ const Chat = () => {
                 filteredFriends.length > 0 && (
                     filteredFriends.map(friend => (
                         <ChatFriendCard {...friend} key={friend.uid} 
-                            joinRoom={() => joinRoom(friend.uid)}
+                            joinRoom={() => joinRoom(friend)}
                         />
                     ))
                 )

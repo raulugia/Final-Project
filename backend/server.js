@@ -1345,32 +1345,39 @@ app.post("/api/friend-request/reject/:requestId", authenticateUser, async(req, r
 
 app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
     const { username } = req.params
+    console.log(username)
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10
-    const { otherUserUid } = req.query
     const offset = (page - 1) * limit
+    const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
 
     try{
-        const messages = await prisma.message.findMany({
-            where: {
-                OR: [
-                    {
-                        senderUid: req.user.uid,
-                        receiverUid: otherUserUid,
+        if(areFriends){
+            const messages = await prisma.message.findMany({
+                where: {
+                    OR: [
+                        {
+                            senderUid: req.user.uid,
+                            receiverUid: otherUserUid,
+                        },
+                        {
+                            receiverUid: req.user.uid,
+                            senderUid: otherUserUid,
+                        }
+                    ],
                     },
-                    {
-                        receiverUid: req.user.uid,
-                        senderUid: otherUserUid,
-                    }
-                ],
-                orderBy: {
-                    timestamp: "desc"
-                },
-            }
-        })
+                    orderBy: {
+                        timestamp: "asc"
+                    },
+                    take: limit,
+                    skip: offset,
+            })
 
-        console.log(messages)
-        
+            res.json(messages)
+        }else{
+            return res.json({ error: "Users are not friends"})
+        }
+
     }catch(err){
         console.log(err)
     }
