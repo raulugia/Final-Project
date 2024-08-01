@@ -12,7 +12,7 @@ const Chat = () => {
     const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState("")
     const [filteredFriends, setFilteredFriends] = useState(friends)
-    const [currentChat, setCurrentChat] = useState(null)
+    const [currentChat, setCurrentChat] = useState()
 
     useEffect(() => {
         (
@@ -38,6 +38,7 @@ const Chat = () => {
 
         socket.on("receiveMessage", message => {
             setMessages(prevMessages => [...prevMessages, message])
+            console.log("received message:", message)
         })
 
         return () => {
@@ -55,11 +56,20 @@ const Chat = () => {
         if(newMessage.trim() && currentChat) {
             const message = {
                 content: newMessage,
-                receiverUid: currentChat.uid,
+                receiverUid: currentChat,
             }
 
+            // const newMessageObj = {
+            //     content: newMessage,
+            //     senderUid: user.uid,
+            //     receiverUid: currentChat,
+            //     timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute:"2-digit"})
+            // }
+
             socket.emit("sendMessage", message)
+            console.log("new message emitted")
             setNewMessage("")
+            //setMessages(prevMessages => [...prevMessages, newMessageObj])
         }
     }
 
@@ -87,11 +97,11 @@ const Chat = () => {
 
             </div>
 
-            <div className='h-full w-full flex flex-col justify-end items-start px-5 py-3 overflow-scroll no-scrollbar'>
+            <div className='h-full w-full flex flex-col justify-end items-start px-5 py-3 overflow-scroll no-scrollbar gap-3'>
                 {
-                    messages.map(message => {
-                        <ChatMessageBubble {...message} sender={message.senderUid === user.uid}/>
-                    })
+                    messages.map(message => (
+                        <ChatMessageBubble {...message} sender={message.senderUid === user.uid ? "currentUser" : "otherUser"}/>
+                    ))
                 }
             </div>
 
