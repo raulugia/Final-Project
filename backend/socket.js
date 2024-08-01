@@ -52,6 +52,23 @@ const initializeSocket = server => {
             console.log("room joined", roomId)
         })
 
+        socket.on("sendMessage", async(message) => {
+            try{
+                const newMessage = await prisma.message.create({
+                    data: {
+                        senderUid: user.uid,
+                        receiverUid: message.receiverUid,
+                        content: message.content,
+                    }
+                })
+
+                io.to(message.receiverUid).emit("receiveMessage", newMessage)
+                io.to(user.uid).emit("receiverMessage", newMessage)
+            }catch(err){
+                console.log(err)
+            }
+        })
+
         socket.on("getPendingFriendRequests", async() => {
             //console.log("running-3")
             try{

@@ -10,7 +10,9 @@ const Chat = () => {
     const user = auth.currentUser
     const [friends, setFriends] = useState([])
     const [messages, setMessages] = useState([])
+    const [newMessage, setNewMessage] = useState("")
     const [filteredFriends, setFilteredFriends] = useState(friends)
+    const [currentChat, setCurrentChat] = useState(null)
 
     useEffect(() => {
         (
@@ -34,11 +36,31 @@ const Chat = () => {
             }
         )()
 
+        socket.on("receiveMessage", message => {
+            setMessages(prevMessages => [...prevMessages, message])
+        })
+
+        return () => {
+            socket.off("receiveMessage")
+        }
+
     },[])
 
     const joinRoom = (friendUid) => {
-        console.log("here")
+        setCurrentChat(friendUid)
         socket.emit("joinRoom", friendUid)
+    }
+
+    const sendMessage = () => {
+        if(newMessage.trim() && currentChat) {
+            const message = {
+                content: newMessage,
+                receiverUid: currentChat.uid,
+            }
+
+            socket.emit("sendMessage", message)
+            setNewMessage("")
+        }
     }
 
   return (
@@ -68,14 +90,17 @@ const Chat = () => {
             <div className='h-full w-full flex flex-col justify-end items-start px-5 py-3 overflow-scroll no-scrollbar'>
                 {
                     messages.map(message => {
-                        <ChatMessageBubble {...message} />
+                        <ChatMessageBubble {...message} sender={message.senderUid === user.uid}/>
                     })
                 }
             </div>
 
             <div className='w-full h-[70px] border mt-auto flex items-center gap-3 px-4'>
-                <input type="text" placeholder='Type your message...' className='bg-gray-100 w-full border rounded-xl py-2 px-3'/>
-                <button className='border'>Send</button>
+                <input type="text" placeholder='Type your message...' 
+                    className='bg-gray-100 w-full border rounded-xl py-2 px-3'
+                    onChange={e => setNewMessage(e.target.value)}
+                />
+                <button className='border' onClick={sendMessage}>Send</button>
             </div>
         </div>
     </div>
