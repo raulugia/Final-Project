@@ -1367,7 +1367,7 @@ app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
                     ],
                     },
                     orderBy: {
-                        timestamp: "asc"
+                        timestamp: "desc"
                     },
                     take: limit,
                     skip: offset,
