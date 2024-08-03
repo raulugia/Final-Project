@@ -8,12 +8,19 @@ import { VscSend } from "react-icons/vsc";
 
 
 const Chat = () => {
+    //get current user
     const user = auth.currentUser
+    //state to display user's friends
     const [friends, setFriends] = useState([])
+    //state to display messages between current user and selected friend
     const [messages, setMessages] = useState([])
+    //state to store the typed in message
     const [newMessage, setNewMessage] = useState("")
+    //state to display filtered friends
     const [filteredFriends, setFilteredFriends] = useState(friends)
+    //state to enable/disable the send button - button will be disabled if no chatroom has been selected
     const [btnDisabled, setBtnDisabled] = useState(true)
+    //state needed to join a chat room (websocket)
     const [currentChat, setCurrentChat] = useState()
     //state used to display Loading component when data is being fetched
     const [loading, setLoading] = useState(true)
@@ -28,7 +35,7 @@ const Chat = () => {
     const observer = useRef()
     //ref to keep a reference to the last HomeMealCard
     const oldestMessageRef = useRef()
-    //
+    //ref to scroll to the bottom of the chat container each time a new message appears
     const chatWindowRef = useRef()
 
     //get user's friends so user can message them
@@ -70,6 +77,7 @@ const Chat = () => {
 
     },[])
 
+    //method to change the messages timestamp format to hh:mm
     const formatTime = timestamp => {
         const date = new Date(timestamp)
         const hours = date.getHours().toString().padStart(2, "0")
@@ -128,17 +136,6 @@ const Chat = () => {
         }
     },[messages])
 
-    useEffect(() => {
-        if(observer.current){
-            console.log("OBSERVER", observer.current)
-        }
-    }, [observer.current])
-
-    useEffect(() => {
-        if(oldestMessageRef.current){
-            console.log("REF", oldestMessageRef.current)
-        }
-    }, [oldestMessageRef.current])
 
     //set up intersection observer and track the oldest message
     useEffect(() => {
