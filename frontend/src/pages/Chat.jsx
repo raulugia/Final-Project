@@ -10,18 +10,20 @@ import { VscSend } from "react-icons/vsc";
 const Chat = () => {
     //get current user
     const user = auth.currentUser
-    //state to display user's friends
+    //state to hold user's friends
     const [friends, setFriends] = useState([])
     //state to display messages between current user and selected friend
     const [messages, setMessages] = useState([])
     //state to store the typed in message
     const [newMessage, setNewMessage] = useState("")
-    //state to store the friends search input
-    const [friendsSearch, setFriendsSearch] = useState("")
     //state to display filtered friends
     const [filteredFriends, setFilteredFriends] = useState(friends)
     //state to enable/disable the send button - button will be disabled if no chatroom has been selected
     const [btnDisabled, setBtnDisabled] = useState(true)
+    //
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+    //
+    const [displayFriends, setDisplayFriends] = useState(windowWidth > 600)
     //state needed to join a chat room (websocket)
     const [currentChat, setCurrentChat] = useState()
     //state used to display Loading component when data is being fetched
@@ -159,6 +161,14 @@ const Chat = () => {
         console.log("oldest mess", oldestMessageRef)
     }, [hasMoreMessages, loading, messages])
 
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth)
+
+        window.addEventListener("resize", handleResize)
+
+        return () => window.removeEventListener("resize", handleResize)
+    },[])
+
     //method to join a room
     const joinRoom = (friend) => {
         //update state with other user details
@@ -197,8 +207,6 @@ const Chat = () => {
     const handleInputChange = (e) => {
         //store input value
         const searchValue = e.target.value
-        //update state
-        setFriendsSearch(searchValue)
 
         //if friends were found
         if(friends.length > 0) {
@@ -213,14 +221,14 @@ const Chat = () => {
     }
 
   return (
-    <div className="flex min-h-screen pb-28 justify-center">
+    <div className="flex min-h-screen pb-28 justify-center px-5 max-h-[675px]">
         {/* Left side */}
         <div className="mt-28 flex flex-col border rounded-l-lg bg-white w-1/2 max-w-[395px] shadow-md">
             <div className="w-full flex items-center justify-center border-b-2 min-h-[75px]">
                 <input type="text" onChange={handleInputChange} className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
             </div>
             <div className="w-full h-full flex flex-col overflow-scroll no-scrollbar">
-                {
+                {   displayFriends &&
                     filteredFriends.length > 0 && (
                         filteredFriends.map((friend, index) => (
                             <ChatFriendCard {...friend} key={friend.uid + index} currentChat={currentChat}
@@ -233,20 +241,23 @@ const Chat = () => {
         </div>
 
         {/* Right side  */}
-        <div className="mt-28 flex flex-col bg-white border w-full max-w-[680px] rounded-r-lg shadow-md">
+        <div className={`mt-28 flex flex-col bg-white border w-full max-w-[680px] rounded-r-lg shadow-md `}>
             <div className='border-b-2 min-h-[75px]'>
                 {
                     currentChat && (
-                        <div className='flex flex-col justify-center h-full px-5 ml-4'>
-                            <p className='text-lg font-bold text-slate-700'>{currentChat.name} {currentChat.surname}</p>
-                            <p className='text-sm'>@{currentChat.username}</p>
+                        <div className='h-full px-5 ml-4 flex items-center justify-start gap-3'>
+                            <button className='md:hidden' onClick={() => setDisplayFriends(true)}>Back</button>
+                            <div className='flex flex-col justify-center h-full'>
+                                <p className='text-lg font-bold text-slate-700'>{currentChat.name} {currentChat.surname}</p>
+                                <p className='text-sm'>@{currentChat.username}</p>
+                            </div>
                         </div>
                     )
                 }
             </div>
 
             {/* Messages display */}
-            <div ref={chatWindowRef}  className='h-full md:h-[586px] md:max-h-[586px] w-full flex flex-col items-start px-5 py-3 overflow-auto no-scrollbar relative gap-3'>
+            <div ref={chatWindowRef}  className={`h-full w-full flex flex-col items-start px-5 py-3 overflow-auto no-scrollbar relative gap-3`}>
                 {
                     messages.map((message, index) => (
                         <ChatMessageBubble 
@@ -261,7 +272,7 @@ const Chat = () => {
                     loading&&(
                         <div className='w-full h-full flex items-start justify-center absolute inset-0'>
                             <div className='flex gap-2 mt-8 bg-gray-400 py-1 px-2 rounded-md'>
-                                <svg aria-hidden="true" class="inline w-6 h-6 text-gray-200 animate-spin fill-white" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg aria-hidden="true" className="inline w-6 h-6 text-gray-200 animate-spin fill-white" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
                                     <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
                                 </svg>
@@ -280,7 +291,7 @@ const Chat = () => {
                     onKeyDown={(e) => e.key === "Enter" ? sendMessage() : ""}
                     value={newMessage}
                 />
-                <button className='py-5' disabled={btnDisabled} onClick={sendMessage}><VscSend size={35} className='px-1 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg'/></button>
+                <button className='py-5' disabled={btnDisabled} onClick={sendMessage}><VscSend size={35} className={`px-1 py-1 bg-blue-600 text-white rounded-lg ${btnDisabled ? "" : "hover:bg-blue-500 hover:cursor-pointer"}`}/></button>
             </div>
         </div>
     </div>
