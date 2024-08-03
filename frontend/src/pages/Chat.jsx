@@ -23,7 +23,7 @@ const Chat = () => {
     //
     const [windowWidth, setWindowWidth] = useState(window.innerWidth)
     //
-    const [displayFriends, setDisplayFriends] = useState(windowWidth > 600)
+    const [displayMessages, setDisplayMessages] = useState(windowWidth > 600)
     //state needed to join a chat room (websocket)
     const [currentChat, setCurrentChat] = useState()
     //state used to display Loading component when data is being fetched
@@ -182,6 +182,9 @@ const Chat = () => {
         //enable send button so messages can be sent
         setBtnDisabled(false)
 
+        if(windowWidth < 600){
+            setDisplayMessages(true)
+        }
         //emit joinRoom with other user uid
         socket.emit("joinRoom", friend.uid)
     }
@@ -219,16 +222,17 @@ const Chat = () => {
             setFilteredFriends(filtered)
         }
     }
+    
 
   return (
     <div className="flex min-h-screen pb-28 justify-center px-5 max-h-[675px]">
         {/* Left side */}
-        <div className="mt-28 flex flex-col border rounded-l-lg bg-white w-1/2 max-w-[395px] shadow-md">
+        <div className={`mt-28 flex flex-col border rounded-l-lg bg-white shadow-md w-full ${windowWidth < 600 ? "rounded-lg" : "max-w-[395px]"} ${displayMessages ? "hidden" : ""}`}>
             <div className="w-full flex items-center justify-center border-b-2 min-h-[75px]">
                 <input type="text" onChange={handleInputChange} className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
             </div>
             <div className="w-full h-full flex flex-col overflow-scroll no-scrollbar">
-                {   displayFriends &&
+                {   
                     filteredFriends.length > 0 && (
                         filteredFriends.map((friend, index) => (
                             <ChatFriendCard {...friend} key={friend.uid + index} currentChat={currentChat}
@@ -241,12 +245,12 @@ const Chat = () => {
         </div>
 
         {/* Right side  */}
-        <div className={`mt-28 flex flex-col bg-white border w-full max-w-[680px] rounded-r-lg shadow-md `}>
+        <div className={`mt-28 flex flex-col bg-white border w-full max-w-[680px] rounded-r-lg shadow-md ${windowWidth < 600 && !displayMessages ? "hidden" : ""}`}>
             <div className='border-b-2 min-h-[75px]'>
                 {
                     currentChat && (
                         <div className='h-full px-5 ml-4 flex items-center justify-start gap-3'>
-                            <button className='md:hidden' onClick={() => setDisplayFriends(true)}>Back</button>
+                            <button className='md:hidden' onClick={() => setDisplayMessages(false)}>Back</button>
                             <div className='flex flex-col justify-center h-full'>
                                 <p className='text-lg font-bold text-slate-700'>{currentChat.name} {currentChat.surname}</p>
                                 <p className='text-sm'>@{currentChat.username}</p>
