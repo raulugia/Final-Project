@@ -122,6 +122,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             carbEstimate: log.carbEstimate,
             createdAt: log.createdAt,
             rating: log.rating,
+            description: log.description,
         }))
 
         res.json(response)
