@@ -4,7 +4,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import ChatFriendCard from '../components/ChatFriendCard'
 import ChatMessageBubble from '../components/ChatMessageBubble'
 import socket from "../../utils/socket"
-//import { disconnect } from 'process'
+import { VscSend } from "react-icons/vsc";
 
 
 const Chat = () => {
@@ -13,6 +13,7 @@ const Chat = () => {
     const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState("")
     const [filteredFriends, setFilteredFriends] = useState(friends)
+    const [btnDisabled, setBtnDisabled] = useState(true)
     const [currentChat, setCurrentChat] = useState()
     //state used to display Loading component when data is being fetched
     const [loading, setLoading] = useState(true)
@@ -69,6 +70,14 @@ const Chat = () => {
 
     },[])
 
+    const formatTime = timestamp => {
+        const date = new Date(timestamp)
+        const hours = date.getHours().toString().padStart(2, "0")
+        const minutes = date.getMinutes().toString().padStart(2, "0")
+
+        return `${hours}:${minutes}`
+    }
+
     //fetch messages between current user and selected friend (currentChat)
     useEffect(() => {
         (
@@ -92,8 +101,9 @@ const Chat = () => {
                     //case the server responds
                     if(data){
                         console.log(data.reverse())
+                        const displayMessages = data.map(message => ({...message, timestamp: formatTime(message.timestamp)}))
                         //update state with newly fetched messages
-                        setMessages(prevMessages => [...data, ...prevMessages])
+                        setMessages(prevMessages => [...displayMessages, ...prevMessages])
                         setLoading(false)
                         //case the array of messages has a length less than 20
                         if(data.length < 20){
@@ -153,13 +163,15 @@ const Chat = () => {
     //method to join a room
     const joinRoom = (friend) => {
         //update state with other user details
-        setCurrentChat({username: friend.username, uid: friend.uid})
+        setCurrentChat({...friend})
         //update state to get rid of old messages
         setMessages([])
         //update state so new messages are fetched
         setHasMoreMessages(true)
         //update page state to reset infinite scrolling
         setPage(1)
+        //enable send button so messages can be sent
+        setBtnDisabled(false)
 
         //emit joinRoom with other user uid
         socket.emit("joinRoom", friend.uid)
@@ -184,15 +196,16 @@ const Chat = () => {
 
   return (
     <div className="flex min-h-screen pb-28 justify-center">
-        <div className="mt-28 flex flex-col border rounded-lg bg-white w-1/2 max-w-[395px]">
-            <div className="w-full flex items-center justify-center border-2 min-h-[75px]">
+        {/* Left side */}
+        <div className="mt-28 flex flex-col border rounded-l-lg bg-white w-1/2 max-w-[395px] shadow-md">
+            <div className="w-full flex items-center justify-center border-b-2 min-h-[75px]">
                 <input type="text" className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
             </div>
             <div className="w-full h-full flex flex-col overflow-scroll no-scrollbar">
                 {
                     filteredFriends.length > 0 && (
                         filteredFriends.map((friend, index) => (
-                            <ChatFriendCard {...friend} key={friend.uid + index} 
+                            <ChatFriendCard {...friend} key={friend.uid + index} currentChat={currentChat}
                                 joinRoom={() => joinRoom(friend)}
                             />
                         ))
@@ -201,11 +214,20 @@ const Chat = () => {
             </div>
         </div>
 
-        <div className="mt-28 flex flex-col bg-white border w-full max-w-[680px]">
-            <div className='border-2 min-h-[75px]'>
-
+        {/* Right side  */}
+        <div className="mt-28 flex flex-col bg-white border w-full max-w-[680px] rounded-r-lg shadow-md">
+            <div className='border-b-2 min-h-[75px]'>
+                {
+                    currentChat && (
+                        <div className='flex flex-col justify-center h-full px-5 ml-4'>
+                            <p className='text-lg font-bold text-slate-700'>{currentChat.name} {currentChat.surname}</p>
+                            <p className='text-sm'>@{currentChat.username}</p>
+                        </div>
+                    )
+                }
             </div>
 
+            {/* Messages display */}
             <div ref={chatWindowRef}  className='h-full md:h-[586px] md:max-h-[586px] w-full flex flex-col items-start px-5 py-3 overflow-auto no-scrollbar relative gap-3'>
                 {
                     messages.map((message, index) => (
@@ -232,14 +254,15 @@ const Chat = () => {
                 }
             </div>
 
-            <div className='w-full h-[70px] border mt-auto flex items-center gap-3 px-4'>
+            {/* Type & send */}
+            <div className='w-full h-[70px] mt-auto flex items-center gap-2 px-4'>
                 <input type="text" placeholder='Type your message...' 
                     className='bg-gray-100 w-full border rounded-xl py-2 px-3'
                     onChange={e => setNewMessage(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" ? sendMessage() : ""}
                     value={newMessage}
                 />
-                <button className='border' onClick={sendMessage}>Send</button>
+                <button className='py-5' disabled={btnDisabled} onClick={sendMessage}><VscSend size={35} className='px-1 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg'/></button>
             </div>
         </div>
     </div>
