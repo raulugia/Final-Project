@@ -16,6 +16,8 @@ const Chat = () => {
     const [messages, setMessages] = useState([])
     //state to store the typed in message
     const [newMessage, setNewMessage] = useState("")
+    //state to store the friends search input
+    const [friendsSearch, setFriendsSearch] = useState("")
     //state to display filtered friends
     const [filteredFriends, setFilteredFriends] = useState(friends)
     //state to enable/disable the send button - button will be disabled if no chatroom has been selected
@@ -191,12 +193,31 @@ const Chat = () => {
         }
     }
 
+    //method triggered by typing in the search bar - filter friends
+    const handleInputChange = (e) => {
+        //store input value
+        const searchValue = e.target.value
+        //update state
+        setFriendsSearch(searchValue)
+
+        //if friends were found
+        if(friends.length > 0) {
+            //get the friends that match the search input
+            const filtered = friends.filter(friend => {
+                return `${friend.name} ${friend.surname} ${friend.username}`.toLowerCase().includes(searchValue.toLowerCase())
+            })
+
+            //update state so the filtered friends are displayed
+            setFilteredFriends(filtered)
+        }
+    }
+
   return (
     <div className="flex min-h-screen pb-28 justify-center">
         {/* Left side */}
         <div className="mt-28 flex flex-col border rounded-l-lg bg-white w-1/2 max-w-[395px] shadow-md">
             <div className="w-full flex items-center justify-center border-b-2 min-h-[75px]">
-                <input type="text" className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
+                <input type="text" onChange={handleInputChange} className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
             </div>
             <div className="w-full h-full flex flex-col overflow-scroll no-scrollbar">
                 {
