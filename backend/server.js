@@ -715,23 +715,29 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
 
 app.get("/api/user-data", authenticateUser, async (req, res) => {
     try {
+        // const user = await prisma.user.findUnique({
+        //     where: { email: req.user.email },
+        //     include: {
+        //        //include all the meal log records logged by the user 
+        //        meals: {
+        //         include: {
+        //             meal: {
+        //                 include: {
+        //                     restaurant: true
+        //                 }
+        //             }
+        //         }
+        //        },
+        //        friends: true,
+        //        friendOf: true,
+        //        chatsSent: true,
+        //        chatsReceived: true
+        //     }
+        // })
+
         const user = await prisma.user.findUnique({
-            where: { email: req.user.email },
-            include: {
-               //include all the meal log records logged by the user 
-               meals: {
-                include: {
-                    meal: {
-                        include: {
-                            restaurant: true
-                        }
-                    }
-                }
-               },
-               friends: true,
-               friendOf: true,
-               chatsSent: true,
-               chatsReceived: true
+            where: {
+                uid: req.user.uid
             }
         })
 

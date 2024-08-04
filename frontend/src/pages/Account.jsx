@@ -1,6 +1,58 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { auth } from '../../utils/firebase'
+import axiosInstance from '../../utils/axiosInstance'
 
-const Account = ({name, surname, username, email}) => {
+const Account = () => {
+    const user = auth.currentUser
+    const [userData, setUserData] = useState({})
+    const [loading, setLoading] = useState(true)
+
+    useState(() => {
+        (
+            async() => {
+                try{
+                    const token = await user.getIdToken()
+
+                    const { data } = await axiosInstance.get("/api/user-data", {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+
+                    if(data){
+                        console.log(data)
+                        setUserData(data)
+                        setLoading(false)
+                    }
+
+                }catch(err){
+                    console.log(err)
+                }
+            }
+        )()
+    },[])
+
+    const handleSubmit = async(e) => {
+        setLoading(true)
+        try{
+            const token = await user.getIdToken()
+            const { data } = await axiosInstance.put("/api/update-user", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+
+            if(response){
+                setUserData(data)
+                setLoading(false)
+            }
+
+        }catch(err){
+            console.log(err)
+            setLoading(false)
+        }
+    }
+
   return (
     <div className="min-h-screen flex justify-center items-start">
         <div className="pt-24 md:pt-28 w-[800px] mx-5">
@@ -14,7 +66,7 @@ const Account = ({name, surname, username, email}) => {
                         <div className="bg-slate-700 h-20 w-20 rounded-full"></div>
                     </div>
                     <div>
-                        <button className="px-2 border text-sm rounded-lg py-1 font-semibold">Upload new picture</button>
+                        <button className="px-2 border bg-gray-100 text-sm rounded-lg py-1 font-semibold">Upload new picture</button>
                     </div>
                 </div>
 
@@ -22,16 +74,16 @@ const Account = ({name, surname, username, email}) => {
                     <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Name</p>
-                            <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
+                            <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2' value={userData.name}/>
                         </div>
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Surname</p>
-                            <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
+                            <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2' value={userData.surname}/>
                         </div>
                     </div>
                     <div className='md:w-1/2 w-full pr-2'>
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Username</p>
-                        <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
+                        <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2' value={userData.username}/>
                     </div>
 
                 </div>
@@ -42,7 +94,7 @@ const Account = ({name, surname, username, email}) => {
                     <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
                     <div className='w-full'>
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Email</p>
-                        <input type="email" className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm'/>
+                        <input type="email" className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm' value={userData.email}/>
                     </div>
                 </div>
 
@@ -65,8 +117,14 @@ const Account = ({name, surname, username, email}) => {
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
                 <div className="w-full flex gap-3 md:gap-5 mb-6 justify-center md:justify-end text-sm md:text-md">
-                    <button className="border border-blue-700 rounded-lg px-2 py-1 text-white font-semibold bg-blue-600 hover:bg-blue-700 hover:shadow-sm">Save Changes</button>
-                    <button className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
+                    <button 
+                        disabled={loading}
+                        onClick={handleSubmit} 
+                        className="border border-blue-700 rounded-lg px-2 py-1 text-white font-semibold bg-blue-600 hover:bg-blue-700 hover:shadow-sm"
+                    >
+                            Save Changes
+                    </button>
+                    <button disabled={loading} className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
                 </div>
                 </form>
         </div>
