@@ -501,6 +501,15 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+//endpoint for updating user's data
+app.put("/api/update-details", authenticateUser, upload.single("picture"), async(req, res) => {
+    try{
+        
+    }catch(err){
+        console.log(err)
+    }
+})
+
 //endpoint for logging a meal
 app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req, res) => {
     //extract the meal information from the request body

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { auth } from '../../utils/firebase'
+import { updateEmail, updatePassword } from "firebase/auth";
 import axiosInstance from '../../utils/axiosInstance'
 
 const Account = () => {
@@ -33,19 +34,30 @@ const Account = () => {
     },[])
 
     const handleSubmit = async(e) => {
+        e.preventDefault()
         setLoading(true)
         try{
             const token = await user.getIdToken()
+            if(userData.email && userData.email !== user.email){
+                await updateEmail(user, userData.email)
+            }
+            
+            if(userData.password){
+
+                updatedPassword = await updatePassword(user, userData.password)
+            }
+
             const { data } = await axiosInstance.put("/api/update-user", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
 
-            if(response){
+            if(data){
                 setUserData(data)
                 setLoading(false)
             }
+            
 
         }catch(err){
             console.log(err)
