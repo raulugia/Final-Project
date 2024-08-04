@@ -6,7 +6,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const multer = require("multer");
-const { imageQueue, imageUpdateQueue } = require("./queue");
+const { imageQueue, imageUpdateQueue, profilePictureQueue } = require("./queue");
 const authenticateUser = require("./authMiddleware");
 const { types } = require("pg");
 const http = require("http");
@@ -504,9 +504,32 @@ app.post("/api/register", async (req, res) => {
 //endpoint for updating user's data
 app.put("/api/update-details", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
-        const updatedUser = await prisma.user.
+        const { name, surname, username, email } = req.body;
+        const { file } = req.file
+
+        if(file) {
+            await profilePictureQueue.add({
+                filePath: picture.path,
+                userUid: req.body.uid,
+            });
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: {
+                uid: req.user.uid
+            },
+            data: {
+                name,
+                surname,
+                email,
+                username
+            }
+        })
+
+        res.json(updatedUser);
     }catch(err){
         console.log(err)
+        res.status(500).json({ error: "Failed to update user details"})
     }
 })
 

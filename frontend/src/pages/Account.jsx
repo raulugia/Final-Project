@@ -6,6 +6,7 @@ import axiosInstance from '../../utils/axiosInstance'
 const Account = () => {
     const user = auth.currentUser
     const [userData, setUserData] = useState({})
+    const [dataToUpdate, setDataToUpdate] = useState({})
     const [loading, setLoading] = useState(true)
 
     useState(() => {
@@ -38,13 +39,22 @@ const Account = () => {
         setLoading(true)
         try{
             const token = await user.getIdToken()
-            if(userData.email && userData.email !== user.email){
-                await updateEmail(user, userData.email)
+            if(dataToUpdate.email && dataToUpdate.email !== userData.email){
+                await updateEmail(user, dataToUpdate.email)
             }
             
-            if(userData.password){
+            if(dataToUpdate.password){
 
-                updatedPassword = await updatePassword(user, userData.password)
+                await updatePassword(user, dataToUpdate.password)
+            }
+
+            const formData = new FormData()
+            for(const key in dataToUpdate){
+                formData.append(key, dataToUpdate[key])
+            }
+
+            if(file) {
+                formData.append("picture", file)
             }
 
             const { data } = await axiosInstance.put("/api/update-user", {
@@ -63,6 +73,10 @@ const Account = () => {
             console.log(err)
             setLoading(false)
         }
+    }
+
+    const handlePassword = e => {
+        setDataToUpdate({...dataToUpdate, password: e.target.value})
     }
 
   return (
@@ -86,16 +100,31 @@ const Account = () => {
                     <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Name</p>
-                            <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2' value={userData.name}/>
+                            <input 
+                                type="text" 
+                                className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                value={dataToUpdate.name ? dataToUpdate.name : userData.name}
+                                onChange={(e) => setDataToUpdate({...dataToUpdate, name: e.target.value})}
+                            />
                         </div>
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Surname</p>
-                            <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2' value={userData.surname}/>
+                            <input 
+                                type="text" 
+                                className='border py-1 rounded-lg w-full shadow-sm px-2' 
+                                value={dataToUpdate.surname ? dataToUpdate.surname :userData.surname}
+                                onChange={(e) => setDataToUpdate({...dataToUpdate, surname: e.target.value})}
+                            />
                         </div>
                     </div>
                     <div className='md:w-1/2 w-full pr-2'>
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Username</p>
-                        <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2' value={userData.username}/>
+                        <input 
+                            type="text" 
+                            className='border py-1 rounded-lg w-full shadow-sm px-2' 
+                            value={dataToUpdate.username ? dataToUpdate.username : userData.username}
+                            onChange={(e) => setDataToUpdate({...dataToUpdate, username: e.target.value})}
+                        />
                     </div>
 
                 </div>
@@ -106,22 +135,33 @@ const Account = () => {
                     <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
                     <div className='w-full'>
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Email</p>
-                        <input type="email" className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm' value={userData.email}/>
+                        <input 
+                            type="email" 
+                            className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm' 
+                            value={dataToUpdate.email ? dataToUpdate.email : userData.email}
+                            onChange={(e) => setDataToUpdate({...dataToUpdate, email: e.target.value})}
+                        />
                     </div>
                 </div>
 
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
                 <div className='mb-6'>
-                    <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
+                    <h3 className='text-md font-semibold text-slate-700 mb-3'>Password</h3>
                     <div className='flex w-full gap-2 md:gap-5'>
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Current Password</p>
-                            <input type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
+                            <input 
+                                type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'
+                            />
                         </div>
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">New Password</p>
-                            <input type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
+                            <input 
+                                type="password" 
+                                className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                onChange={handlePassword}
+                            />
                         </div>
                     </div>
                 </div>

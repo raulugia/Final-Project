@@ -7,8 +7,10 @@ const { redisConfig } = require("./config")
 const imageQueue = new Queue("image-processing", { redis: redisConfig })
 //create a new job to update images
 const imageUpdateQueue = new Queue("image-update", { redis: redisConfig })
+//
+const profilePictureQueue = new Queue("profile-picture-update", { redis: redisConfig })
 
 //export the imageQueue instance
-module.exports = { imageQueue, imageUpdateQueue }
+module.exports = { imageQueue, imageUpdateQueue, profilePictureQueue }
 
 
