@@ -14,6 +14,7 @@ import MealLogs from './pages/MealLogs'
 import Log from './pages/Log'
 import SearchResults from './pages/SearchResults'
 import Chat from './pages/Chat'
+import Account from './pages/Account'
 import { auth } from '../utils/firebase'
 import {Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
@@ -123,6 +124,7 @@ function App() {
         <Route path='/my-meals/:mealId/log/:logId' element={<Log />}/>
         <Route path='/search' element={<SearchResults />}/>
         <Route path='/chats' element={<Chat />}/>
+        <Route path='/account' element={<Account />}/>
       </Route>
 
      </Routes>
