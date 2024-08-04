@@ -504,7 +504,7 @@ app.post("/api/register", async (req, res) => {
 //endpoint for updating user's data
 app.put("/api/update-details", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
-        
+        const updatedUser = await prisma.user.
     }catch(err){
         console.log(err)
     }

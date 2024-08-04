@@ -21,6 +21,7 @@ model User {
   name String
   surname String
   profilePicUrl String?
+  profileThumbnailUrl String?
   meals MealLog[]
   friends Friendship[] @relation("UserFriends")
   friendOf Friendship[] @relation("FriendFriends")
