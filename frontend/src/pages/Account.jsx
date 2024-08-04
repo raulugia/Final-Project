@@ -3,13 +3,13 @@ import React from 'react'
 const Account = ({name, surname, username, email}) => {
   return (
     <div className="min-h-screen flex justify-center items-start">
-        <div className="pt-28 w-[800px]">
+        <div className="pt-24 md:pt-28 w-[800px] mx-5">
             <form className="bg-white px-8 border rounded-xl shadow-md">
                 <h1 className="text-lg font-semibold text-slate-700 mt-6">Manage Your Account</h1>
                 <p className='text-sm text-slate-600 mb-6'>Click on the Save button to save your changes.</p>
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
-                <div className="flex justify-start gap-16 items-center mb-6">
+                <div className="flex justify-between md:justify-start md:gap-16 items-center mb-6">
                     <div>
                         <div className="bg-slate-700 h-20 w-20 rounded-full"></div>
                     </div>
@@ -19,7 +19,7 @@ const Account = ({name, surname, username, email}) => {
                 </div>
 
                 <div className='w-full flex flex-col gap-3 mb-6'>
-                    <div className="flex gap-5 w-full">
+                    <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Name</p>
                             <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
@@ -29,7 +29,7 @@ const Account = ({name, surname, username, email}) => {
                             <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
                         </div>
                     </div>
-                    <div className='w-1/2 pr-2'>
+                    <div className='md:w-1/2 w-full pr-2'>
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Username</p>
                         <input type="text" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
                     </div>
@@ -40,9 +40,9 @@ const Account = ({name, surname, username, email}) => {
                 
                 <div className='mb-6'>
                     <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
-                    <div>
+                    <div className='w-full'>
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Email</p>
-                        <input type="email" className='border py-1 rounded-lg w-1/2 shadow-sm px-2'/>
+                        <input type="email" className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm'/>
                     </div>
                 </div>
 
@@ -50,7 +50,7 @@ const Account = ({name, surname, username, email}) => {
 
                 <div className='mb-6'>
                     <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
-                    <div className='flex w-full gap-5'>
+                    <div className='flex w-full gap-2 md:gap-5'>
                         <div className='w-full'>
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Current Password</p>
                             <input type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'/>
@@ -64,7 +64,7 @@ const Account = ({name, surname, username, email}) => {
 
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
-                <div className="w-full flex gap-5 mb-6 justify-end">
+                <div className="w-full flex gap-3 md:gap-5 mb-6 justify-center md:justify-end text-sm md:text-md">
                     <button className="border border-blue-700 rounded-lg px-2 py-1 text-white font-semibold bg-blue-600 hover:bg-blue-700 hover:shadow-sm">Save Changes</button>
                     <button className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
                 </div>
