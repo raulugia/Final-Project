@@ -8,6 +8,7 @@ const Account = () => {
     const [userData, setUserData] = useState({})
     const [dataToUpdate, setDataToUpdate] = useState({})
     const [loading, setLoading] = useState(true)
+    const [errors, setErrors] = useState([])
 
     useState(() => {
         (
@@ -57,7 +58,7 @@ const Account = () => {
                 formData.append("picture", file)
             }
 
-            const { data } = await axiosInstance.put("/api/update-user", {
+            const { data } = await axiosInstance.put("/api/update-user", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -77,6 +78,25 @@ const Account = () => {
 
     const handlePassword = e => {
         setDataToUpdate({...dataToUpdate, password: e.target.value})
+    }
+
+    const checkUniqueness = async(fieldType, fieldValue) => {
+        try{
+            const token = await user.getIdToken()
+
+            const { data } = await axiosInstance.post("/api/update-user/is-unique", {[fieldType]: fieldValue}, {
+                Authorization: `Bearer ${token}`,
+            })
+            console.log(data)
+            if(data.error && fieldType === "email"){
+                setErrors([...errors, {email: "Email is already in use"}])
+            } else if(data.error && fieldType === "username"){
+                setErrors([...errors, {username: "Username is already in use"}])
+            }
+
+        }catch(err){
+            console.log(err)
+        }
     }
 
   return (
@@ -124,6 +144,7 @@ const Account = () => {
                             className='border py-1 rounded-lg w-full shadow-sm px-2' 
                             value={dataToUpdate.username ? dataToUpdate.username : userData.username}
                             onChange={(e) => setDataToUpdate({...dataToUpdate, username: e.target.value})}
+                            onBlur={(e) => checkUniqueness("username", e.target.value)}
                         />
                     </div>
 
@@ -140,6 +161,7 @@ const Account = () => {
                             className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm' 
                             value={dataToUpdate.email ? dataToUpdate.email : userData.email}
                             onChange={(e) => setDataToUpdate({...dataToUpdate, email: e.target.value})}
+                            onBlur={(e) => checkUniqueness("email", e.target.value)}
                         />
                     </div>
                 </div>

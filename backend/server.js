@@ -501,8 +501,57 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+app.post("/api/update-user/is-unique", async(req, res) => {
+    const { email, username} = req.body
+
+    try{
+        if(email){
+            const uniqueEmail = await prisma.user.findFirst({
+                where: {
+                    email: email,
+                    NOT: {
+                        uid: req.user.uid
+                    }
+                },
+                select: {
+                    uid: true
+                }
+            })
+
+            if(!uniqueEmail){
+                return res.status(200).json({ message: "Email is unique"})
+            }
+
+            return res.status(400).json({error: "Email is not unique"})
+        }
+
+        if(username){
+            const uniqueUsername = await prisma.user.findFirst({
+                where: {
+                    username: username,
+                    NOT: {
+                        uid: req.user.uid
+                    }
+                },
+                select: {
+                    uid: true
+                }
+            })
+
+            if(!uniqueUsername){
+                return res.status(200).json({ message: "Username is unique"})
+            }
+
+            return res.status(400).json({error: "Username is not unique"})
+        }
+    }catch(err){
+        console.error(err)
+        return res.status(500).json({error: "Internal server error"})
+    }
+})
+
 //endpoint for updating user's data
-app.put("/api/update-details", authenticateUser, upload.single("picture"), async(req, res) => {
+app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email } = req.body;
         const { file } = req.file
@@ -512,6 +561,26 @@ app.put("/api/update-details", authenticateUser, upload.single("picture"), async
                 filePath: picture.path,
                 userUid: req.body.uid,
             });
+        }
+
+        const isUnique = await prisma.user.findMany({
+            where: {
+                OR: [
+                    {
+                        username: username
+                    },
+                    {
+                        email: email
+                    }
+                ]
+            },
+            select: {
+                uid: true
+            }
+        })
+
+        if(isUnique) {
+            return res.status(404).json({ error: "Meal log not found" })
         }
 
         const updatedUser = await prisma.user.update({
