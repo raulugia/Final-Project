@@ -476,7 +476,7 @@ app.get("/api/user/:username/friends", authenticateUser, async(req, res) => {
 })
 
 //endpoint for user registration
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", authenticateUser, async (req, res) => {
   //extract email, name and surname from the request body
   const { email, name, surname, username, uid, profilePicUrl } = req.body;
 
@@ -501,7 +501,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-app.post("/api/update-user/is-unique", async(req, res) => {
+app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
     const { email, username} = req.body
 
     try{
@@ -519,10 +519,10 @@ app.post("/api/update-user/is-unique", async(req, res) => {
             })
 
             if(!uniqueEmail){
-                return res.status(200).json({ message: "Email is unique"})
+                return res.status(200).json({ email: "Email is available"})
             }
 
-            return res.status(400).json({error: "Email is not unique"})
+            return res.status(400).json({emailError: "Email is not available"})
         }
 
         if(username){
@@ -537,12 +537,13 @@ app.post("/api/update-user/is-unique", async(req, res) => {
                     uid: true
                 }
             })
-
+            console.log("uniquesuername: ", uniqueUsername)
             if(!uniqueUsername){
-                return res.status(200).json({ message: "Username is unique"})
+                console.log("username unique")
+                return res.status(200).json({ username: "Username is available"})
             }
 
-            return res.status(400).json({error: "Username is not unique"})
+            return res.status(400).json({ usernameError: "Username is not available"})
         }
     }catch(err){
         console.error(err)

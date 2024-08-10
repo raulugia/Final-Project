@@ -5,10 +5,24 @@ import axiosInstance from '../../utils/axiosInstance'
 
 const Account = () => {
     const user = auth.currentUser
-    const [userData, setUserData] = useState({})
-    const [dataToUpdate, setDataToUpdate] = useState({})
+    const [userData, setUserData] = useState({
+        name: "",
+        surname: "",
+        username: "",
+        email: "",
+    })
+    const [dataToUpdate, setDataToUpdate] = useState({
+        name: "",
+        surname: "",
+        username: "",
+        email: "",
+    })
     const [loading, setLoading] = useState(true)
     const [errors, setErrors] = useState([])
+    const [usernameErrors, setUsernameErrors] = useState([])
+    const [emailErrors, setEmailErrors] = useState([])
+    const [emailAvailable, setEmailAvailable] = useState()
+    const [usernameAvailable, setUsernameAvailable] = useState()
 
     useState(() => {
         (
@@ -25,6 +39,7 @@ const Account = () => {
                     if(data){
                         console.log(data)
                         setUserData(data)
+                        setDataToUpdate(data)
                         setLoading(false)
                     }
 
@@ -51,7 +66,9 @@ const Account = () => {
 
             const formData = new FormData()
             for(const key in dataToUpdate){
-                formData.append(key, dataToUpdate[key])
+                if(userData[key] !== dataToUpdate[key]){
+                    formData.append(key, dataToUpdate[key])
+                }
             }
 
             if(file) {
@@ -76,28 +93,68 @@ const Account = () => {
         }
     }
 
+    const handleInputChange = (e, inputType) => {
+        setDataToUpdate({...dataToUpdate, [inputType]: e.target.value})
+
+        if(inputType === "email") setEmailErrors([])
+        if(inputType === "username") setUsernameErrors([])
+    }
+
+
     const handlePassword = e => {
         setDataToUpdate({...dataToUpdate, password: e.target.value})
     }
 
     const checkUniqueness = async(fieldType, fieldValue) => {
-        try{
-            const token = await user.getIdToken()
+        //case email/username inputs have been changed - avoid calls to server if data has not been changed
+        if(userData && fieldValue !== userData[fieldType]){
+            try{
+                const token = await user.getIdToken()
 
-            const { data } = await axiosInstance.post("/api/update-user/is-unique", {[fieldType]: fieldValue}, {
-                Authorization: `Bearer ${token}`,
-            })
-            console.log(data)
-            if(data.error && fieldType === "email"){
-                setErrors([...errors, {email: "Email is already in use"}])
-            } else if(data.error && fieldType === "username"){
-                setErrors([...errors, {username: "Username is already in use"}])
+                const response = await axiosInstance.post("/api/update-user/is-unique", {[fieldType]: fieldValue}, {
+                    headers:{
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const { data } = response
+                // if(data.error && fieldType === "email"){
+                //     setErrors([...errors, {email: "Email is already in use"}])
+                // } else if(data.error && fieldType === "username"){
+                //     setErrors([...errors, {username: "Username is already in use"}])
+                // }
+                const key = Object.keys(data)[0]
+                console.log("key", key)
+                console.log(data)
+                if(response.status === 200){
+                    if(key === "username") setUsernameAvailable(true)
+                    if(key === "email") setEmailAvailable(true)
+                }
+    
+            }catch(err){
+                if(err.response && err.response.status === 400){
+                    const { data } = err.response
+                    console.log("data: ", data)
+                    const key = Object.keys(data)[0]
+                    console.log("key ", key)
+                    if (key === "emailError") {
+                        setEmailErrors([...emailErrors, {error: data[key]}])
+                        setEmailAvailable(false)
+                    }
+                    if (key === "usernameError"){
+                        setUsernameErrors([...usernameErrors, {error: data[key]}])
+                        setUsernameAvailable(false)
+                    } 
+                }
+                console.log(err)
             }
-
-        }catch(err){
-            console.log(err)
         }
     }
+
+    useEffect(() => {
+        if(errors){
+            console.log(errors[0])
+        }
+    }, [errors])
 
   return (
     <div className="min-h-screen flex justify-center items-start">
@@ -124,7 +181,7 @@ const Account = () => {
                                 type="text" 
                                 className='border py-1 rounded-lg w-full shadow-sm px-2'
                                 value={dataToUpdate.name ? dataToUpdate.name : userData.name}
-                                onChange={(e) => setDataToUpdate({...dataToUpdate, name: e.target.value})}
+                                onChange={(e) => handleInputChange(e, "name")}
                             />
                         </div>
                         <div className='w-full'>
@@ -133,7 +190,7 @@ const Account = () => {
                                 type="text" 
                                 className='border py-1 rounded-lg w-full shadow-sm px-2' 
                                 value={dataToUpdate.surname ? dataToUpdate.surname :userData.surname}
-                                onChange={(e) => setDataToUpdate({...dataToUpdate, surname: e.target.value})}
+                                onChange={(e) => handleInputChange(e, "surname")}
                             />
                         </div>
                     </div>
@@ -141,11 +198,30 @@ const Account = () => {
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Username</p>
                         <input 
                             type="text" 
-                            className='border py-1 rounded-lg w-full shadow-sm px-2' 
-                            value={dataToUpdate.username ? dataToUpdate.username : userData.username}
-                            onChange={(e) => setDataToUpdate({...dataToUpdate, username: e.target.value})}
+                            className={`border py-1 rounded-lg w-full shadow-sm px-2 
+                                ${usernameErrors.length > 0 ? "border-red-500 text-red-900 placeholder-red-700" : ""}
+                                ${usernameErrors.length === 0 && usernameAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
+                            }
+                            value={dataToUpdate.username}
+                            onChange={(e) => handleInputChange(e, "username")}
                             onBlur={(e) => checkUniqueness("username", e.target.value)}
                         />
+                        {
+                            usernameErrors. length > 0 && (
+                                usernameErrors.map((error, index) => (
+                                    <div className="text-sm text-red-600 font-medium mt-1" key={error.error+index}>
+                                        <p>{error.error}</p>
+                                    </div>
+                                ))
+                            )
+                        }
+                        {
+                            usernameAvailable && (
+                                <div className="text-sm  font-medium mt-1">
+                                    <p className="text-green-600">Username is available</p>
+                                </div>
+                            )
+                        }
                     </div>
 
                 </div>
@@ -158,12 +234,34 @@ const Account = () => {
                         <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Email</p>
                         <input 
                             type="email" 
-                            className='border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm' 
+                            className={`border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm 
+                                ${emailErrors.length > 0 ? "border-red-500 text-red-900 bg-red-50 placeholder-red-700" : ""}
+                                ${emailErrors.length === 0 && emailAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
+                            } 
                             value={dataToUpdate.email ? dataToUpdate.email : userData.email}
-                            onChange={(e) => setDataToUpdate({...dataToUpdate, email: e.target.value})}
+                            onChange={(e) => handleInputChange(e, "email")}
                             onBlur={(e) => checkUniqueness("email", e.target.value)}
                         />
+                        {
+                            emailErrors. length > 0 && (
+                                emailErrors.map((error, index) => (
+                                    <div className="text-sm text-red-600 font-medium mt-1" key={error.error+index}>
+                                        <p>{error.error}</p>
+                                    </div>
+                                ))
+                            )
+                        }
+                        {
+                            emailAvailable && (
+                                <div className="text-sm  font-medium mt-1">
+                                    <p className="text-green-600">Email is available</p>
+                                </div>
+                            )
+                        }
                     </div>
+                    {
+                        
+                    }
                 </div>
 
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
