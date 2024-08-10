@@ -554,46 +554,33 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
 //endpoint for updating user's data
 app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
-        const { name, surname, username, email } = req.body;
+        const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
         const { file } = req.file
+
+        //store only the fields that need updating
+        const dataToUpdate = {}
+        if(name !== undefined) dataToUpdate.name = name
+        if(surname !== undefined) dataToUpdate.surname = surname
+        if(username !== undefined) dataToUpdate.username = username
+        if(email !== undefined) dataToUpdate.email = email
 
         if(file) {
             await profilePictureQueue.add({
-                filePath: picture.path,
+                filePath: file.path,
                 userUid: req.body.uid,
+                oldPictureUrl: profilePicUrl,
+                oldThumbnailUrl: profileThumbnailUrl
             });
-        }
 
-        const isUnique = await prisma.user.findMany({
-            where: {
-                OR: [
-                    {
-                        username: username
-                    },
-                    {
-                        email: email
-                    }
-                ]
-            },
-            select: {
-                uid: true
-            }
-        })
-
-        if(isUnique) {
-            return res.status(404).json({ error: "Meal log not found" })
+            dataToUpdate.profilePicUrl = ""
+            dataToUpdate.profileThumbnailUrl = ""
         }
 
         const updatedUser = await prisma.user.update({
             where: {
                 uid: req.user.uid
             },
-            data: {
-                name,
-                surname,
-                email,
-                username
-            }
+            data: dataToUpdate,
         })
 
         res.json(updatedUser);

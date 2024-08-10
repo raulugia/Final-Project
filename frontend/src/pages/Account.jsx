@@ -10,12 +10,16 @@ const Account = () => {
         surname: "",
         username: "",
         email: "",
+        profileThumbnailUrl: "",
+        profilePicUrl: "",
     })
     const [dataToUpdate, setDataToUpdate] = useState({
         name: "",
         surname: "",
         username: "",
         email: "",
+        profileThumbnailUrl: "",
+        profilePicUrl: ""
     })
     const [loading, setLoading] = useState(true)
     const [errors, setErrors] = useState([])
