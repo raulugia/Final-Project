@@ -1,10 +1,12 @@
 import React from 'react'
 
-const UpdateUserModal = ({credentialDetails, setCredentialDetails, setDisplayModal, handleSubmit}) => {
+const UpdateUserModal = ({credentialDetails, setCredentialDetails, setDisplayModal, handleSubmit, setLoading}) => {
     
     const handleCancel = () => {
+        console.log("here")
         setCredentialDetails({email: "", password: ""})
         setDisplayModal(false)
+        setLoading(false)
     }
     
     return (

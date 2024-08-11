@@ -64,28 +64,44 @@ const Account = () => {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
-        setDisplayModal(false)
         setLoading(true)
+        setDisplayModal(false)
         console.log("here")
 
         if(emailAvailable === false|| usernameAvailable === false){
-            console.log("here")
+            console.log("first if")
+            setLoading(false)
             return
         }
 
-        try{
-            const token = await user.getIdToken()
-            if(dataToUpdate.email && dataToUpdate.email !== userData.email){
+        // if(!credentialDetails.email || !credentialDetails.password){
+        //     console.log("second if")
+        //     setDisplayModal(true)
+        //     return
+        // }
 
+        try{
+            
+            const token = await user.getIdToken()
+            //case user has entered a new email address
+            if(dataToUpdate.email && dataToUpdate.email !== userData.email){
+                //case user has not re-authenticated
                 if(!credentialDetails.email || !credentialDetails.password ){
                     console.log("need credentials")
+                    //display modal so user enters email and password
                     setDisplayModal(true)
+                    //update loading state
+                    setLoading(false)
+                    
+                    //stop submission process
                     return
                 }
 
                 console.log("updating email in firebase")
-                const credential = EmailAuthProvider.credential(user.email, "09po87iu")
+                //get credential using details entered by user in the modal
+                const credential = EmailAuthProvider.credential(credentialDetails.email, credentialDetails.password)
                 console.log(credential)
+                //re-authenticate user and update their email on firebase
                 await reauthenticateWithCredential(user, credential)
                     .then(async() => {
                         await updateEmail(user, dataToUpdate.email)
@@ -360,7 +376,8 @@ const Account = () => {
                     credentialDetails={credentialDetails} 
                     setCredentialDetails={setCredentialDetails}
                     setDisplayModal={setDisplayModal}
-                    handleSubmit={handleSubmit} 
+                    handleSubmit={handleSubmit}
+                    setLoading={setLoading} 
                 />
             )
         }
