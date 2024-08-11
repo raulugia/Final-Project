@@ -75,12 +75,6 @@ const Account = () => {
             return
         }
 
-        // if(!credentialDetails.email || !credentialDetails.password){
-        //     console.log("second if")
-        //     setDisplayModal(true)
-        //     return
-        // }
-
         try{
             
             const token = await user.getIdToken()
@@ -117,36 +111,48 @@ const Account = () => {
                 await handlePassword()
             }
 
+            //create a new FormData object to store the form data that will be send to the server
             const formData = new FormData()
+            //loop over dataToUpdate
             for(const key in dataToUpdate){
+                //only append values that have been changed by user
                 if(userData[key] !== dataToUpdate[key]){
-                    console.log(`added ${dataToUpdate[key]}`)
                     formData.append(key, dataToUpdate[key])
                 }
             }
 
+            //case user uploaded a new profile picture
             if(file) {
+                //append file
                 formData.append("picture", file)
             }
 
+            //api call to update user'd details
             const { data } = await axiosInstance.put("/api/update-user", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
 
+            //case server returns data
             if(data){
+                //update state to display updated details
                 setUserData(data)
+                //reset states
                 setEmailAvailable("")
                 setUsernameAvailable("")
+                //update state to provide feedback
                 setDisplayMessage({success: "Details updated successfully"})
+                //reset loading state
                 setLoading(false)
             }
             
 
         }catch(err){
             console.log(err)
+            //update state to provide feedback
             setDisplayMessage({error: "Details could not be updated"})
+            //reset loading state
             setLoading(false)
         }
     }
@@ -158,7 +164,7 @@ const Account = () => {
         if(inputType === "username") setUsernameErrors([])
     }
 
-
+    //method to update user's password
     const handlePassword = async() => {
         try{
             //get credential with current password and email
@@ -168,20 +174,23 @@ const Account = () => {
             await reauthenticateWithCredential(user, credential)
             //update password
             await updatePassword(user, dataToUpdate.password.new);
-            console.log("password updated");
 
         }catch(err){
-            console.log(err)
+            //update state to provide feedback
             setDisplayMessage({error: "Details could not be updated"})
             
             //case authentication failed - display error message
             if(err.message === "Firebase: Error (auth/wrong-password)."){
                 setErrors(prevErrors => ({...prevErrors, password: [...prevErrors.password, "Authentication failed - Incorrect password"]}))
             }
+
+            //throw error to ensure form submission stops
+            throw err
         }
         
     }
 
+    //method to check if new username/email is available onBlur
     const checkUniqueness = async(fieldType, fieldValue) => {
         //case email/username inputs have been changed - avoid calls to server if data has not been changed
         if(userData && fieldValue !== userData[fieldType]){
@@ -194,30 +203,36 @@ const Account = () => {
                     }
                 })
                 const { data } = response
-                // if(data.error && fieldType === "email"){
-                //     setErrors([...errors, {email: "Email is already in use"}])
-                // } else if(data.error && fieldType === "username"){
-                //     setErrors([...errors, {username: "Username is already in use"}])
-                // }
+                
+                //get keys from returned data object
                 const key = Object.keys(data)[0]
-                console.log("key", key)
-                console.log(data)
+
+                //case response status was ok - 200
                 if(response.status === 200){
+                    //update states to provide feedback
                     if(key === "username") setUsernameAvailable(true)
                     if(key === "email") setEmailAvailable(true)
                 }
     
             }catch(err){
+                //case server responded with an error
                 if(err.response && err.response.status === 400){
+                    //get data from response
                     const { data } = err.response
-                    console.log("data: ", data)
+                    //get the keys from the extracted data
                     const key = Object.keys(data)[0]
-                    console.log("key ", key)
+
+                    //case email was already taken
                     if (key === "emailError") {
+                        //update states to provide feedback
                         setEmailErrors([...emailErrors, {error: data[key]}])
+                        setErrors(prevErrors => ({...prevErrors, email: [...prevErrors.email, data[key]]}))
                         setEmailAvailable(false)
                     }
+
+                    //case username was already taken
                     if (key === "usernameError"){
+                        //update states to provide feedback
                         setUsernameErrors([...usernameErrors, {error: data[key]}])
                         setErrors(prevErrors => ({...prevErrors, username: [...prevErrors.username, data[key]]}))
                         setUsernameAvailable(false)
@@ -247,7 +262,7 @@ const Account = () => {
                                 <p>{ displayMessage.success }</p>
                             </div>
                         ) : (
-                            <div className='mt-3 text-sm text-red-700 font-medium'>
+                            <div className='mt-3 text-sm text-red-600 font-medium'>
                                 <p>{ displayMessage?.error }</p>
                             </div>
                         )
