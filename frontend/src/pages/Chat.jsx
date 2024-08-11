@@ -23,7 +23,7 @@ const Chat = () => {
     //
     const [windowWidth, setWindowWidth] = useState(window.innerWidth)
     //
-    const [displayMessages, setDisplayMessages] = useState(windowWidth > 600)
+    const [displayMessages, setDisplayMessages] = useState(window.innerWidth > 600)
     //state needed to join a chat room (websocket)
     const [currentChat, setCurrentChat] = useState()
     //state used to display Loading component when data is being fetched
@@ -162,7 +162,11 @@ const Chat = () => {
     }, [hasMoreMessages, loading, messages])
 
     useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth)
+        const handleResize = () => { 
+            setWindowWidth(window.innerWidth)
+            setDisplayMessages(window.innerWidth > 600)
+            console.log("innder width: ", window.innerWidth)
+        }
 
         window.addEventListener("resize", handleResize)
 
@@ -222,12 +226,11 @@ const Chat = () => {
             setFilteredFriends(filtered)
         }
     }
-    
 
   return (
     <div className="flex min-h-screen pb-28 justify-center px-5 max-h-[675px]">
         {/* Left side */}
-        <div className={`mt-28 flex flex-col border rounded-l-lg bg-white shadow-md w-full ${windowWidth < 600 ? "rounded-lg" : "max-w-[395px]"} ${displayMessages ? "hidden" : ""}`}>
+        <div className={`mt-28 flex flex-col border rounded-l-lg bg-white shadow-md w-full ${windowWidth < 600 ? "rounded-lg" : "max-w-[395px]"} ${displayMessages && windowWidth < 600 ? "hidden" : ""}`}>
             <div className="w-full flex items-center justify-center border-b-2 min-h-[75px]">
                 <input type="text" onChange={handleInputChange} className='bg-gray-100 w-full border py-2 mx-4 rounded-xl px-3' placeholder='Search Friend...'/>
             </div>

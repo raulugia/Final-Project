@@ -6,6 +6,7 @@ import UpdateUserModal from '../components/UpdateUserModal';
 
 const Account = () => {
     const user = auth.currentUser
+    //state to store user data fetched from server
     const [userData, setUserData] = useState({
         name: "",
         surname: "",
@@ -14,6 +15,8 @@ const Account = () => {
         profileThumbnailUrl: "",
         profilePicUrl: "",
     })
+    //state to store the data fetched from server and updated data 
+    //userData and dataToUpdate will be compared to only send the new data to the server
     const [dataToUpdate, setDataToUpdate] = useState({
         name: "",
         surname: "",
@@ -23,18 +26,20 @@ const Account = () => {
         profilePicUrl: "",
         password: {},
     })
+    //state to store new profile picture
     const [file, setFile] = useState("")
+    //state to display/hide loading feedback and disable/enable submit button - disabled when loading is true
     const [loading, setLoading] = useState(true)
+    //sates to provide feedback to user
     const [errors, setErrors] = useState({email: [], username: [], password: []})
-    const [usernameErrors, setUsernameErrors] = useState([])
-    const [emailErrors, setEmailErrors] = useState([])
     const [emailAvailable, setEmailAvailable] = useState()
     const [usernameAvailable, setUsernameAvailable] = useState()
-
+    const [displayMessage, setDisplayMessage] = useState()
+    //state to display/hide modal
     const [displayModal, setDisplayModal] = useState(false)
+    //state to store credentials for re-authentication
     const [credentialDetails, setCredentialDetails] = useState({email: "", password: ""})
 
-    const [displayMessage, setDisplayMessage] = useState()
 
 
     useState(() => {
@@ -65,19 +70,23 @@ const Account = () => {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
+        //update loading state - submit button disabled
         setLoading(true)
+        //reset modal state
         setDisplayModal(false)
-        console.log("here")
 
+        //case new email/username are not available
         if(emailAvailable === false|| usernameAvailable === false){
-            console.log("first if")
+            //reset loading state - submit button enabled
             setLoading(false)
+            //stop the submission process
             return
         }
 
         try{
-            
+            //get token for server authentication
             const token = await user.getIdToken()
+
             //case user has entered a new email address
             if(dataToUpdate.email && dataToUpdate.email !== userData.email){
                 //case user has not re-authenticated
@@ -85,22 +94,20 @@ const Account = () => {
                     console.log("need credentials")
                     //display modal so user enters email and password
                     setDisplayModal(true)
-                    //update loading state
+                    //reset loading state - submit button enabled
                     setLoading(false)
 
                     //stop submission process
                     return
                 }
 
-                console.log("updating email in firebase")
                 //get credential using details entered by user in the modal
                 const credential = EmailAuthProvider.credential(credentialDetails.email, credentialDetails.password)
-                console.log(credential)
                 //re-authenticate user and update their email on firebase
                 await reauthenticateWithCredential(user, credential)
                     .then(async() => {
+                        //update email
                         await updateEmail(user, dataToUpdate.email)
-                        console.log("email updated")
                     })
             }
             
@@ -157,11 +164,14 @@ const Account = () => {
         }
     }
 
+    //method to update the data that needs to be updated
     const handleInputChange = (e, inputType) => {
+        //add field and value that needs updating
         setDataToUpdate({...dataToUpdate, [inputType]: e.target.value})
 
-        if(inputType === "email") setEmailErrors([])
-        if(inputType === "username") setUsernameErrors([])
+        //reset errors state (email/username)
+        if(inputType === "email") setErrors(prevErrors => ({...prevErrors, email: []}))
+        if(inputType === "username") setErrors(prevErrors => ({...prevErrors, username: []}))
     }
 
     //method to update user's password
@@ -195,13 +205,17 @@ const Account = () => {
         //case email/username inputs have been changed - avoid calls to server if data has not been changed
         if(userData && fieldValue !== userData[fieldType]){
             try{
+                //get token for server authentication
                 const token = await user.getIdToken()
 
+                //send the new email/username to server to check if they are available
                 const response = await axiosInstance.post("/api/update-user/is-unique", {[fieldType]: fieldValue}, {
                     headers:{
                         Authorization: `Bearer ${token}`,
                     }
                 })
+
+                //extract data from response object
                 const { data } = response
                 
                 //get keys from returned data object
@@ -225,7 +239,6 @@ const Account = () => {
                     //case email was already taken
                     if (key === "emailError") {
                         //update states to provide feedback
-                        setEmailErrors([...emailErrors, {error: data[key]}])
                         setErrors(prevErrors => ({...prevErrors, email: [...prevErrors.email, data[key]]}))
                         setEmailAvailable(false)
                     }
@@ -233,7 +246,6 @@ const Account = () => {
                     //case username was already taken
                     if (key === "usernameError"){
                         //update states to provide feedback
-                        setUsernameErrors([...usernameErrors, {error: data[key]}])
                         setErrors(prevErrors => ({...prevErrors, username: [...prevErrors.username, data[key]]}))
                         setUsernameAvailable(false)
                     } 
@@ -242,12 +254,6 @@ const Account = () => {
             }
         }
     }
-
-    useEffect(() => {
-        if(errors){
-            console.log(errors[0])
-        }
-    }, [errors])
 
   return (
     <div className="min-h-screen flex justify-center items-start">
@@ -305,8 +311,8 @@ const Account = () => {
                         <input 
                             type="text" 
                             className={`border py-1 rounded-lg w-full shadow-sm px-2 
-                                ${usernameErrors.length > 0 ? "border-red-500 text-red-900 placeholder-red-700" : ""}
-                                ${usernameErrors.length === 0 && usernameAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
+                                ${errors.username.length > 0 ? "border-red-500 text-red-900 placeholder-red-700" : ""}
+                                ${errors.username.length === 0 && usernameAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
                             }
                             value={dataToUpdate.username}
                             onChange={(e) => handleInputChange(e, "username")}
@@ -314,9 +320,9 @@ const Account = () => {
                         />
                         <div className="text-sm text-red-600 font-medium mt-1" >
                             {
-                                usernameErrors. length > 0 && (
-                                    usernameErrors.map((error, index) => (
-                                        <p key={error.error+index}>{error.error}</p>
+                                errors.username.length > 0 && (
+                                    errors.username.map((error, index) => (
+                                        <p key={error+index}>{error}</p>
                                     ))
                                 )
                             }
@@ -341,8 +347,8 @@ const Account = () => {
                         <input 
                             type="email" 
                             className={`border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm 
-                                ${emailErrors.length > 0 ? "border-red-500 text-red-900 bg-red-50 placeholder-red-700" : ""}
-                                ${emailErrors.length === 0 && emailAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
+                                ${errors.email.length > 0 ? "border-red-500 text-red-900 bg-red-50 placeholder-red-700" : ""}
+                                ${errors.email.length === 0 && emailAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
                             } 
                             value={dataToUpdate.email ? dataToUpdate.email : userData.email}
                             onChange={(e) => handleInputChange(e, "email")}
@@ -351,9 +357,9 @@ const Account = () => {
 
                         <div className="text-sm text-red-600 font-medium mt-1" >
                             {
-                                emailErrors. length > 0 && (
-                                    emailErrors.map((error, index) => (
-                                            <p key={error.error+index}>{error.error}</p>
+                                errors.email.length > 0 && (
+                                    errors.email.map((error, index) => (
+                                            <p key={error+index}>{error}</p>
                                     ))
                                 )
                             }
@@ -366,9 +372,6 @@ const Account = () => {
                             )
                         }
                     </div>
-                    {
-                        
-                    }
                 </div>
 
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
@@ -406,6 +409,7 @@ const Account = () => {
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
                 <div className="w-full flex gap-3 md:gap-5 mb-6 justify-center md:justify-end text-sm md:text-md">
+                    <button disabled={loading} className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
                     <button 
                         disabled={loading}
                         onClick={handleSubmit} 
@@ -413,7 +417,6 @@ const Account = () => {
                     >
                             Save Changes
                     </button>
-                    <button disabled={loading} className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
                 </div>
                 </form>
         </div>
