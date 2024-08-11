@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { auth } from '../../utils/firebase'
-import { updateEmail, updatePassword } from "firebase/auth";
+import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import axiosInstance from '../../utils/axiosInstance'
 
 const Account = () => {
@@ -21,12 +21,14 @@ const Account = () => {
         profileThumbnailUrl: "",
         profilePicUrl: ""
     })
+    const [file, setFile] = useState("")
     const [loading, setLoading] = useState(true)
     const [errors, setErrors] = useState([])
     const [usernameErrors, setUsernameErrors] = useState([])
     const [emailErrors, setEmailErrors] = useState([])
     const [emailAvailable, setEmailAvailable] = useState()
     const [usernameAvailable, setUsernameAvailable] = useState()
+    const [displayModal, setDisplayModal] = useState(true)
 
     useState(() => {
         (
@@ -60,17 +62,25 @@ const Account = () => {
         try{
             const token = await user.getIdToken()
             if(dataToUpdate.email && dataToUpdate.email !== userData.email){
-                await updateEmail(user, dataToUpdate.email)
+                console.log("updating email in firebase")
+                const credential = EmailAuthProvider.credential(user.email, "09po87iu")
+                console.log(credential)
+                await reauthenticateWithCredential(user, credential)
+                    .then(async() => {
+                        await updateEmail(user, dataToUpdate.email)
+                        console.log("email updated")
+                    })
             }
             
-            if(dataToUpdate.password){
+            // if(dataToUpdate.password){
 
-                await updatePassword(user, dataToUpdate.password)
-            }
+            //     await updatePassword(user, dataToUpdate.password)
+            // }
 
             const formData = new FormData()
             for(const key in dataToUpdate){
                 if(userData[key] !== dataToUpdate[key]){
+                    console.log(`added ${dataToUpdate[key]}`)
                     formData.append(key, dataToUpdate[key])
                 }
             }
@@ -106,7 +116,9 @@ const Account = () => {
 
 
     const handlePassword = e => {
-        setDataToUpdate({...dataToUpdate, password: e.target.value})
+        if(e.target.value.length >= 8){
+            setDataToUpdate({...dataToUpdate, password: e.target.value})
+        }
     }
 
     const checkUniqueness = async(fieldType, fieldValue) => {
@@ -304,6 +316,22 @@ const Account = () => {
                 </div>
                 </form>
         </div>
+        {
+            displayModal &&(
+                <div>
+                    <div>
+                        <div>
+                            <label htmlFor="email">Email</label>
+                            <input type="email"  id='email'/>
+                        </div>
+                        <div>
+                            <label htmlFor="email">Email</label>
+                            <input type="password"  />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
     </div>
   )
 }

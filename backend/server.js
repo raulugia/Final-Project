@@ -555,7 +555,7 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
 app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
-        const { file } = req.file
+        
 
         //store only the fields that need updating
         const dataToUpdate = {}
@@ -564,7 +564,9 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
         if(username !== undefined) dataToUpdate.username = username
         if(email !== undefined) dataToUpdate.email = email
 
-        if(file) {
+        if(req.file) {
+            const { file } = req.file
+            
             await profilePictureQueue.add({
                 filePath: file.path,
                 userUid: req.body.uid,
@@ -575,7 +577,7 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
             dataToUpdate.profilePicUrl = ""
             dataToUpdate.profileThumbnailUrl = ""
         }
-
+        console.log("data to be changed: ", dataToUpdate)
         const updatedUser = await prisma.user.update({
             where: {
                 uid: req.user.uid
