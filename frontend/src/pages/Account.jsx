@@ -20,11 +20,12 @@ const Account = () => {
         username: "",
         email: "",
         profileThumbnailUrl: "",
-        profilePicUrl: ""
+        profilePicUrl: "",
+        password: {},
     })
     const [file, setFile] = useState("")
     const [loading, setLoading] = useState(true)
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState({email: [], username: [], password: []})
     const [usernameErrors, setUsernameErrors] = useState([])
     const [emailErrors, setEmailErrors] = useState([])
     const [emailAvailable, setEmailAvailable] = useState()
@@ -92,7 +93,7 @@ const Account = () => {
                     setDisplayModal(true)
                     //update loading state
                     setLoading(false)
-                    
+
                     //stop submission process
                     return
                 }
@@ -109,9 +110,11 @@ const Account = () => {
                     })
             }
             
-            if(dataToUpdate.password){
-
-                await updatePassword(user, dataToUpdate.password)
+            //case user entered current and new password and they are different
+            if(dataToUpdate.password.current && dataToUpdate.password.new &&
+                dataToUpdate.password.current !== dataToUpdate.password.new){
+                //update password    
+                await handlePassword()
             }
 
             const formData = new FormData()
@@ -156,10 +159,27 @@ const Account = () => {
     }
 
 
-    const handlePassword = e => {
-        if(e.target.value.length >= 8){
-            setDataToUpdate({...dataToUpdate, password: e.target.value})
+    const handlePassword = async() => {
+        try{
+            //get credential with current password and email
+            const credential = EmailAuthProvider.credential(user.email, dataToUpdate.password.current);
+
+            //re-authenticate user
+            await reauthenticateWithCredential(user, credential)
+            //update password
+            await updatePassword(user, dataToUpdate.password.new);
+            console.log("password updated");
+
+        }catch(err){
+            console.log(err)
+            setDisplayMessage({error: "Details could not be updated"})
+            
+            //case authentication failed - display error message
+            if(err.message === "Firebase: Error (auth/wrong-password)."){
+                setErrors(prevErrors => ({...prevErrors, password: [...prevErrors.password, "Authentication failed - Incorrect password"]}))
+            }
         }
+        
     }
 
     const checkUniqueness = async(fieldType, fieldValue) => {
@@ -199,6 +219,7 @@ const Account = () => {
                     }
                     if (key === "usernameError"){
                         setUsernameErrors([...usernameErrors, {error: data[key]}])
+                        setErrors(prevErrors => ({...prevErrors, username: [...prevErrors.username, data[key]]}))
                         setUsernameAvailable(false)
                     } 
                 }
@@ -276,15 +297,15 @@ const Account = () => {
                             onChange={(e) => handleInputChange(e, "username")}
                             onBlur={(e) => checkUniqueness("username", e.target.value)}
                         />
-                        {
-                            usernameErrors. length > 0 && (
-                                usernameErrors.map((error, index) => (
-                                    <div className="text-sm text-red-600 font-medium mt-1" key={error.error+index}>
-                                        <p>{error.error}</p>
-                                    </div>
-                                ))
-                            )
-                        }
+                        <div className="text-sm text-red-600 font-medium mt-1" >
+                            {
+                                usernameErrors. length > 0 && (
+                                    usernameErrors.map((error, index) => (
+                                        <p key={error.error+index}>{error.error}</p>
+                                    ))
+                                )
+                            }
+                        </div>
                         {
                             usernameAvailable && (
                                 <div className="text-sm  font-medium mt-1">
@@ -312,15 +333,16 @@ const Account = () => {
                             onChange={(e) => handleInputChange(e, "email")}
                             onBlur={(e) => checkUniqueness("email", e.target.value)}
                         />
-                        {
-                            emailErrors. length > 0 && (
-                                emailErrors.map((error, index) => (
-                                    <div className="text-sm text-red-600 font-medium mt-1" key={error.error+index}>
-                                        <p>{error.error}</p>
-                                    </div>
-                                ))
-                            )
-                        }
+
+                        <div className="text-sm text-red-600 font-medium mt-1" >
+                            {
+                                emailErrors. length > 0 && (
+                                    emailErrors.map((error, index) => (
+                                            <p key={error.error+index}>{error.error}</p>
+                                    ))
+                                )
+                            }
+                        </div>
                         {
                             emailAvailable && (
                                 <div className="text-sm  font-medium mt-1">
@@ -343,6 +365,7 @@ const Account = () => {
                             <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Current Password</p>
                             <input 
                                 type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, current: e.target.value}})}
                             />
                         </div>
                         <div className='w-full'>
@@ -350,9 +373,18 @@ const Account = () => {
                             <input 
                                 type="password" 
                                 className='border py-1 rounded-lg w-full shadow-sm px-2'
-                                onChange={handlePassword}
+                                onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, new: e.target.value}})}
                             />
                         </div>
+                    </div>
+                    <div className='flex flex-col text-sm text-red-600 font-medium mt-1'>
+                        {
+                            errors.password.length > 0 &&(
+                                errors.password.map((error, index) => (
+                                    <p key={error+index}>{error}</p>
+                                ))
+                            )
+                        }
                     </div>
                 </div>
 
