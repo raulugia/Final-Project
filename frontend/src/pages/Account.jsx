@@ -28,7 +28,9 @@ const Account = () => {
     const [emailErrors, setEmailErrors] = useState([])
     const [emailAvailable, setEmailAvailable] = useState()
     const [usernameAvailable, setUsernameAvailable] = useState()
-    const [displayModal, setDisplayModal] = useState(true)
+
+    const [displayModal, setDisplayModal] = useState(false)
+    const[credentialDetails, setCredentialDetails] = useState({email: "", password: ""})
 
 
     useState(() => {
@@ -59,10 +61,18 @@ const Account = () => {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
+        setDisplayModal(false)
         setLoading(true)
+        
         try{
             const token = await user.getIdToken()
             if(dataToUpdate.email && dataToUpdate.email !== userData.email){
+
+                if(!credentialDetails.email || !credentialDetails.password ){
+                    setDisplayModal(true)
+                    return
+                }
+
                 console.log("updating email in firebase")
                 const credential = EmailAuthProvider.credential(user.email, "09po87iu")
                 console.log(credential)
@@ -328,15 +338,33 @@ const Account = () => {
                         <div className='flex flex-col gap-1 mb-3'>
                             <label htmlFor="email" className='text-sm'>Email</label>
                             <input 
-                                type="email"  id='email' className='py-1 px-2 rounded-md border'/>
+                                type="email"  id='email'
+                                onChange={e => setCredentialDetails({...credentialDetails, email: e.target.value})} 
+                                className='py-1 px-2 rounded-md border'/>
                         </div>
                         <div className='flex flex-col gap-1 mb-2'>
                             <label htmlFor="password" className='text-sm'>Password</label>
-                            <input type="password"  id='password' className='py-1 px-2 rounded-md border'/>
+                            <input 
+                                type="password"  id='password' 
+                                onChange={e => setCredentialDetails({...credentialDetails, password: e.target.value})}
+                                className='py-1 px-2 rounded-md border'
+                            />
                         </div>
                         <div className='flex gap-3 w-full mb-2 mt-5'>
-                            <button type="button" className="py-1 px-2 rounded-md bg-gray-50 border mt-3 w-full">Cancel</button>
-                            <button type="button" className="py-1 px-2 rounded-md bg-blue-700 border border-blue-700 text-white mt-3 w-full">Confirm</button>
+                            <button 
+                                type="button"
+                                onClick={() => setDisplayModal(false)} 
+                                className="py-1 px-2 rounded-md bg-gray-50 border mt-3 w-full"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={handleSubmit} 
+                                className="py-1 px-2 rounded-md bg-blue-700 border border-blue-700 text-white mt-3 w-full"
+                            >
+                                Confirm
+                            </button>
                         </div>
                     </div>
                 </div>
