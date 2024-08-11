@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { auth } from '../../utils/firebase'
 import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import axiosInstance from '../../utils/axiosInstance'
+import UpdateUserModal from '../components/UpdateUserModal';
 
 const Account = () => {
     const user = auth.currentUser
@@ -30,7 +31,9 @@ const Account = () => {
     const [usernameAvailable, setUsernameAvailable] = useState()
 
     const [displayModal, setDisplayModal] = useState(false)
-    const[credentialDetails, setCredentialDetails] = useState({email: "", password: ""})
+    const [credentialDetails, setCredentialDetails] = useState({email: "", password: ""})
+
+    const [displayMessage, setDisplayMessage] = useState()
 
 
     useState(() => {
@@ -63,12 +66,19 @@ const Account = () => {
         e.preventDefault()
         setDisplayModal(false)
         setLoading(true)
-        
+        console.log("here")
+
+        if(emailAvailable === false|| usernameAvailable === false){
+            console.log("here")
+            return
+        }
+
         try{
             const token = await user.getIdToken()
             if(dataToUpdate.email && dataToUpdate.email !== userData.email){
 
                 if(!credentialDetails.email || !credentialDetails.password ){
+                    console.log("need credentials")
                     setDisplayModal(true)
                     return
                 }
@@ -83,10 +93,10 @@ const Account = () => {
                     })
             }
             
-            // if(dataToUpdate.password){
+            if(dataToUpdate.password){
 
-            //     await updatePassword(user, dataToUpdate.password)
-            // }
+                await updatePassword(user, dataToUpdate.password)
+            }
 
             const formData = new FormData()
             for(const key in dataToUpdate){
@@ -108,12 +118,16 @@ const Account = () => {
 
             if(data){
                 setUserData(data)
+                setEmailAvailable("")
+                setUsernameAvailable("")
+                setDisplayMessage({success: "Details updated successfully"})
                 setLoading(false)
             }
             
 
         }catch(err){
             console.log(err)
+            setDisplayMessage({error: "Details could not be updated"})
             setLoading(false)
         }
     }
@@ -185,10 +199,23 @@ const Account = () => {
 
   return (
     <div className="min-h-screen flex justify-center items-start">
-        <div className="pt-24 md:pt-28 w-[800px] mx-5">
+        <div className="pt-24 pb-5 md:pt-28 w-[800px] mx-5">
             <form className="bg-white px-8 border rounded-xl shadow-md">
-                <h1 className="text-lg font-semibold text-slate-700 mt-6">Manage Your Account</h1>
-                <p className='text-sm text-slate-600 mb-6'>Click on the Save button to save your changes.</p>
+                <div className="my-6">
+                    <h1 className="text-lg font-semibold text-slate-700">Manage Your Account</h1>
+                    <p className='text-sm text-slate-600'>Click on the Save button to save your changes.</p>
+                    {
+                        displayMessage?.success ? (
+                            <div className='mt-3 text-sm text-green-700 font-medium'>
+                                <p>{ displayMessage.success }</p>
+                            </div>
+                        ) : (
+                            <div className='mt-3 text-sm text-red-700 font-medium'>
+                                <p>{ displayMessage?.error }</p>
+                            </div>
+                        )
+                    }
+                </div>
                 <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
                 <div className="flex justify-between md:justify-start md:gap-16 items-center mb-6">
@@ -329,45 +356,12 @@ const Account = () => {
         </div>
         {
             displayModal &&(
-                <div className='flex items-center justify-center absolute inset-0 z-100 w-full min-h-screen bg-black/60'>
-                    <div className='py-3 px-8 border rounded-lg shadow-md bg-white'>
-                        <div className="mb-4">
-                            <h3 className='text-2xl font-semibold'>Authentication Required</h3>
-                            <p className='text-sm'>Please enter your sing in details</p>
-                        </div>
-                        <div className='flex flex-col gap-1 mb-3'>
-                            <label htmlFor="email" className='text-sm'>Email</label>
-                            <input 
-                                type="email"  id='email'
-                                onChange={e => setCredentialDetails({...credentialDetails, email: e.target.value})} 
-                                className='py-1 px-2 rounded-md border'/>
-                        </div>
-                        <div className='flex flex-col gap-1 mb-2'>
-                            <label htmlFor="password" className='text-sm'>Password</label>
-                            <input 
-                                type="password"  id='password' 
-                                onChange={e => setCredentialDetails({...credentialDetails, password: e.target.value})}
-                                className='py-1 px-2 rounded-md border'
-                            />
-                        </div>
-                        <div className='flex gap-3 w-full mb-2 mt-5'>
-                            <button 
-                                type="button"
-                                onClick={() => setDisplayModal(false)} 
-                                className="py-1 px-2 rounded-md bg-gray-50 border mt-3 w-full"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                type="button"
-                                onClick={handleSubmit} 
-                                className="py-1 px-2 rounded-md bg-blue-700 border border-blue-700 text-white mt-3 w-full"
-                            >
-                                Confirm
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <UpdateUserModal 
+                    credentialDetails={credentialDetails} 
+                    setCredentialDetails={setCredentialDetails}
+                    setDisplayModal={setDisplayModal}
+                    handleSubmit={handleSubmit} 
+                />
             )
         }
     </div>
