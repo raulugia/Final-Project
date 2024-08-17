@@ -9,13 +9,14 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import Register from "./Register";
 import axiosInstance from "../../../utils/axiosInstance"
+import { VscError } from "react-icons/vsc";
 
 const Login = () => {
   //states to store email and password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   //state to store errors
-  const [error, setError] = useState();
+  const [error, setError] = useState("");
   //state to store the user
   const [user, setUser] = useState();
   //state to check if the user is authenticated
@@ -44,7 +45,12 @@ const Login = () => {
           setAuthenticated(true);
           console.log("success", user);
       } catch(err) {
-          setError(err.message)
+          //update the error state if there was an error
+        if(err.message === "Firebase: Error (auth/user-not-found)."){
+          setError("Account not found")
+        } else if(err.message === "Firebase: Error (auth/invalid-password)."){
+          setError("Password incorrect")
+        }
       }
     }
   };
@@ -77,8 +83,13 @@ const Login = () => {
 
         console.log("success", user)
     } catch(err) {
+      console.log(err.message)
         //update the error state if there was an error
-        setError(err.message)
+        if(err.message === "Firebase: Error (auth/user-not-found)."){
+          setError("Account not found")
+        } else if(err.message === "Firebase: Error (auth/invalid-password)."){
+          setError("Password incorrect")
+        }
     }
   };
 
@@ -110,7 +121,13 @@ const Login = () => {
             className="border py-2 px-3 rounded-md"
           />
 
-          {error && <p>{error}</p>}
+          {error && (
+            <div class="flex items-center gap-1 border py-1 rounded-md text-sm font-semibold text-red-700 bg-red-100 border-red-900 px-2">
+              <VscError />
+              <p className="">{error}</p>
+            </div>
+            )
+          }
 
           <button
             type="submit"
