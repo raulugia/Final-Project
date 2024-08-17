@@ -3,6 +3,7 @@ import { MdOutlineCameraAlt } from "react-icons/md";
 import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../utils/firebase";
+import socket from "../../utils/socket";
 
 const LogMeal = () => {
   //state to store the meal rating
@@ -84,6 +85,17 @@ const LogMeal = () => {
           },
         });
 
+        const { id: mealLogId } = response.data
+        //
+        if(mealLogId){
+          setTimeout(() => {
+            socket.emit("accuracyReviewNotification", {
+              mealLogId,
+              userUid: user.uid,
+            })
+          }, 60000)
+        }
+
         //navigate to the /home route
         navigate("/home");
       } else {
@@ -95,7 +107,7 @@ const LogMeal = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-slate-50">
+    <div className="flex justify-center items-center min-h-screen bg-slate-200">
       <div className="border mt-12 py-5 px-3 rounded-lg lg:w-[50%] md:w-1/3 shadow-md bg-white">
         <form action="" className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex items-center justify-center w-[50%] mx-auto mb-2">
@@ -182,7 +194,7 @@ const LogMeal = () => {
               so the glycemic impact can be evaluated.)
             </p>
           </div>
-          <div className="flex justify-around mt-2">
+          {/* <div className="flex justify-around mt-2">
             <div
               onClick={() => setMealRating("ACCURATE")}
               className="flex items-center justify-center px-2 py-1 rounded-md bg-green-500 hover:shadow-md cursor-pointer"
@@ -201,7 +213,7 @@ const LogMeal = () => {
             >
               <p>Inaccurate</p>
             </div>
-          </div>
+          </div> */}
 
           <button
             type="submit"

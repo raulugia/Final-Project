@@ -651,6 +651,7 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
       });
 
       //send the response to the client
+      console.log(mealLog)
       res.json(mealLog);
 
       //add job to queue for image processing

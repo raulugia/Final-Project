@@ -83,13 +83,7 @@ const Login = () => {
 
         console.log("success", user)
     } catch(err) {
-      console.log(err.message)
-        //update the error state if there was an error
-        if(err.message === "Firebase: Error (auth/user-not-found)."){
-          setError("Account not found")
-        } else if(err.message === "Firebase: Error (auth/invalid-password)."){
-          setError("Password incorrect")
-        }
+      setError("Log in with Google failed")
     }
   };
 
@@ -99,7 +93,7 @@ const Login = () => {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-slate-50">
+    <div className="flex justify-center items-center min-h-screen bg-slate-100">
       <div className="border py-5 px-3 rounded-lg lg:w-[35%] md:w-1/3 shadow-md bg-white">
         <form action="" className="flex flex-col gap-3">
           <input
