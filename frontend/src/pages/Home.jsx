@@ -127,7 +127,7 @@ const Home = () => {
     socket.on("pendingMealLogs", (logs) => {
       const readyToReview = logs.filter(log => log.reviewAvailable)
       const notReadyToReview = logs.filter(log => !log.reviewAvailable)
-
+      console.log("readyyyyy: ", readyToReview)
       setPendingMealLogs(readyToReview)
       setMealCountdowns(notReadyToReview)
     })
@@ -137,6 +137,27 @@ const Home = () => {
     }
 
   },[])
+
+  //update countdowns every second
+  useEffect(() => {
+    const interval = setInterval(() =>{
+      if(mealCountdowns){
+        //update countdown every second
+        setMealCountdowns(prevMealCountdowns => {
+          //iterate over the meals that are not ready to be reviewed
+          prevMealCountdowns.map(log => {
+            //reduce the time left by 1 second
+            const newTimeLeft = log.timeLeft - 1000
+            //return the updated log with the new time left
+            return {...log, timeLeft: newTimeLeft > 0 ? newTimeLeft : 0}
+          })
+        }, 1000)
+      }
+    })
+    //clear interval
+    return () => clearInterval(interval)
+
+  }, [mealCountdowns])
 
   //method to redirect user to "/" when they click on "log out" button
   // const handleClick = () => {

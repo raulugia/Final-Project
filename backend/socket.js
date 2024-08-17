@@ -102,6 +102,46 @@ const initializeSocket = server => {
             })
         })
 
+        socket.on("getPendingMealLogs", async() => {
+            try{
+
+                const mealLogs = await prisma.mealLog.findMany({
+                    where: {
+                        userUid: user.uid,
+                        rating: "PENDING"
+                    },
+                    select: {
+                        id: true,
+                        mealId: true,
+                        meal: {
+                            select:{
+                                name: true,
+                            }
+                        },
+                        createdAt: true
+                    }
+                })
+                console.log("returned meals: ", mealLogs)
+                const notReadyToReview = mealLogs.map(log => {
+                    const timeElapsed = Date.now() - new Date(log.createdAt).getTime();
+                    //subtract the time elapsed from 1 minute (for testing purposes, users can set the accuracy rating after 1 minute instead of 4 hours)
+                    const timeLeft = 60000 - timeElapsed
+                    
+                    return {
+                        id: log.id,
+                        mealName: log.meal.name,
+                        mealId: log.mealId,
+                        timeLeft: timeLeft > 0 ? timeLeft : 0,
+                        reviewAvailable: timeLeft <= 0,
+                    }
+                })
+    
+                socket.emit("pendingMealLogs", notReadyToReview)
+            }catch(err){
+                console.log(err)
+            }
+        })
+
         socket.on("disconnect", () => {
             console.log("user disconnected")
         })
