@@ -31,13 +31,14 @@ const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId,
             </div>
             <div className='absolute z-20 bottom-[-135px]'>
                 {
-                    rating === "ACCURATE" || rating === "INACCURATE" || rating === "SLIGHTLY_INACCURATE" ? (
-                        <Accuracy accuracy={rating} style={"text-lg px-2 font-semibold rounded-md"}/>
-                    ) : rating === "waiting" ? (
-                        <div>Not available yet</div>
-                    ) : (
-                        <div>Rate your meal</div>
-                    )
+                    // rating === "ACCURATE" || rating === "INACCURATE" || rating === "SLIGHTLY_INACCURATE" ? (
+                    //     <Accuracy accuracy={rating} style={"text-lg px-2 font-semibold rounded-md"}/>
+                    // ) : rating === "waiting" ? (
+                    //     <div>Not available yet</div>
+                    // ) : (
+                    //     <div>Rate your meal</div>
+                    // )
+                    <Accuracy accuracy={rating} style={"text-lg px-2 font-semibold rounded-md"}/>
                 }
             </div>
         </div>

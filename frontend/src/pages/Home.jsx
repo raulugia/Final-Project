@@ -200,7 +200,7 @@ const Home = () => {
         </div>
         </div>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex md:flex-col md:items-end mt-32">
           {
             pendingRequests.length > 0 && (
 
@@ -217,6 +217,22 @@ const Home = () => {
               </div>
             )
           }
+          <div className="border border-slate-700 rounded-md overflow-hidden shadow-sm">
+            <h4 className="px-3 bg-slate-700 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
+            <div className="flex flex-col bg-white min-h-[60px]">
+              {
+                pendingMealLogs.length > 0 ? (
+                  pendingMealLogs.map((log, index) => (
+                    <div key={log+index} className={`px-3 py-1 ${index === pendingMealLogs.length - 1 ? "" : "border-b border-slate-700"}`}>
+                      <a href={`/my-meals/${log.mealId}/log/${log.id}`} class="hover:underline">{log.mealName}</a>
+                    </div>
+                  ))
+                ):(
+                  <p className="mx-auto text-slate-400">No pending meal logs</p>
+                )
+              }
+            </div>
+          </div>
       </div>
     </div>
   )
