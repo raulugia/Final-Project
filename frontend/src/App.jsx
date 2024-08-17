@@ -16,7 +16,7 @@ import SearchResults from './pages/SearchResults'
 import Chat from './pages/Chat'
 import Account from './pages/Account'
 import { auth } from '../utils/firebase'
-import {Routes, Route} from 'react-router-dom'
+import {Routes, Route, useLocation} from 'react-router-dom'
 import ProtectedRoute from './pages/ProtectedRoute'
 import socket from "../utils/socket"
 import { Outlet } from 'react-router-dom'
@@ -28,6 +28,7 @@ function App() {
   const [user, setUser] = useState(null)
   //const [pendingRequests, setPendingRequests] = useState([])
   const { pendingRequests, setPendingRequests } = useStateContext()
+  const location = useLocation()
 
   //method to ensure no expired tokens are used
   // const refreshToken = async() => {
@@ -99,7 +100,9 @@ function App() {
   //components rendered by protected routes will be wrapped by ProtectedRoute to ensure the user is authenticated
   return (
     <div className='bg-slate-200'>
-      <Navbar name={user?.displayName}/>
+      {
+        location.pathname !== "/" && <Navbar name={user?.displayName}/>
+      }
     <div className='max-w-[1200px] mx-auto'>
      <Routes>
       <Route path='/' element={<Login />}/>

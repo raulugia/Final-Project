@@ -3,16 +3,29 @@ import { Outlet, Link } from 'react-router-dom'
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
+import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowUp } from "react-icons/io";
+import { signOut } from "firebase/auth"
+import { auth } from '../../utils/firebase';
 
 const Navbar = ({ name }) => {
     const [searchInput, setSearchInput] = useState("")
     const [displayName, setDisplayName] = useState("")
+    const [displayOptions, setDisplayOptions] = useState(false)
     const navigate = useNavigate()
     
 
     const handleSubmit = e => {
         e.preventDefault()
         navigate(`/search?query=${searchInput}`)
+    }
+
+    const logOut = async() => {
+        signOut(auth).then(() => {
+            navigate("/")
+        }).catch(err => {
+            alert("There was an error logging out")
+        })
     }
     
   return (
@@ -37,8 +50,21 @@ const Navbar = ({ name }) => {
                 />
                 <button type="submit"><FaSearch color={"white"} className='hover:cursor-pointer'/></button>
             </form>
-            <div>
-                <p className='text-sm text-black'>Hello, {name}</p>
+            <div class={`relative select-none ${displayOptions ? "bg-slate-100" : ""}`}>
+                <div class="flex items-center">
+                    {
+                        displayOptions ? (
+                            <IoIosArrowUp />
+                        ) : (
+                            <IoIosArrowDown />
+                        )
+                    }
+                    <p className={`text-sm text-black px-1 hover:cursor-pointer`} onClick={() => setDisplayOptions(!displayOptions)}> Hello, {name}</p>
+                </div>
+                <div className={`bg-slate-100 w-full px-1 top-5 text-sm pt-3 pb-2 flex flex-col gap-1 ${displayOptions ? "absolute shadow-md" : "hidden"}`}>
+                    <a href="/account" class="hover:underline hover:cursor-pointer">My Account</a>
+                    <p class="hover:underline hover:cursor-pointer" onClick={logOut}>Log out</p>
+                </div>
             </div>
         </div>
     </div>
