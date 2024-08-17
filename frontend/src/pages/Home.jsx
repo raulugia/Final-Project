@@ -8,6 +8,7 @@ import SkeletonHomeMealCard from '../components/SkeletonHomeMealCard';
 import HomeFriendReqCard from '../components/HomeFriendReqCard';
 import { FaUserFriends } from "react-icons/fa";
 import { useStateContext } from '../context/ContextProvider'
+import socket from '../../utils/socket';
 
 const Home = () => {
   //get current user
@@ -20,6 +21,9 @@ const Home = () => {
   //state needed to trigger data fetching (useEffect dependency)
   //this state will be increase by 1 each time the last HomeMealCard intersects with the viewport (infinite scrolling) 
   const [page, setPage] = useState(1)
+  //
+  const [pendingMealLogs, setPendingMealLogs] = useState([])
+  const [mealCountdowns, setMealCountdowns] = useState([])
   //ref to keep the intersection observer instance
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
@@ -115,6 +119,24 @@ const Home = () => {
     //make the observer watch the last HomeMealCard, referenced by lastLogRef
     if(lastLogRef.current) observer.current.observe(lastLogRef.current)
   }, [loading, hasMoreLogs])
+
+  //get pending meal logs and update states to display them
+  useEffect(() => {
+    socket.emit("getPendingMealLogs")
+
+    socket.on("pendingMealLogs", (logs) => {
+      const readyToReview = logs.filter(log => log.reviewAvailable)
+      const notReadyToReview = logs.filter(log => !log.reviewAvailable)
+
+      setPendingMealLogs(readyToReview)
+      setMealCountdowns(notReadyToReview)
+    })
+
+    return () => {
+      socket.off("pendingMealLogs")
+    }
+
+  },[])
 
   //method to redirect user to "/" when they click on "log out" button
   // const handleClick = () => {

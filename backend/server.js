@@ -595,7 +595,7 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
 //endpoint for logging a meal
 app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req, res) => {
     //extract the meal information from the request body
-    const { mealName, restaurantName, carbEstimate, description, rating } = req.body;
+    const { mealName, restaurantName, carbEstimate, description } = req.body;
     //extract the picture uploaded by the user
     const picture = req.file;
 
@@ -640,18 +640,17 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
           //log the carb estimate, description and rating
           carbEstimate: parseInt(carbEstimate),
           description,
-          rating,
           //associate the meal log with the authenticated user
           user: { connect: { uid: req.user.uid } },
+          rating: "PENDING",
           //placeholders - picture and thumbnail will be added in worker.js once 
           //they have been processed
           picture: "",
           thumbnail:"",
         },
       });
-
+      
       //send the response to the client
-      console.log(mealLog)
       res.json(mealLog);
 
       //add job to queue for image processing
@@ -663,8 +662,9 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
       });
 
     } catch (err) {
+        console.log(err)
       //respond with a 400 status code if there was an error  
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ error: "There was a problem logging your meal. Please, try again." });
     }
   }
 );

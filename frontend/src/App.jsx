@@ -88,6 +88,11 @@ function App() {
       setPendingRequests(prevRequests => [...prevRequests, request])
     })
 
+    socket.on("notifyAccuracyReview", ({ message, mealLogId}) => {
+      console.log("new log to review ", mealLogId)
+      alert(message)
+    } )
+
     return () => {
       socket.off("connect");
       socket.off("disconnect")

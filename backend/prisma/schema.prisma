@@ -64,6 +64,7 @@ enum Rating {
   ACCURATE
   INACCURATE
   SLIGHTLY_INACCURATE
+  PENDING
 }
 
 model Friendship {

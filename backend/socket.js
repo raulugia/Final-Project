@@ -95,6 +95,13 @@ const initializeSocket = server => {
             }
         })
 
+        socket.on("accuracyReviewNotification", ({mealLogId, userUid}) => {
+            io.to(userUid).emit("notifyAccuracyReview", {
+                message: "A new meal log is available to be reviewed.",
+                mealLogId
+            })
+        })
+
         socket.on("disconnect", () => {
             console.log("user disconnected")
         })

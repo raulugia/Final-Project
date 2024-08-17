@@ -67,7 +67,7 @@ const LogMeal = () => {
     data.append("restaurantName", restaurantName);
     data.append("carbEstimate", carbEstimate);
     data.append("description", description);
-    data.append("rating", mealRating);
+    //data.append("rating", mealRating);
     data.append("picture", file);
 
     try {
@@ -77,14 +77,14 @@ const LogMeal = () => {
       if (user) {
         //get the id token
         const token = await user.getIdToken();
-
+        
         //send a POST request with the form data and authorization header
         const response = await axiosInstance.post("/api/log-meal", data, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
+        console.log("response", response);
         const { id: mealLogId } = response.data
         //
         if(mealLogId){
@@ -102,7 +102,7 @@ const LogMeal = () => {
         console.log("User not authenticated");
       }
     } catch (err) {
-      console.error(err);
+      console.error(err.message);
     }
   };
 
