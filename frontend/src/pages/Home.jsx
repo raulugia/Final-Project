@@ -128,8 +128,9 @@ const Home = () => {
       const readyToReview = logs.filter(log => log.reviewAvailable)
       const notReadyToReview = logs.filter(log => !log.reviewAvailable)
       console.log("readyyyyy: ", readyToReview)
-      setPendingMealLogs(readyToReview)
-      setMealCountdowns(notReadyToReview)
+      console.log("notttt readyyyyy: ", notReadyToReview)
+      if (readyToReview.length > 0) setPendingMealLogs(readyToReview)
+      if (notReadyToReview.length > 0) setMealCountdowns(notReadyToReview)
     })
 
     return () => {
@@ -141,38 +142,55 @@ const Home = () => {
   //update countdowns every second
   useEffect(() => {
     const interval = setInterval(() =>{
-      if(mealCountdowns){
+      if(mealCountdowns.length > 0){
+        console.log("here")
         //update countdown every second
         setMealCountdowns(prevMealCountdowns => {
+          const updatedCountDowns = []
+          const readyToReview = []
           //iterate over the meals that are not ready to be reviewed
-          prevMealCountdowns.map(log => {
+          prevMealCountdowns.forEach((log )=> {
+            console.log(log)
+
             //reduce the time left by 1 second
             const newTimeLeft = log.timeLeft - 1000
-            //return the updated log with the new time left
-            return {...log, timeLeft: newTimeLeft > 0 ? newTimeLeft : 0}
-          })
-        }, 1000)
+
+            if(newTimeLeft <= 0){
+              readyToReview.push({...log, reviewAvailable: true, timeLeft: 0})
+            }else{
+              const hours = Math.floor((newTimeLeft) / (1000 * 60 * 60) % 24)
+              const minutes = Math.floor((newTimeLeft) / (1000 * 60) % 60)
+              const seconds = Math.floor((newTimeLeft / 1000) % 60)
+  
+              const formattedSeconds = String(seconds).padStart(2, "0")
+              const formattedHours = String(hours).padStart(2, "0")
+              const formattedMinutes = String(minutes).padStart(2, "0")
+  
+              const formattedTimeLeft = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+              updatedCountDowns.push({...log, timeLeft: newTimeLeft, formattedTimeLeft})
+            }
+
+            // if(formattedTimeLeft === "00:00:00"){
+            //   setPendingMealLogs([...pendingMealLogs, {...log, reviewAvailable: true, timeLeft: 0}])
+            //   return
+            // }
+
+            })
+            
+            if(readyToReview.length > 0){
+              setPendingMealLogs(prevPendingMealLogs => [...prevPendingMealLogs, ...readyToReview])
+            }
+
+            return updatedCountDowns
+        })
       }
-    })
+    }, 1000)
     //clear interval
     return () => clearInterval(interval)
 
-  }, [mealCountdowns])
+  }, [pendingMealLogs])
 
-  //method to redirect user to "/" when they click on "log out" button
-  // const handleClick = () => {
-  //   //sign out user
-  //   signOut(auth).then(() => {
-  //     //redirect to "/"
-  //     navigate("/")
-  //   }).catch(e => console.error(e))
-  // }
   return (
-    // <div className="pt-20">
-    //   <p>Welcome Home</p>
-    //   <p className="cursor-pointer font-semibold" onClick={handleClick}>Log Out</p>
-    // </div>
-    // <div className='flex justify-between min-h-screen pb-16 gap-4 bg-slate-200'>
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
       <div className="border bg-red-300 hidden md:block">
         <div className='bg-white py-5 sticky top-32'>
@@ -200,11 +218,11 @@ const Home = () => {
         </div>
         </div>
 
-        <div className="hidden md:flex md:flex-col md:items-end mt-32">
+        <div className="hidden md:flex md:flex-col md:items-end md:gap-8 mt-32 pr-4">
           {
             pendingRequests.length > 0 && (
 
-              <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
+              <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden w-[230px]'>
                 <div className='flex gap-2 items-center px-3'>
                   <FaUserFriends size={20} className='text-slate-800'/>
                   <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
@@ -217,18 +235,38 @@ const Home = () => {
               </div>
             )
           }
-          <div className="border border-slate-700 rounded-md overflow-hidden shadow-sm">
+          
+          <div className="border border-slate-700 rounded-md overflow-hidden shadow-sm w-[230px]">
             <h4 className="px-3 bg-slate-700 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
             <div className="flex flex-col bg-white min-h-[60px]">
               {
                 pendingMealLogs.length > 0 ? (
                   pendingMealLogs.map((log, index) => (
                     <div key={log+index} className={`px-3 py-1 ${index === pendingMealLogs.length - 1 ? "" : "border-b border-slate-700"}`}>
-                      <a href={`/my-meals/${log.mealId}/log/${log.id}`} class="hover:underline">{log.mealName}</a>
+                      <a href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</a>
                     </div>
                   ))
                 ):(
-                  <p className="mx-auto text-slate-400">No pending meal logs</p>
+                  <p className="mx-auto my-auto text-slate-400">No pending meal logs</p>
+                )
+              }
+            </div>
+          </div>
+
+          <div className="border border-slate-700 rounded-md overflow-hidden shadow-sm md:w-[230px] ">
+            <h4 className="px-3 bg-slate-700 text-white py-1 text-lg">Meal Logs Countdown</h4>
+            <div className="flex flex-col bg-white min-h-[60px]">
+            {
+                mealCountdowns.length > 0 ? (
+                  mealCountdowns.map((log, index) => (
+                    <div key={log+index} className={`px-3 py-1 flex justify-between ${index === mealCountdowns.length - 1 ? "" : "border-b border-slate-700"}`}>
+                      <p href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</p>
+                      <p>{log.formattedTimeLeft}</p>
+                      <p>A</p>
+                    </div>
+                  ))
+                ):(
+                  <p className="mx-auto my-auto text-slate-400">No pending meal logs</p>
                 )
               }
             </div>

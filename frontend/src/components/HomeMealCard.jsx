@@ -10,7 +10,8 @@ const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId,
         to={`${isOtherUser ? `/user/${user.username}/meals/${mealId}/log/${logId}` : `/my-meals/${mealId}/log/${logId}`}`} 
         className='rounded-2xl overflow-hidden shadow-md max-w-[456px] bg-white flex flex-col'
     >   
-        <div className='min-h-1/2 flex flex-col items-center bg-gradient-to-t from-blue-600 to-cyan-500 relative pt-2'>
+        {/* <div className='min-h-1/2 flex flex-col items-center bg-gradient-to-t from-blue-600 to-cyan-500 relative pt-2'> */}
+        <div className='min-h-1/2 flex flex-col items-center bg-gradient-to-t from-sky-900 to-cyan-600 relative pt-2'>
             <div className='mb-3'>
                 <p className='text-white font-bold text-2xl'>{mealName.toUpperCase()}</p>
                 <p className='text-white font-semibold'>{restaurantName}</p>

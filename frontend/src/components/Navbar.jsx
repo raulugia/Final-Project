@@ -50,8 +50,8 @@ const Navbar = ({ name }) => {
                 />
                 <button type="submit"><FaSearch color={"white"} className='hover:cursor-pointer'/></button>
             </form>
-            <div class={`relative select-none ${displayOptions ? "bg-slate-100" : ""}`}>
-                <div class="flex items-center">
+            <div className={`relative select-none ${displayOptions ? "bg-slate-100" : ""}`}>
+                <div className="flex items-center">
                     {
                         displayOptions ? (
                             <IoIosArrowUp />
@@ -62,8 +62,8 @@ const Navbar = ({ name }) => {
                     <p className={`text-sm text-black px-1 hover:cursor-pointer`} onClick={() => setDisplayOptions(!displayOptions)}> Hello, {name}</p>
                 </div>
                 <div className={`bg-slate-100 w-full px-1 top-5 text-sm pt-3 pb-2 flex flex-col gap-1 ${displayOptions ? "absolute shadow-md" : "hidden"}`}>
-                    <a href="/account" class="hover:underline hover:cursor-pointer">My Account</a>
-                    <p class="hover:underline hover:cursor-pointer" onClick={logOut}>Log out</p>
+                    <a href="/account" className="hover:underline hover:cursor-pointer">My Account</a>
+                    <p className="hover:underline hover:cursor-pointer" onClick={logOut}>Log out</p>
                 </div>
             </div>
         </div>
