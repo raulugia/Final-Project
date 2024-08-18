@@ -211,33 +211,50 @@ const Home = () => {
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
-      <div className="border hidden md:block">
-        <div className='bg-white py-5 sticky top-32'>
-          <p>This is goig to be updates</p>
+      {/* //Left */}
+      <div className="border hidden md:block mt-[100px] pl-4">
+
+        <div className='bg-white py-5 sticky top-56 w-[270px] h-[160px] rounded-lg shadow-md z-20'>
+          
+          <div className="rounded-full w-[160px] h-[160px] bg-sky-900 absolute z-21 inset-0 top-[-100px] mx-auto shadow-md">
+            {/* <img src="" alt="" /> */}
+          </div>
+          <div className="px-6 mt-14 w-full relative">
+            {
+              !loading &&(
+                <div className="flex flex-col items-center">
+                  <h4 className="text-2xl font-semibold mx-auto">{logs[0]?.user.name} {logs[0]?.user.surname}</h4>
+                  <p>@{logs[0]?.user.username}</p>
+                </div>
+              )
+            }
+          </div>
         </div>
+
       </div>
 
-        <div className='flex flex-col gap-4 px-5 mt-20'>
-          <h1 className='text-2xl font-bold text-sky-900 mb-2'>Your Recent Logs</h1>
-          <div className='flex flex-col gap-5'>
-            {   
-                loading ? (
-                  <SkeletonHomeMealCard />
-                ) : (
-                  logs.map((log, index) => (
-                    //ref will be assigned when the last HomeMealCard is rendered
-                    <HomeMealCard 
-                      key={log.logId} {...log} 
-                      isOtherUser={false} 
-                      ref={index === logs.length - 1 ? lastLogRef: null}
-                    />
-                  ))
-                )
-            }
+      {/* Middle */}
+      <div className='flex flex-col gap-4 px-5 mt-20'>
+        <h1 className='text-2xl font-bold text-sky-900 mb-2'>Your Recent Logs</h1>
+        <div className='flex flex-col gap-6'>
+          {   
+              loading ? (
+                <SkeletonHomeMealCard />
+              ) : (
+                logs.map((log, index) => (
+                  //ref will be assigned when the last HomeMealCard is rendered
+                  <HomeMealCard 
+                    key={log.logId} {...log} 
+                    isOtherUser={false} 
+                    ref={index === logs.length - 1 ? lastLogRef: null}
+                  />
+                ))
+              )
+          }
         </div>
-        </div>
-
-        <div className="hidden md:flex md:flex-col md:items-end md:gap-8 mt-32 pr-4">
+      </div>
+          {/* Right */}
+        <div className="hidden md:flex md:flex-col md:items-end md:gap-8 mt-[135px] pr-4">
           {
             pendingRequests.length > 0 && (
 
@@ -255,7 +272,7 @@ const Home = () => {
             )
           }
           
-          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm w-[230px]">
+        <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm w-[260px]">
             <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
             <div className="flex flex-col bg-white min-h-[60px]">
               {
@@ -270,9 +287,9 @@ const Home = () => {
                 )
               }
             </div>
-          </div>
+        </div>
 
-          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm md:w-[230px] ">
+          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm md:w-[260px]">
             <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs Countdown</h4>
             <div className="flex flex-col bg-white min-h-[60px]">
             {

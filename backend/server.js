@@ -108,6 +108,13 @@ app.get("/api/home", authenticateUser, async(req, res) => {
                     include: {
                         restaurant: true
                     }
+                },
+                user: {
+                    select: {
+                        name: true,
+                        surname: true,
+                        username: true
+                    }
                 }
             }
 
@@ -123,6 +130,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             createdAt: log.createdAt,
             rating: log.rating,
             description: log.description,
+            user: log.user
         }))
 
         res.json(response)

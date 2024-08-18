@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import axiosInstance from "../../../utils/axiosInstance"
+import { MdOutlineCameraAlt } from "react-icons/md";
 
 //reducer function to manage state updates based on action types
 const reducer = (newUser, action) => {
@@ -35,6 +36,11 @@ const Register = () => {
   //hook to navigate withing the web app
   const navigate = useNavigate();
 
+  //state to store the picture uploaded by the user
+  const [file, setFile] = useState(null);
+  //
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+
   //method triggered after the user submits the form to register
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,15 +53,28 @@ const Register = () => {
             //store new user
             const user = userCredential.user;
 
+            //create a FormData object so the data can be sent to the server
+            const data = new FormData();
+            data.append("email", newUser.email);
+            data.append("name", newUser.name);
+            data.append("surname", newUser.surname);
+            data.append("username", newUser.username);
+            data.append("uid", user.uid);
+
+            if(file){
+              data.append("profilePicUrl", file);
+            }
+
             //send a POST request with the user's data so it can be saved in the database in Railway
-            await axiosInstance.post("/api/register", {
-              email: newUser.email,
-              name: newUser.name,
-              surname: newUser.surname,
-              username: newUser.username,
-              uid: user.uid,
-              profilePicUrl: "",
-            })
+            await axiosInstance.post("/api/register", data)
+            // await axiosInstance.post("/api/register", {
+            //   email: newUser.email,
+            //   name: newUser.name,
+            //   surname: newUser.surname,
+            //   username: newUser.username,
+            //   uid: user.uid,
+            //   profilePicUrl: "",
+            // })
 
             //update the user's name in Firebase
             await updateProfile(user, { displayName: newUser.name })
@@ -69,12 +88,64 @@ const Register = () => {
     }
   };
 
+  //method to update the file state when the file input changes
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0]
+    setFile(selectedFile);
+
+    const reader = new FileReader();
+
+    //set up an event handler to be called when the reading process has finished
+    reader.onloadend = () => {
+      //update state to store the image url
+      setImagePreviewUrl(reader.result)
+    }
+
+    //case a file was chosen by the user
+    if(selectedFile) {
+      //read file and convert it to url
+      reader.readAsDataURL(selectedFile)
+    }
+  };
+
   return (
     <div className="flex justify-center items-center h-full bg-slate-50 min-h-screen">
       <div className="border py-5 px-3 rounded-lg shadow-md bg-white">
         <p className="mb-5 text-2xl font-semibold">Register Now!</p>
 
         <form action="" className="flex flex-col gap-3">
+        <div className="flex items-center justify-center w-[50%] mx-auto mb-2">
+            <label
+              htmlFor="dropzone-file"
+              className={`flex flex-col items-center justify-center w-[170px] h-[170px] rounded-full cursor-pointer overflow-hidden ${imagePreviewUrl ? "" : "border-2 border-gray-300 border-dashed bg-gray-50 dark:hover:bg-bray-800 hover:bg-gray-100"}`}
+            >
+              {
+                imagePreviewUrl ? (
+                  <img src={imagePreviewUrl} alt="profile picture" />
+                ) : (
+
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <MdOutlineCameraAlt size={30} style={{ color: "gray" }} />
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span>
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    (MAX. 800x400px)
+                  </p>
+                </div>
+                )
+              }
+              <input
+                id="dropzone-file"
+                type="file"
+                className="hidden"
+                accept=".jpg, .jpeg, .svg, .png, .bmp, .webp, .heic, .heif, .tiff"
+                onChange={handleFileChange}
+              />
+            </label>
+      
+          </div>
+
           <div className="flex gap-2">
             <input
               type="text"

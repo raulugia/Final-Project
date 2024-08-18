@@ -27,7 +27,7 @@ const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId,
                     >
                         {description}
                     </p>
-                    <p className='mx-auto text-xl font-semibold text-slate-400'>Carbs: <span className='text-blue-600 font-bold text-2xl'>{carbEstimate}g</span></p>
+                    <p className='mx-auto text-xl font-semibold text-slate-400'>Carbs: <span className='text-sky-800 font-bold text-2xl'>{carbEstimate}g</span></p>
                 </div>
             </div>
             <div className='absolute z-20 bottom-[-135px]'>
