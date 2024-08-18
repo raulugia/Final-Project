@@ -14,7 +14,7 @@ const Log = () => {
     const user = auth.currentUser
     //get location object
     const logLocation = useLocation()
-    console.log("location", logLocation)
+    console.log("LOCATION|: ", logLocation)
     //state to store the meal log data
     const [log, setLog] = useState(logLocation.state || {})
     //get username, meal id and log id
@@ -28,6 +28,8 @@ const Log = () => {
     useEffect(() => {
         //method to send a get request to fetch log data    
         const fetchLog = async() => {
+            setLog({})
+            setLoading(true)
             //get user's id token for authorization in the server
             const token = await user.getIdToken()
             try{
@@ -41,9 +43,13 @@ const Log = () => {
 
                 //format and store the date of the log
                 const displayData = {...data, createdAt: formatDate(data.createdAt)}
-                console.log(`log has been fetched: ${displayData}`)
+                console.log(`log has been fetched: ${data}`)
                 //update state so the log data is displayed
                 setLog(displayData)
+
+                if(displayData.rating === "PENDING"){
+                    setEdit(true)
+                }
                 //hide loading element
                 setLoading(false)
             }catch(err){
@@ -83,13 +89,21 @@ const Log = () => {
 
   return (
     <>
-    <div className='flex justify-center items-start min-h-screen pb-16 gap-4 bg-slate-200 pt-20'>
-
+    <div className='flex flex-col justify-start items-center min-h-screen pb-16 gap-4 bg-slate-200 pt-20'>
         {
             loading ? (
                 <div>Loading...</div>
             ) : (
-                <div className='border flex justify-start mt-8 bg-white w-[85%] md:w-[75%] max-w-[790px] rounded-lg px-8 py-7 shadow-md'>
+                <>
+                {
+                    log.rating !== "PENDING" && (
+                        <div className="md:mr-auto md:pl-14">
+                            <h1 className="text-3xl font-semibold mb-3">Log Details</h1>
+                            <p>Click on <span className="border border-slate-400 px-1 bg-slate-100 rounded-sm">Edit Log</span> to update the log details</p>
+                        </div>
+                    ) 
+                }
+                <div className='border flex justify-start mt-8 bg-white w-[85%] md:w-[80%] max-w-[790px] rounded-lg px-8 py-7 shadow-md'>
                     <div className='flex md:flex-row flex-col w-full'>
 
                         <div className='md:w-[50%] max-w-[280px] overflow-hidden rounded-md mx-auto md:mx-0'>
@@ -117,8 +131,10 @@ const Log = () => {
                                     </div>
                                     <h3 className='text-slate-600 md:text-md'>{log.restaurantName || log.meal?.restaurant?.name}</h3>
                                 </div>
+                                
                                 <div className='flex flex-col items-start'>
                                     <p className='text-slate-700 font-semibold md:text-lg'>Carb estimate: <span className="font-normal">{log.carbEstimate}g</span></p>
+                                    
                                     <Accuracy accuracy={log.rating}/>
                                     {
                                         log.description && (
@@ -138,6 +154,7 @@ const Log = () => {
                     </div>
 
                 </div>
+                </>
             )
         }
     </div>

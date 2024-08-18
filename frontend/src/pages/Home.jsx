@@ -125,11 +125,14 @@ const Home = () => {
     socket.emit("getPendingMealLogs")
 
     socket.on("pendingMealLogs", (logs) => {
+      //store logs that are ready to be reviewed
       const readyToReview = logs.filter(log => log.reviewAvailable)
+      //store logs that are not ready to be reviewed
       const notReadyToReview = logs.filter(log => !log.reviewAvailable)
-      console.log("readyyyyy: ", readyToReview)
-      console.log("notttt readyyyyy: ", notReadyToReview)
+      
+      //case there are logs ready to be reviewed - update state
       if (readyToReview.length > 0) setPendingMealLogs(readyToReview)
+        //case there are logs not ready to be reviewed - update state
       if (notReadyToReview.length > 0) setMealCountdowns(notReadyToReview)
     })
 
@@ -146,42 +149,39 @@ const Home = () => {
         console.log("here")
         //update countdown every second
         setMealCountdowns(prevMealCountdowns => {
+          //array of logs that are ready to be reviewed
           const updatedCountDowns = []
+          //array of logs that are not ready to be reviewed
           const readyToReview = []
+
           //iterate over the meals that are not ready to be reviewed
           prevMealCountdowns.forEach((log )=> {
-            console.log(log)
-
             //reduce the time left by 1 second
             const newTimeLeft = log.timeLeft - 1000
 
+            //case countdown has reached 00:00:00 and is ready to be reviewed
             if(newTimeLeft <= 0){
+              //add log to the array of logs ready to be reviewed
               readyToReview.push({...log, reviewAvailable: true, timeLeft: 0})
+            
+            //case log is not ready to be reviewed
             }else{
-              const hours = Math.floor((newTimeLeft) / (1000 * 60 * 60) % 24)
-              const minutes = Math.floor((newTimeLeft) / (1000 * 60) % 60)
-              const seconds = Math.floor((newTimeLeft / 1000) % 60)
-  
-              const formattedSeconds = String(seconds).padStart(2, "0")
-              const formattedHours = String(hours).padStart(2, "0")
-              const formattedMinutes = String(minutes).padStart(2, "0")
-  
-              const formattedTimeLeft = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+              //get formatted time left
+              const formattedTimeLeft = formatTime(newTimeLeft)
+              //add log to the array of logs that are not ready to be reviewed
               updatedCountDowns.push({...log, timeLeft: newTimeLeft, formattedTimeLeft})
             }
 
-            // if(formattedTimeLeft === "00:00:00"){
-            //   setPendingMealLogs([...pendingMealLogs, {...log, reviewAvailable: true, timeLeft: 0}])
-            //   return
-            // }
+          })
+          
+          //case a log was added to the array of logs ready to be reviewed
+          if(readyToReview.length > 0){
+            //update state containing logs that are ready to be reviewed - trigger rerender
+            setPendingMealLogs(prevPendingMealLogs => [...prevPendingMealLogs, ...readyToReview])
+          }
 
-            })
-            
-            if(readyToReview.length > 0){
-              setPendingMealLogs(prevPendingMealLogs => [...prevPendingMealLogs, ...readyToReview])
-            }
-
-            return updatedCountDowns
+          //return the log with the updated countdown
+          return updatedCountDowns
         })
       }
     }, 1000)
@@ -190,16 +190,35 @@ const Home = () => {
 
   }, [pendingMealLogs])
 
+  //method to format the time left for a log to be reviewed
+  const formatTime = (newTimeLeft) => {
+    //format time to hh:mm:ss
+    const hours = Math.floor((newTimeLeft) / (1000 * 60 * 60) % 24)
+    const minutes = Math.floor((newTimeLeft) / (1000 * 60) % 60)
+    const seconds = Math.floor((newTimeLeft / 1000) % 60)
+
+    //ensure hours, minutes and seconds have 2 digits
+    const formattedSeconds = String(seconds).padStart(2, "0")
+    const formattedHours = String(hours).padStart(2, "0")
+    const formattedMinutes = String(minutes).padStart(2, "0")
+
+    //construct the time left string
+    const formattedTimeLeft = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+
+    //return formatted time left
+    return formattedTimeLeft
+  }
+
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
-      <div className="border bg-red-300 hidden md:block">
+      <div className="border hidden md:block">
         <div className='bg-white py-5 sticky top-32'>
           <p>This is goig to be updates</p>
         </div>
       </div>
 
         <div className='flex flex-col gap-4 px-5 mt-20'>
-          <h1 className='text-2xl font-bold text-slate-700 mb-2'>Your Recent Logs</h1>
+          <h1 className='text-2xl font-bold text-sky-900 mb-2'>Your Recent Logs</h1>
           <div className='flex flex-col gap-5'>
             {   
                 loading ? (
@@ -224,8 +243,8 @@ const Home = () => {
 
               <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden w-[230px]'>
                 <div className='flex gap-2 items-center px-3'>
-                  <FaUserFriends size={20} className='text-slate-800'/>
-                  <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
+                  <FaUserFriends size={20} className='text-sky-800'/>
+                  <h1 className='text-lg text-sky-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
                 </div>
                 {
                   pendingRequests.map(request => (
@@ -236,8 +255,8 @@ const Home = () => {
             )
           }
           
-          <div className="border border-slate-700 rounded-md overflow-hidden shadow-sm w-[230px]">
-            <h4 className="px-3 bg-slate-700 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
+          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm w-[230px]">
+            <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
             <div className="flex flex-col bg-white min-h-[60px]">
               {
                 pendingMealLogs.length > 0 ? (
@@ -253,8 +272,8 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="border border-slate-700 rounded-md overflow-hidden shadow-sm md:w-[230px] ">
-            <h4 className="px-3 bg-slate-700 text-white py-1 text-lg">Meal Logs Countdown</h4>
+          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm md:w-[230px] ">
+            <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs Countdown</h4>
             <div className="flex flex-col bg-white min-h-[60px]">
             {
                 mealCountdowns.length > 0 ? (

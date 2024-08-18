@@ -95,6 +95,10 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
 
   return (
     <div className='flex flex-col items-center min-h-screen pb-16 bg-slate-200 pt-20'>
+        <div className="mr-auto">
+            <h1 className="text-3xl font-semibold mb-3">Review Accuracy</h1>
+            <p>Select an accuracy level for this log. You can also edit the log information.</p>
+        </div>
         {
             error &&(
                 <div className='border border-red-300 flex justify-start items-center gap-1 w-[85%] md:w-[75%] max-w-[790px] rounded-lg px-4 py-1 shadow-sm mt-8 bg-red-200'>
@@ -102,7 +106,7 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                 </div>
             )
         }
-    <div className='border flex justify-start bg-white w-[85%] md:w-[75%] max-w-[790px] rounded-lg px-8 py-7 shadow-md mt-3'>
+    <div className='border flex justify-start bg-white w-[85%] md:w-[75%] max-w-[790px] rounded-lg px-8 py-7 shadow-md mt-8'>
         <form className='flex md:flex-row flex-col w-full'>
 
             <div className='md:w-[50%] max-w-[280px] max-h-[280px] overflow-hidden rounded-md mx-auto md:mx-0 relative'>
