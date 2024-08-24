@@ -10,7 +10,7 @@ const { imageQueue, imageUpdateQueue, profilePictureQueue } = require("./queue")
 const authenticateUser = require("./authMiddleware");
 const { types } = require("pg");
 const http = require("http");
-const { initializeSocket, notifyUserNewReq } = require("./socket");
+const { initializeSocket, notifyUserNewReq} = require("./socket");
 
 //initialize the Prisma client
 const prisma = new PrismaClient();
@@ -109,18 +109,26 @@ app.get("/api/home", authenticateUser, async(req, res) => {
                         restaurant: true
                     }
                 },
-                user: {
-                    select: {
-                        name: true,
-                        surname: true,
-                        username: true
-                    }
-                }
             }
 
         })
 
-        const response = logs.map(log => ({
+        const userData = await prisma.user.findUnique({
+            where: {
+                uid: req.user.uid
+            },
+            select: {
+                name: true,
+                surname: true,
+                username: true,
+                profilePicUrl: true,
+                profileThumbnailUrl: true
+            }
+        })
+
+        console.log("user data: ", userData)
+
+        const responseLogs = logs.map(log => ({
             logId: log.id,
             mealId: log.meal.id,
             mealName: log.meal.name,
@@ -130,8 +138,10 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             createdAt: log.createdAt,
             rating: log.rating,
             description: log.description,
-            user: log.user
+            user: userData
         }))
+
+        const response = {logs: responseLogs, user: userData}
 
         res.json(response)
     }catch(err){
@@ -484,9 +494,9 @@ app.get("/api/user/:username/friends", authenticateUser, async(req, res) => {
 })
 
 //endpoint for user registration
-app.post("/api/register", authenticateUser, async (req, res) => {
+app.post("/api/register", upload.single("profilePicUrl"),async (req, res) => {
   //extract email, name and surname from the request body
-  const { email, name, surname, username, uid, profilePicUrl } = req.body;
+  const { email, name, surname, username, uid } = req.body;
 
   try {
     //create a new user in the database with the extracted data
@@ -497,13 +507,25 @@ app.post("/api/register", authenticateUser, async (req, res) => {
         surname,
         username,
         uid,
-        profilePicUrl,
+        profilePicUrl: "",
+        profileThumbnailUrl: "",
       },
     });
+
+    if(req.file) {
+        const file  = req.file
+        
+        await profilePictureQueue.add({
+            filePath: file.path,
+            userUid: user.uid,
+        });
+    }
+
     
     //respond with the new user object
     res.json(user);
   } catch (err) {
+    console.log(err)
     //respond with a 400 status code if there was an error
     res.status(400).json({ error: err.message });
   }
@@ -664,10 +686,14 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
       //add job to queue for image processing
       //as a result, a thumbnail will be created and both the original image and thumbnail will be uploaded to
       //Clodinary and their URLs will be added to the database in Railway
-      await imageQueue.add({
+      const job = await imageQueue.add({
         filePath: picture.path,
         mealId: mealLog.id,
+        userUid: req.user.uid,
       });
+
+      const result = await job.finished()
+      console.log("finished", result)
 
     } catch (err) {
         console.log(err)

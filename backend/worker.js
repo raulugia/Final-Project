@@ -64,6 +64,11 @@ imageQueue.process(async (job) => {
       },
     });
 
+    return {
+      mealLogId: updatedMealLog.id,
+      picture: updatedMealLog.picture,
+      thumbnail: updatedMealLog.thumbnail,
+    }
     console.log(`Updated meal log: ${JSON.stringify(updatedMealLog)}`);
   } catch (err) {
     console.error(`Failed to process job for meal ID: ${mealId}`, err);
@@ -152,7 +157,7 @@ profilePictureQueue.process(async(job) => {
 
     //update meal log in the database with the Cloudinary urls
     const updatedUser = await prisma.user.update({
-      where: { id: userUid },
+      where: { uid: userUid },
       data: {
         profilePicUrl: originalUpload.secure_url,
         profileThumbnailUrl: thumbnailUpload.secure_url,

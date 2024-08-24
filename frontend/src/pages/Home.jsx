@@ -15,6 +15,7 @@ const Home = () => {
   const user = auth.currentUser
   //state used to hold the logs returned by the server
   const [logs, setLogs] = useState([])
+  const [userData, setUserData] = useState({})
   const navigate = useNavigate();
   //state used to display Loading component when data is being fetched
   const [loading, setLoading] = useState(true)
@@ -77,9 +78,10 @@ const Home = () => {
         //only update states if ignore is false
         if(!ignore){
           //format date of every log
-          const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+          const displayData = data.logs.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
           //update logs state with formatted logs
           setLogs(prevLogs => [...prevLogs, ...displayData])
+          setUserData(data.user)
           //hide loading component
           setLoading(false)
 
@@ -136,59 +138,69 @@ const Home = () => {
       if (notReadyToReview.length > 0) setMealCountdowns(notReadyToReview)
     })
 
+    socket.on("imageReady", ({id, pictureUlr, thumbnailUlr}) => {
+      console.log("event recieved: ", id, pictureUlr, thumbnailUlr)
+      setLogs(prevLogs => prevLogs.map(log => {
+        return log.id === id ? ({...log, pictureUlr: pictureUlr, thumbnailUlr: thumbnailUlr}) : log
+      }))
+    })
+
     return () => {
       socket.off("pendingMealLogs")
+      socket.off("imageReady")
     }
 
   },[])
 
   //update countdowns every second
   useEffect(() => {
-    const interval = setInterval(() =>{
-      if(mealCountdowns.length > 0){
-        console.log("here")
-        //update countdown every second
-        setMealCountdowns(prevMealCountdowns => {
-          //array of logs that are ready to be reviewed
-          const updatedCountDowns = []
-          //array of logs that are not ready to be reviewed
-          const readyToReview = []
+    if(mealCountdowns.length > 0){
+      const interval = setInterval(() =>{
+        if(mealCountdowns.length > 0){
+          //update countdown every second
+          setMealCountdowns(prevMealCountdowns => {
+            //array of logs that are ready to be reviewed
+            const updatedCountDowns = []
+            //array of logs that are not ready to be reviewed
+            const readyToReview = []
 
-          //iterate over the meals that are not ready to be reviewed
-          prevMealCountdowns.forEach((log )=> {
-            //reduce the time left by 1 second
-            const newTimeLeft = log.timeLeft - 1000
+            //iterate over the meals that are not ready to be reviewed
+            prevMealCountdowns.forEach((log )=> {
+              //reduce the time left by 1 second
+              const newTimeLeft = log.timeLeft - 1000
 
-            //case countdown has reached 00:00:00 and is ready to be reviewed
-            if(newTimeLeft <= 0){
-              //add log to the array of logs ready to be reviewed
-              readyToReview.push({...log, reviewAvailable: true, timeLeft: 0})
+              //case countdown has reached 00:00:00 and is ready to be reviewed
+              if(newTimeLeft <= 0){
+                //add log to the array of logs ready to be reviewed
+                readyToReview.push({...log, reviewAvailable: true, timeLeft: 0})
+              
+              //case log is not ready to be reviewed
+              }else{
+                //get formatted time left
+                const formattedTimeLeft = formatTime(newTimeLeft)
+                //add log to the array of logs that are not ready to be reviewed
+                updatedCountDowns.push({...log, timeLeft: newTimeLeft, formattedTimeLeft})
+              }
+
+            })
             
-            //case log is not ready to be reviewed
-            }else{
-              //get formatted time left
-              const formattedTimeLeft = formatTime(newTimeLeft)
-              //add log to the array of logs that are not ready to be reviewed
-              updatedCountDowns.push({...log, timeLeft: newTimeLeft, formattedTimeLeft})
+            //case a log was added to the array of logs ready to be reviewed
+            if(readyToReview.length > 0){
+              //update state containing logs that are ready to be reviewed - trigger rerender
+              setPendingMealLogs(prevPendingMealLogs => [...prevPendingMealLogs, ...readyToReview])
             }
 
+            //return the log with the updated countdown
+            return updatedCountDowns
           })
-          
-          //case a log was added to the array of logs ready to be reviewed
-          if(readyToReview.length > 0){
-            //update state containing logs that are ready to be reviewed - trigger rerender
-            setPendingMealLogs(prevPendingMealLogs => [...prevPendingMealLogs, ...readyToReview])
-          }
-
-          //return the log with the updated countdown
-          return updatedCountDowns
-        })
-      }
-    }, 1000)
+        }
+      }, 1000)
+      
     //clear interval
     return () => clearInterval(interval)
+  }
 
-  }, [pendingMealLogs])
+  }, [mealCountdowns])
 
   //method to format the time left for a log to be reviewed
   const formatTime = (newTimeLeft) => {
@@ -214,17 +226,17 @@ const Home = () => {
       {/* //Left */}
       <div className="border hidden md:block mt-[100px] pl-4">
 
-        <div className='bg-white py-5 sticky top-56 w-[270px] h-[160px] rounded-lg shadow-md z-20'>
+        <div className='bg-white py-5 sticky top-56 w-[270px] h-[160px] rounded-lg shadow-md z-20 '>
           
-          <div className="rounded-full w-[160px] h-[160px] bg-sky-900 absolute z-21 inset-0 top-[-100px] mx-auto shadow-md">
-            {/* <img src="" alt="" /> */}
+          <div className="rounded-full w-[160px] h-[160px] absolute z-21 inset-0 top-[-100px] overflow-hidden mx-auto shadow-md outline outline-2 outline-sky-900">
+            <img src={userData.profileThumbnailUrl} alt="" />
           </div>
           <div className="px-6 mt-14 w-full relative">
             {
               !loading &&(
                 <div className="flex flex-col items-center">
-                  <h4 className="text-2xl font-semibold mx-auto">{logs[0]?.user.name} {logs[0]?.user.surname}</h4>
-                  <p>@{logs[0]?.user.username}</p>
+                  <h4 className="text-2xl font-semibold mx-auto">{userData.name} {userData.surname}</h4>
+                  <p>@{userData.username}</p>
                 </div>
               )
             }
@@ -298,7 +310,6 @@ const Home = () => {
                     <div key={log+index} className={`px-3 py-1 flex justify-between ${index === mealCountdowns.length - 1 ? "" : "border-b border-slate-700"}`}>
                       <p href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</p>
                       <p>{log.formattedTimeLeft}</p>
-                      <p>A</p>
                     </div>
                   ))
                 ):(
