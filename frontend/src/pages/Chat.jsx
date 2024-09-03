@@ -71,8 +71,10 @@ const Chat = () => {
 
         //listener used to add the latest message to the "message" state so it can be displayed
         socket.on("receiveMessage", message => {
+            //format the timestamp
+            const formattedMessage = {...message, timestamp: formatTime(message.timestamp)} 
             //add new message to state
-            setMessages(prevMessages => [...prevMessages, ...message])
+            setMessages(prevMessages => [...prevMessages, formattedMessage])
         })
 
         return () => {

@@ -306,7 +306,8 @@ const Home = () => {
         </div>
       </div>
           {/* Right */}
-        <div className="hidden md:flex md:flex-col md:items-end md:gap-8 mt-[135px] pr-4">
+      <div class="mt-[135px] pr-4 md:flex md:justify-end">
+        <div className="hidden md:flex md:flex-col md:items-end md:gap-8  md:fixed">
           {
             pendingRequests.length > 0 && (
 
@@ -324,22 +325,22 @@ const Home = () => {
             )
           }
           
-        <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm w-[260px]">
-            <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
-            <div className="flex flex-col bg-white min-h-[60px]">
-              {
-                pendingMealLogs.length > 0 ? (
-                  pendingMealLogs.map((log, index) => (
-                    <div key={log+index} className={`px-3 py-1 ${index === pendingMealLogs.length - 1 ? "" : "border-b border-slate-700"}`}>
-                      <a href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</a>
-                    </div>
-                  ))
-                ):(
-                  <p className="mx-auto my-auto text-slate-400">No pending meal logs</p>
-                )
-              }
-            </div>
-        </div>
+          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm w-[260px]">
+              <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
+              <div className="flex flex-col bg-white min-h-[60px] justify-center">
+                {
+                  pendingMealLogs.length > 0 ? (
+                    pendingMealLogs.map((log, index) => (
+                      <div key={log+index} className={`px-3 py-1 ${index === pendingMealLogs.length - 1 ? "" : "border-b border-slate-700"}`}>
+                        <a href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</a>
+                      </div>
+                    ))
+                  ):(
+                    <p className="mx-auto my-auto text-slate-400">No pending meal logs</p>
+                  )
+                }
+              </div>
+          </div>
 
           <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm md:w-[260px]">
             <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs Countdown</h4>
@@ -358,6 +359,7 @@ const Home = () => {
               }
             </div>
           </div>
+        </div>
       </div>
     </div>
   )

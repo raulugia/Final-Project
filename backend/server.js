@@ -690,7 +690,10 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
         filePath: picture.path,
         mealId: mealLog.id,
         userUid: req.user.uid,
-      });
+        //retry up to 3 times if it fails with a 5-second interval. Job must be completed within 2 minutes.
+      }, {attempts: 3, backoff: 5000, timeout: 120000})
+
+      
 
     } catch (err) {
         console.log(err)
@@ -810,7 +813,8 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
                 oldLogId: existingLog.id,
                 oldPictureUrl: existingLog.picture,
                 oldThumbnailUrl: existingLog.thumbnail,
-            })
+                //retry up to 3 times if it fails with a 5-second interval. Job must be completed within 2 minutes.
+            }, {attempts: 3, backoff: 5000, timeout: 120000})
         }
 
         const remainingLogs = await prisma.mealLog.findMany({

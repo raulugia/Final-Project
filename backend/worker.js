@@ -72,6 +72,7 @@ imageQueue.process(async (job) => {
     console.log(`Updated meal log: ${JSON.stringify(updatedMealLog)}`);
   } catch (err) {
     console.error(`Failed to process job for meal ID: ${mealId}`, err);
+    throw err
   }
 });
 
@@ -120,8 +121,9 @@ imageUpdateQueue.process(async(job) => {
     console.log(`Updated meal log: ${JSON.stringify(updatedMealLog)}`);
   }catch(err){
     console.error(`Failed to process job for meal ID: ${mealLogId}`, err);
+    throw err
   }
-})
+}) //retry 5 times with a 5-second delay
 
 profilePictureQueue.process(async(job) => {
   //extract the data from job
@@ -168,5 +170,6 @@ profilePictureQueue.process(async(job) => {
     console.log(`Updated user: ${JSON.stringify(updatedUser)}`);
   }catch(err){
     console.error(`Failed to process job for user ID: ${userUid}`, err);
+    throw err
   }
 })
