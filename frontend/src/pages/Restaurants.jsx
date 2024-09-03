@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import SkeletonRestaurantCard from '../components/SkeletonRestaurantCard';
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link, useParams } from "react-router-dom"
+import Error from '../components/Error'
 
 const Restaurants = () => {
     const user = auth.currentUser
@@ -16,6 +17,8 @@ const Restaurants = () => {
     //get username - if it exists, other user's restaurants will be rendered
     //if it does not exist, current user's restaurants will be rendered
     const { username } = useParams()
+    //state to store an error message
+    const [error, setError] = useState("")
 
     useEffect(() => {
         (
@@ -25,7 +28,7 @@ const Restaurants = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get curren user's/other user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/restaurants` : "/api/restaurants"}`, {
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/restaurants` : "/restaurants"}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -35,7 +38,15 @@ const Restaurants = () => {
                     setFilteredRestaurants(data)
                     setLoading(false)
                 } catch(err) {
-                    console.log(err)
+                    //update state to display an error message
+                    if(err.response && err.response.data && err.response.data.error){
+                        setError(err.response.data.error)
+                    } else {
+                        setError("Failed to load restaurants. Please try again later.")
+                    }
+                } finally {
+                    //hide loading state
+                    setLoading(false)
                 }
             }
         )()
@@ -65,12 +76,12 @@ const Restaurants = () => {
     <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
         <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>My Restaurants</h1>
         <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
-            <form action="" className='absolute h-fit inset-0 mt-[-30px] mx-10'>
+            <div action="" className='absolute h-fit inset-0 mt-[-30px] mx-10'>
                 <input type="search" name="" id="" value={searchInput} placeholder='Search for restaurants...' 
                     className='py-3 px-6 text-lg w-full rounded-full shadow-md'
                     onChange={handleInputChange}
                 />
-            </form>
+            </div>
             <div className='flex flex-col gap-4 mt-4'>
         {   
             filteredRestaurants.length > 0 && !loading ? (
@@ -89,15 +100,20 @@ const Restaurants = () => {
                     </Link>
                 ))
             ) :  filteredRestaurants.length <= 0 && !loading ?(
-            
-                <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
-                    <p>We couldn't find any restaurants that match your search.</p>
-                </div>
+                error ? (
+                    <div className="mx-8 mt-5">
+                        <Error message={error} />
+                    </div>
+                ) : (
+                    <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
+                        <p>We couldn't find any restaurants that match your search.</p>
+                    </div>
+                )
             ) : (
                 <SkeletonRestaurantCard />
             )
         }
-            </div>
+        </div>
     </div>
     </div>
   )

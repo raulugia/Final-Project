@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import MealCard from '../components/MealCard'
 import SkeletonMealCard from '../components/SkeletonMealCard'
 import { useParams } from 'react-router-dom'
+import Error from '../components/Error'
 
 const Meals = () => {
     const user = auth.currentUser
@@ -14,6 +15,7 @@ const Meals = () => {
     const [loading, setLoading] = useState(true)
     //const [hoveredMeal, setHoveredMeal] = useState(null)
     const { username } = useParams()
+    const [error, setError] = useState("")
 
     useEffect(() => {
         (
@@ -23,7 +25,7 @@ const Meals = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/meals` : "/api/meals"}`, {
+                    const { data } = await axiosInstance.get(`${username ? `/user/${username}/meals` : "/meals"}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -45,12 +47,21 @@ const Meals = () => {
                       return 0;
                     });
                     
-                    console.log(sortedData)
+                    //update status with sorted meals
                     setMeals(sortedData)
                     setFilteredMeals(sortedData)
+
+                    //set loading to false
                     setLoading(false)
                 } catch(err) {
-                    console.log(err)
+                    //display error
+                    if(err.response && err.response.data && err.response.data.error){
+                        setError(err.response.data.error)
+                    } else {
+                        setError("Failed to retrieve the data. Please try again later.")
+                    }
+                } finally {
+                    setLoading(false)
                 }
             }
         )()
@@ -87,10 +98,15 @@ const Meals = () => {
                 loading ? (
                     <SkeletonMealCard />
                 ) : (
-
-                    filteredMeals.map(item => (
-                        <MealCard key={item.id} id={item.meal.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail} username={username}/>
-                    ))
+                    error ? (
+                        <div className="mx-8 mt-5">
+                            <Error message={error} />
+                        </div>
+                    ) : (
+                        filteredMeals.map(item => (
+                            <MealCard key={item.id} id={item.meal.id} mealName={item.meal.name} restaurantName={item.meal.restaurant.name} thumbnailUrl={item.thumbnail} username={username}/>
+                        ))
+                    )
                 )
             }
         </div>

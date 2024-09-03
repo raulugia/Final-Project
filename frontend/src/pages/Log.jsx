@@ -5,6 +5,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import Accuracy from "../components/Accuracy"
 import { IoMdClose } from "react-icons/io";
 import EditLog from '../components/EditLog'
+import Error from '../components/Error'
 
 //this component renders all the data linked to a particular meal log
 //in order to avoid redundant database queries, the data will only be fetched if it is not in the location object
@@ -23,6 +24,7 @@ const Log = () => {
     const [loading, setLoading] = useState(!logLocation.state)
     const [displayOverlay, setDisplayOverlay] = useState(false)
     const [edit, setEdit] = useState(false)
+    const [error, setError] = useState("")
     
     //request data from the server only if it was not passed in the location object
     useEffect(() => {
@@ -33,6 +35,7 @@ const Log = () => {
             //get user's id token for authorization in the server
             const token = await user.getIdToken()
             try{
+                console.log("in try")
                 //send a get request and store data from the request object
                 //route will vary based on whose data the system is fetching (current user vs other user)
                 const { data } = await axiosInstance.get(username ? `/user/${username}/meals/${mealId}/log/${logId}` : `/api/my-meals/${mealId}/log/${logId}`, { 
@@ -41,19 +44,28 @@ const Log = () => {
                     }
                 })
 
-                //format and store the date of the log
-                const displayData = {...data, createdAt: formatDate(data.createdAt)}
-                console.log(`log has been fetched: ${data}`)
-                //update state so the log data is displayed
-                setLog(displayData)
-
-                if(displayData.rating === "PENDING"){
-                    setEdit(true)
+                if(data){
+                    //format and store the date of the log
+                    const displayData = {...data, createdAt: formatDate(data.createdAt)}
+                    console.log(`log has been fetched: ${data}`)
+                    //update state so the log data is displayed
+                    setLog(displayData)
+    
+                    if(displayData.rating === "PENDING"){
+                        setEdit(true)
+                    }
+                    //hide loading element
+                    setLoading(false)
                 }
-                //hide loading element
-                setLoading(false)
             }catch(err){
                 console.error(err)
+                if(err.response && err.response.data && err.response.data.error){
+                    setError(err.response.data.error)
+                } else {
+                    setError("Failed to load meal logs. Please try again later.")
+                }
+            } finally {
+                setLoading(false)
             }
         }
 
@@ -94,7 +106,14 @@ const Log = () => {
             loading ? (
                 <div>Loading...</div>
             ) : (
-                <>
+                    error ? (
+                        error && (
+                            <div className="mt-5">
+                                <Error message={error}/>
+                            </div>
+                        )
+                    ) : (
+                        <>
                 {
                     log.rating !== "PENDING" && (
                         <div className="md:mr-auto md:pl-14">
@@ -152,10 +171,10 @@ const Log = () => {
                         </div>
 
                     </div>
-
                 </div>
                 </>
-            )
+                    )
+                )
         }
     </div>
     {

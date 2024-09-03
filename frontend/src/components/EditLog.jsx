@@ -95,7 +95,7 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
 
   return (
     <div className='flex flex-col items-center min-h-screen pb-16 bg-slate-200 pt-20'>
-        <div className="mr-auto">
+        <div className="mr-auto pl-10">
             <h1 className="text-3xl font-semibold mb-3">Review Accuracy</h1>
             <p>Select an accuracy level for this log. You can also edit the log information.</p>
         </div>

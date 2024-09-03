@@ -33,7 +33,7 @@ const ProfileCard = ({name, surname, username}) => {
         </div>
 
         <div className='mt-16 w-full'>
-            <Link to={`chats/${username}`} className='w-full flex gap-2 justify-center items-center border rounded-md bg-blue-600 hover:bg-blue-700 py-1'>
+            <Link to={`/chats/`} className='w-full flex gap-2 justify-center items-center border rounded-md bg-blue-600 hover:bg-blue-700 py-1'>
                 <RiMessage2Line className='text-white' size={24}/>
                 <p className='text-xl text-white font-semibold'>Message</p>
             </Link>

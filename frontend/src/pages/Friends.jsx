@@ -3,6 +3,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import { auth } from '../../utils/firebase'
 import FriendCard from '../components/FriendCard'
 import { useParams } from 'react-router-dom'
+import Error from '../components/Error'
 
 
 const Friends = () => {
@@ -19,6 +20,8 @@ const Friends = () => {
     //get username - if it exists, other user's friends will be rendered
     //if it does not exist, current user's friends will be rendered
     const { username } = useParams()
+    //state to store an error message
+    const [error, setError] = useState("")
 
     //get the user's friends
     useEffect(() => {
@@ -29,7 +32,7 @@ const Friends = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get current user's/other user's friends passing the id token for verification
-                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/friends` : "/api/friends"}`, {
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/friends` : "/friends"}`, {
                         headers: {
                         Authorization: `Bearer ${token}`,
                         },
@@ -40,7 +43,15 @@ const Friends = () => {
                     setFilteredFriends(data)
                     setLoading(false)
                 } catch(err) {
-                    console.log(err)
+                    //update state to display an error message
+                    if(err.response && err.response.data && err.response.data.error){
+                        setError(err.response.data.error)
+                    } else {
+                        setError("Failed to load friends. Please try again later.")
+                    }
+                } finally {
+                    //hide loading state
+                    setLoading(false)
                 }
             }
         )()
@@ -85,10 +96,17 @@ const Friends = () => {
                 <FriendCard name={friend.name} surname={friend.surname} username={friend.username} key={friend.id+friend.name}/>
             ))
         ) : (
+
+            error ? (
+                <div className="mx-8 mt-5">
+                    <Error message={error} />
+                </div>
+            ) : (
+                <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
+                    <p>We couldn't find any friends that match your search.</p>
+                </div>
+            )
            
-            <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
-                <p>We couldn't find any friends that match your search.</p>
-            </div>
         )
         }
     </div>

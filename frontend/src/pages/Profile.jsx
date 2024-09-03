@@ -7,6 +7,7 @@ import HomeMealCard from '../components/HomeMealCard';
 import ProfileCard from '../components/ProfileCard';
 import NotFriendsProfile from '../components/NotFriendsProfile';
 import SkeletonProfile from '../components/SkeletonProfile';
+import Error from '../components/Error'
 
 const Profile = () => {
   const user = auth.currentUser
@@ -32,23 +33,26 @@ const Profile = () => {
   const [displayPartialProfile, setDisplayPartialProfile] = useState(false)
   //
   const { username } = useParams()
+  //state to store an error message
+  const [error, setError] = useState("")
+
 
   //method to format the createdAt date
   const formatDate = (dateString) => {
-  //create a new Date object
-  const date = new Date(dateString)
+    //create a new Date object
+    const date = new Date(dateString)
 
-  //get the day, month and year - padStart(2, "0") ensures that the elements have a least 2 digits (7 => 07)
-  const day = String(date.getDate()).padStart(2, "0")
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const year = date.getFullYear()
+    //get the day, month and year - padStart(2, "0") ensures that the elements have a least 2 digits (7 => 07)
+    const day = String(date.getDate()).padStart(2, "0")
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const year = date.getFullYear()
 
-  //get the hour and minutes
-  const hours = String(date.getHours()).padStart(2, "0")
-  const minutes = String(date.getMinutes()).padStart(2, "0")
+    //get the hour and minutes
+    const hours = String(date.getHours()).padStart(2, "0")
+    const minutes = String(date.getMinutes()).padStart(2, "0")
 
-  //return the combined timestamp
-  return `Logged on ${day}/${month}/${year} at ${hours}:${minutes}`
+    //return the combined timestamp
+    return `Logged on ${day}/${month}/${year} at ${hours}:${minutes}`
 }
 
   useEffect(() => {
@@ -61,7 +65,7 @@ const Profile = () => {
         //get the id token
         const token = await user.getIdToken();
         //fetch first 5 meal logs - page is needed to calculate the offset in the server
-        const { data } = await axiosInstance.get(`/api/user/${username}`, {
+        const { data } = await axiosInstance.get(`/user/${username}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -77,7 +81,7 @@ const Profile = () => {
             setDisplayPartialProfile(true)
           }
         }
-        console.log("DATA", data)
+
         //only update states if ignore is false
         if(!ignore){
           setOtherUser({name: data.user.name, surname: data.user.surname, username: data.user.username, profilePicUrl: data.user.profilePicUrl})
@@ -87,18 +91,25 @@ const Profile = () => {
           //update logs state with formatted logs
           setLogs(prevLogs => [...prevLogs, ...displayData])
           setRestaurantsInCommon([...data.commonRestaurants])
-          //hide loading component
-          setLoading(false)
 
           //update state if there are no more logs left to fetch
           if(data.logs.length < 5) {
             setHasMoreLogs(false)
           }
+
+          //hide loading component
+          setLoading(false)
         }
       } catch(err) {
-        console.log(err)
-        //hide loading component
-        setLoading(false)
+          //update state to display an error message
+          if(err.response && err.response.data && err.response.data.error){
+              setError(err.response.data.error)
+          } else {
+              setError("Failed to load profile. Please try again later.")
+          }
+      } finally {
+          //hide loading state
+          setLoading(false)
       }
     })()
 
@@ -142,14 +153,18 @@ const Profile = () => {
           <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
             <div className="md:flex md:flex-col border hidden">
               {
-                otherUser && (
+                otherUser && !error && (
                   <ProfileCard {...otherUser} />
                 )
               }
             </div>
 
               <div className='flex flex-col gap-4 px-5 mt-20'>
-                <h1 className='text-2xl font-bold text-slate-700 mb-2'>Recent Logs</h1>
+                {
+                  !error && (
+                    <h1 className='text-2xl font-bold text-slate-700 mb-2'>Recent Logs</h1>
+                  )
+                }
                 <div className='flex flex-col gap-5'>
                   { 
                     logs.length > 0 ? (
@@ -164,9 +179,15 @@ const Profile = () => {
                         />
                       ))
                     ) : (
-                      <div className='flex justify-center items-center bg-white rounded-lg h-[445px] shadow-md'>
-                        <p className='text-lg text-slate-700'>{otherUser.name} has not logged any meals yet</p>
-                      </div>
+                      error ? (
+                        <div className="mx-8 mt-5">
+                          <Error message={error} />
+                        </div>
+                      ) : (
+                        <div className='flex justify-center items-center bg-white rounded-lg h-[445px] shadow-md'>
+                          <p className='text-lg text-slate-700'>{otherUser.name} has not logged any meals yet</p>
+                        </div>
+                      )
                     ) 
                   }
               </div>

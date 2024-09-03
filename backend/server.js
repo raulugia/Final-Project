@@ -150,7 +150,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 })
 
 //endpoint for displaying data linked to a certain user
-app.get("/api/user/:username", authenticateUser, async(req, res) => {
+app.get("/user/:username", authenticateUser, async(req, res) => {
     try{
         const { username } = req.params
         //find out if users are friends and get the other user's uid
@@ -263,7 +263,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
 })
 
 //endpoint for displaying other users' meals
-app.get("/api/user/:username/meals", authenticateUser, async(req, res) => {
+app.get("/user/:username/meals", authenticateUser, async(req, res) => {
     //get the other user's username
     const { username } = req.params
     
@@ -582,7 +582,7 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
 })
 
 //endpoint for updating user's data
-app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
+app.put("/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
         
@@ -594,20 +594,26 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
         if(username !== undefined) dataToUpdate.username = username
         if(email !== undefined) dataToUpdate.email = email
 
+        //case the user uploaded a new profile picture
         if(req.file) {
-            const { file } = req.file
+            //get the file
+            const { file } = req
             
+            //trigger the task to process it and update the database
             await profilePictureQueue.add({
                 filePath: file.path,
-                userUid: req.body.uid,
+                userUid: req.user.uid,
                 oldPictureUrl: profilePicUrl,
                 oldThumbnailUrl: profileThumbnailUrl
-            });
+            //retry up to 3 times if it fails with a 5-second interval. Job must be completed within 2 minutes.
+            }, {attempts: 3, backoff: 5000, timeout: 120000})
 
+            //ensure pre-existing urls are deleted
             dataToUpdate.profilePicUrl = ""
             dataToUpdate.profileThumbnailUrl = ""
         }
-        console.log("data to be changed: ", dataToUpdate)
+        
+        //update user details in the database
         const updatedUser = await prisma.user.update({
             where: {
                 uid: req.user.uid
@@ -615,9 +621,9 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
             data: dataToUpdate,
         })
 
+        //return the updated user
         res.json(updatedUser);
     }catch(err){
-        console.log(err)
         res.status(500).json({ error: "Failed to update user details"})
     }
 })
@@ -835,39 +841,20 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
         res.json(updatedLog)
         console.log("response sent")
     }catch(err) {
-        console.error(err)
         return res.status(500).json({ error: "Log could not be updated" })
     }
 })
 
-app.get("/api/user-data", authenticateUser, async (req, res) => {
+app.get("/user-data", authenticateUser, async (req, res) => {
     try {
-        // const user = await prisma.user.findUnique({
-        //     where: { email: req.user.email },
-        //     include: {
-        //        //include all the meal log records logged by the user 
-        //        meals: {
-        //         include: {
-        //             meal: {
-        //                 include: {
-        //                     restaurant: true
-        //                 }
-        //             }
-        //         }
-        //        },
-        //        friends: true,
-        //        friendOf: true,
-        //        chatsSent: true,
-        //        chatsReceived: true
-        //     }
-        // })
-
+        //get the user's details
         const user = await prisma.user.findUnique({
             where: {
                 uid: req.user.uid
             }
         })
 
+        //return an error if the user is not found
         if(!user) {
             return res.status(404).json({ error: "User not found" })
         }
@@ -875,11 +862,11 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
         res.json(user)
 
     } catch(err) {
-        console.log(err)
+        res.status(500).json({error: "An error occurred while getting your details. Please try again."})
     }
 })
 
-app.get("/api/friends", authenticateUser, async (req, res) => {
+app.get("/friends", authenticateUser, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where : { uid: req.user.uid },
@@ -917,6 +904,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
             },
         })
 
+        //current user not found
         if(!user) {
             return res.status(404).json({ error: "User not found" })
         }
@@ -930,12 +918,12 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
         res.json(friends)
 
     } catch(err) {
-        console.log(err)
+        res.status(500).json({error: "An error occurred while getting your friends. Please try again."})
     }
 })
 
 
-app.get("/api/restaurants", authenticateUser, async(req, res,) => {
+app.get("/restaurants", authenticateUser, async(req, res,) => {
     try {
         const mealLogs = await prisma.mealLog.findMany({
             where: {
@@ -961,12 +949,12 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
         res.json(uniqueRestaurants)
 
     } catch(err) {
-        console.log(err)
+        res.status(500).json({error: "An error occurred while getting the data. Please try again."})
     }
 })
 
 //endpoint for returning all the meals linked to a certain restaurant
-app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) => {
+app.get("/my-restaurants/:restaurantId", authenticateUser, async(req, res) => {
     const { restaurantId } = req.params
 
     try{
@@ -1002,6 +990,11 @@ app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) =
             }
         })
 
+        //case no meals were found 
+        if(meals.length === 0){
+            return res.status(404).json({error: "No meals were found for the specified restaurant."})
+        }
+
         //object that will be returned to the client
         const result = meals.map(meal => ({
             mealId: meal.id,
@@ -1010,16 +1003,16 @@ app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) =
             restaurantName: meal.restaurant.name,
         }))
 
+
         //send response to client
         res.json(result)
-
-        console.log("MEALS", meals)
     }catch(err){
-        console.log(err)
+        //return an error
+        res.status(500).json({error: "An error occurred while getting the data. Please try again."})
     }
 })
 
-app.get("/api/meals", authenticateUser, async(req, res,) => {
+app.get("/meals", authenticateUser, async(req, res,) => {
     try{
         //get the most recent meal logs avoiding duplicates
         const latestLogs = await prisma.mealLog.findMany({
@@ -1056,10 +1049,11 @@ app.get("/api/meals", authenticateUser, async(req, res,) => {
 
         res.json(mealLogs)
     } catch(err) {
-        console.log(err)
+        res.status(500).json({error: "An error occurred while getting the data. Please try again."})
     }
 })
 
+//endpoint for returning the logs linked to a meal
 app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
     const { mealId } = req.params;
 
@@ -1092,6 +1086,7 @@ app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
     }
 })
 
+//endpoint for getting a meal log's information
 app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
     const { logId } = req.params
 
@@ -1125,9 +1120,16 @@ app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
             }
         })
 
+        //case log was not found
+        if(!log){
+            return res.status(404).json({error: "The specified log could not be found"})
+        }
+
+        //return the log details
         res.json(log)
     }catch(err){
         console.error(err)
+        return res.status(500).json({error: "The specified log could not be found"})
     }
 })
 

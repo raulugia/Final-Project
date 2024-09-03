@@ -155,9 +155,7 @@ profilePictureQueue.process(async(job) => {
         uploadToCloudinary(thumbnailBuffer),
     ])
 
-    console.log("here", originalUpload)
-
-    //update meal log in the database with the Cloudinary urls
+    //profile picture in the database with the Cloudinary urls
     const updatedUser = await prisma.user.update({
       where: { uid: userUid },
       data: {

@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosInstance'
 import MealCard from '../components/MealCard'
 import SkeletonMealCard from '../components/SkeletonMealCard'
 import { useParams } from 'react-router-dom'
+import Error from '../components/Error'
 
 //this component displays the meals linked to a certain restaurant
 //rendered by route "/my-restaurants/:restaurantId"
@@ -19,6 +20,8 @@ const RestaurantMeals = () => {
     const [loading, setLoading] = useState(true)
     //const [hoveredMeal, setHoveredMeal] = useState(null)
     const { restaurantId } = useParams()
+    //state to store an error message
+    const [error, setError] = useState("")
 
     //fetch meals linked to a certain restaurant and display them
     useEffect(() => {
@@ -29,7 +32,7 @@ const RestaurantMeals = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get(`/api/my-restaurants/${restaurantId}`, {
+                    const { data } = await axiosInstance.get(`/my-restaurants/${restaurantId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -61,7 +64,15 @@ const RestaurantMeals = () => {
                     //stop rendering loading component
                     setLoading(false)
                 } catch(err) {
-                    console.log(err)
+                    //update state to display an error message
+                    if(err.response && err.response.data && err.response.data.error){
+                        setError(err.response.data.error)
+                    } else {
+                        setError("Failed to load meals. Please try again later.")
+                    }
+                } finally {
+                    //hide loading state
+                    setLoading(false)
                 }
             }
         )()
@@ -88,20 +99,25 @@ const RestaurantMeals = () => {
     <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
         <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>{meals[0]?.restaurantName} Meals</h1>
         <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
-            <form action="" className='absolute h-fit inset-0 mt-[-30px] mx-5 md:mx-10'>
+            <div action="" className='absolute h-fit inset-0 mt-[-30px] mx-5 md:mx-10'>
                 <input type="search" name="" id="" value={searchInput} placeholder='Search for meals...' 
                     className='py-3 px-6 text-lg w-full rounded-full shadow-md'
                     onChange={handleInputChange}
                 />
-            </form>
+            </div>
             {   
                 loading ? (
                     <SkeletonMealCard />
                 ) : (
-
-                    filteredMeals.map(meal => (
-                        <MealCard key={meal.mealId} id={meal.mealId} mealName={meal.mealName} thumbnailUrl={meal.thumbnail}/>
-                    ))
+                    error ? (
+                        <div className="mx-8 mt-5">
+                            <Error message={error} />
+                        </div>
+                    ): (
+                        filteredMeals.map(meal => (
+                            <MealCard key={meal.mealId} id={meal.mealId} mealName={meal.mealName} thumbnailUrl={meal.thumbnail}/>
+                        ))
+                    )
                 )
             }
         </div>

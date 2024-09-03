@@ -7,7 +7,7 @@ const FriendCard = ({ name, surname, username, imgUrl}) => {
     const [isHovered, setIsHovered] = useState(null)
 
   return (
-    <Link to={`/${username}`}
+    <Link to={`/user/${username}`}
         onMouseEnter={() => setIsHovered(username)}
         onMouseLeave={() => setIsHovered(null)}
         className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg"

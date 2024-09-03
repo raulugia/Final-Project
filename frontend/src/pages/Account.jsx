@@ -3,6 +3,7 @@ import { auth } from '../../utils/firebase'
 import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import axiosInstance from '../../utils/axiosInstance'
 import UpdateUserModal from '../components/UpdateUserModal';
+import Error from '../components/Error'
 
 const Account = () => {
     const user = auth.currentUser
@@ -30,7 +31,7 @@ const Account = () => {
     const [file, setFile] = useState("")
     //state to display/hide loading feedback and disable/enable submit button - disabled when loading is true
     const [loading, setLoading] = useState(true)
-    //sates to provide feedback to user
+    //sates to provide error feedback to user
     const [errors, setErrors] = useState({email: [], username: [], password: []})
     const [emailAvailable, setEmailAvailable] = useState()
     const [usernameAvailable, setUsernameAvailable] = useState()
@@ -39,35 +40,50 @@ const Account = () => {
     const [displayModal, setDisplayModal] = useState(false)
     //state to store credentials for re-authentication
     const [credentialDetails, setCredentialDetails] = useState({email: "", password: ""})
+    //state to store an error message
+    const [serverError, setServerError] = useState("")
+    const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+    
 
 
-
+    //get the user's details
     useState(() => {
         (
             async() => {
                 try{
+                    //get the token for verification in the server
                     const token = await user.getIdToken()
 
-                    const { data } = await axiosInstance.get("/api/user-data", {
+                    //send a get request to get the user's data
+                    const { data } = await axiosInstance.get("/user-data", {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     })
 
                     if(data){
-                        console.log(data)
+                        //update states
                         setUserData(data)
                         setDataToUpdate(data)
                         setLoading(false)
                     }
 
-                }catch(err){
-                    console.log(err)
+                } catch(err) {
+                    //update state to display an error message
+                    if(err.response && err.response.data && err.response.data.error){
+                        setServerError(err.response.data.error)
+                    } else {
+                        setServerError("Failed to load your details. Please try again later.")
+                    }
+                } finally {
+                    //hide loading state
+                    setLoading(false)
                 }
             }
         )()
     },[])
 
+    //submit details to update user
     const handleSubmit = async(e) => {
         e.preventDefault()
         //update loading state - submit button disabled
@@ -91,7 +107,6 @@ const Account = () => {
             if(dataToUpdate.email && dataToUpdate.email !== userData.email){
                 //case user has not re-authenticated
                 if(!credentialDetails.email || !credentialDetails.password ){
-                    console.log("need credentials")
                     //display modal so user enters email and password
                     setDisplayModal(true)
                     //reset loading state - submit button enabled
@@ -130,12 +145,17 @@ const Account = () => {
 
             //case user uploaded a new profile picture
             if(file) {
+                console.log("there is a file", file)
                 //append file
                 formData.append("picture", file)
-            }
 
+                //append existing pictures urls
+                formData.append("profileThumbnailUrl", userData.profileThumbnailUrl)
+                formData.append("profilePicUrl", userData.profilePicUrl)
+            }
+            console.log(formData)
             //api call to update user'd details
-            const { data } = await axiosInstance.put("/api/update-user", formData, {
+            const { data } = await axiosInstance.put("/update-user", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -156,13 +176,34 @@ const Account = () => {
             
 
         }catch(err){
-            console.log(err)
             //update state to provide feedback
             setDisplayMessage({error: "Details could not be updated"})
             //reset loading state
             setLoading(false)
         }
     }
+
+  //method to update the file state when the file input changes
+  const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0]
+        console.log("selected file: ", selectedFile)
+        setFile(selectedFile);
+
+        const reader = new FileReader();
+
+        //set up an event handler to be called when the reading process has finished
+        reader.onloadend = () => {
+            //update state to store the image url
+            setImagePreviewUrl(reader.result)
+        }
+
+        //case a file was chosen by the user
+        if(selectedFile) {
+            //read file and convert it to url
+            reader.readAsDataURL(selectedFile)
+        }
+    }
+
 
     //method to update the data that needs to be updated
     const handleInputChange = (e, inputType) => {
@@ -250,7 +291,6 @@ const Account = () => {
                         setUsernameAvailable(false)
                     } 
                 }
-                console.log(err)
             }
         }
     }
@@ -258,167 +298,188 @@ const Account = () => {
   return (
     <div className="min-h-screen flex justify-center items-start">
         <div className="pt-24 pb-5 md:pt-28 w-[800px] mx-5">
-            <form className="bg-white px-8 border rounded-xl shadow-md">
-                <div className="my-6">
-                    <h1 className="text-lg font-semibold text-slate-700">Manage Your Account</h1>
-                    <p className='text-sm text-slate-600'>Click on the Save button to save your changes.</p>
-                    {
-                        displayMessage?.success ? (
-                            <div className='mt-3 text-sm text-green-700 font-medium'>
-                                <p>{ displayMessage.success }</p>
-                            </div>
-                        ) : (
-                            <div className='mt-3 text-sm text-red-600 font-medium'>
-                                <p>{ displayMessage?.error }</p>
-                            </div>
-                        )
-                    }
-                </div>
-                <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
-                <div className="flex justify-between md:justify-start md:gap-16 items-center mb-6">
-                    <div>
-                        <div className="bg-slate-700 h-20 w-20 rounded-full"></div>
+            {
+                serverError ? (
+                    <div className="mx-8 mt-5">
+                        <Error message={serverError} />
                     </div>
-                    <div>
-                        <button className="px-2 border bg-gray-100 text-sm rounded-lg py-1 font-semibold">Upload new picture</button>
-                    </div>
-                </div>
+                ) : (
 
-                <div className='w-full flex flex-col gap-3 mb-6'>
-                    <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
-                        <div className='w-full'>
-                            <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Name</p>
-                            <input 
-                                type="text" 
-                                className='border py-1 rounded-lg w-full shadow-sm px-2'
-                                value={dataToUpdate.name ? dataToUpdate.name : userData.name}
-                                onChange={(e) => handleInputChange(e, "name")}
-                            />
-                        </div>
-                        <div className='w-full'>
-                            <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Surname</p>
-                            <input 
-                                type="text" 
-                                className='border py-1 rounded-lg w-full shadow-sm px-2' 
-                                value={dataToUpdate.surname ? dataToUpdate.surname :userData.surname}
-                                onChange={(e) => handleInputChange(e, "surname")}
-                            />
-                        </div>
-                    </div>
-                    <div className='md:w-1/2 w-full pr-2'>
-                        <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Username</p>
-                        <input 
-                            type="text" 
-                            className={`border py-1 rounded-lg w-full shadow-sm px-2 
-                                ${errors.username.length > 0 ? "border-red-500 text-red-900 placeholder-red-700" : ""}
-                                ${errors.username.length === 0 && usernameAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
-                            }
-                            value={dataToUpdate.username}
-                            onChange={(e) => handleInputChange(e, "username")}
-                            onBlur={(e) => checkUniqueness("username", e.target.value)}
-                        />
-                        <div className="text-sm text-red-600 font-medium mt-1" >
+                    <form className="bg-white px-8 border rounded-xl shadow-md">
+                        <div className="my-6">
+                            <h1 className="text-lg font-semibold text-slate-700">Manage Your Account</h1>
+                            <p className='text-sm text-slate-600'>Click on the Save button to save your changes.</p>
                             {
-                                errors.username.length > 0 && (
-                                    errors.username.map((error, index) => (
-                                        <p key={error+index}>{error}</p>
-                                    ))
+                                displayMessage?.success ? (
+                                    <div className='mt-3 text-sm text-green-700 font-medium'>
+                                        <p>{ displayMessage.success }</p>
+                                    </div>
+                                ) : (
+                                    <div className='mt-3 text-sm text-red-600 font-medium'>
+                                        <p>{ displayMessage?.error }</p>
+                                    </div>
                                 )
                             }
                         </div>
-                        {
-                            usernameAvailable && (
-                                <div className="text-sm  font-medium mt-1">
-                                    <p className="text-green-600">Username is available</p>
+                        <div className="border-b-2 border-slate-200 w-full mb-6"></div>
+
+                        <div className="flex justify-between md:justify-start md:gap-16 items-center mb-6">
+                            <div>
+                                <div className="bg-slate-700 h-20 w-20 rounded-full overflow-hidden">
+                                    <img 
+                                        src={imagePreviewUrl ? imagePreviewUrl :  userData.profileThumbnailUrl ? userData.profileThumbnailUrl : userData.profilePicUrl ? userData.profilePicUrl : ""} 
+                                        className='w-full' 
+                                    />
                                 </div>
-                            )
-                        }
-                    </div>
+                            </div>
+                            <div>
+                                <label className="text-base text-gray-500 font-semibold mb-2 block">Upload a new profile picture</label>
+                                <input type="file" 
+                                    onChange={handleFileChange}
+                                    accept=".jpg, .jpeg, .svg, .png, .bmp, .webp, .heic, .heif, .tiff" 
+                                    className="w-full text-gray-400  text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-2 file:px-4 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-500 rounded" 
+                                />
+                            </div>
+                        </div>
 
-                </div>
+                        <div className='w-full flex flex-col gap-3 mb-6'>
+                            <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
+                                <div className='w-full'>
+                                    <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Name</p>
+                                    <input 
+                                        type="text" 
+                                        className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                        value={dataToUpdate.name ? dataToUpdate.name : userData.name}
+                                        onChange={(e) => handleInputChange(e, "name")}
+                                    />
+                                </div>
+                                <div className='w-full'>
+                                    <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Surname</p>
+                                    <input 
+                                        type="text" 
+                                        className='border py-1 rounded-lg w-full shadow-sm px-2' 
+                                        value={dataToUpdate.surname ? dataToUpdate.surname :userData.surname}
+                                        onChange={(e) => handleInputChange(e, "surname")}
+                                    />
+                                </div>
+                            </div>
+                            <div className='md:w-1/2 w-full pr-2'>
+                                <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Username</p>
+                                <input 
+                                    type="text" 
+                                    className={`border py-1 rounded-lg w-full shadow-sm px-2 
+                                        ${errors.username.length > 0 ? "border-red-500 text-red-900 placeholder-red-700" : ""}
+                                        ${errors.username.length === 0 && usernameAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
+                                    }
+                                    value={dataToUpdate.username}
+                                    onChange={(e) => handleInputChange(e, "username")}
+                                    onBlur={(e) => checkUniqueness("username", e.target.value)}
+                                />
+                                <div className="text-sm text-red-600 font-medium mt-1" >
+                                    {
+                                        errors.username.length > 0 && (
+                                            errors.username.map((error, index) => (
+                                                <p key={error+index}>{error}</p>
+                                            ))
+                                        )
+                                    }
+                                </div>
+                                {
+                                    usernameAvailable && (
+                                        <div className="text-sm  font-medium mt-1">
+                                            <p className="text-green-600">Username is available</p>
+                                        </div>
+                                    )
+                                }
+                            </div>
 
-                <div className="border-b-2 border-slate-200 w-full mb-6"></div>
-                
-                <div className='mb-6'>
-                    <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
-                    <div className='w-full'>
-                        <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Email</p>
-                        <input 
-                            type="email" 
-                            className={`border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm 
-                                ${errors.email.length > 0 ? "border-red-500 text-red-900 bg-red-50 placeholder-red-700" : ""}
-                                ${errors.email.length === 0 && emailAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
-                            } 
-                            value={dataToUpdate.email ? dataToUpdate.email : userData.email}
-                            onChange={(e) => handleInputChange(e, "email")}
-                            onBlur={(e) => checkUniqueness("email", e.target.value)}
-                        />
+                        </div>
 
-                        <div className="text-sm text-red-600 font-medium mt-1" >
-                            {
-                                errors.email.length > 0 && (
-                                    errors.email.map((error, index) => (
+                        <div className="border-b-2 border-slate-200 w-full mb-6"></div>
+                        
+                        <div className='mb-6'>
+                            <h3 className='text-md font-semibold text-slate-700 mb-3'>Contact email</h3>
+                            <div className='w-full'>
+                                <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Email</p>
+                                <input 
+                                    type="email" 
+                                    className={`border py-1 rounded-lg w-full md:w-1/2 shadow-sm px-2 text-sm 
+                                        ${errors.email.length > 0 ? "border-red-500 text-red-900 bg-red-50 placeholder-red-700" : ""}
+                                        ${errors.email.length === 0 && emailAvailable ? "border-green-500 bg-green-50 text-green-900" : ""}`
+                                    } 
+                                    value={dataToUpdate.email ? dataToUpdate.email : userData.email}
+                                    onChange={(e) => handleInputChange(e, "email")}
+                                    onBlur={(e) => checkUniqueness("email", e.target.value)}
+                                />
+
+                                <div className="text-sm text-red-600 font-medium mt-1" >
+                                    {
+                                        errors.email.length > 0 && (
+                                            errors.email.map((error, index) => (
+                                                    <p key={error+index}>{error}</p>
+                                            ))
+                                        )
+                                    }
+                                </div>
+                                {
+                                    emailAvailable && (
+                                        <div className="text-sm  font-medium mt-1">
+                                            <p className="text-green-600">Email is available</p>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
+
+                        <div className="border-b-2 border-slate-200 w-full mb-6"></div>
+
+                        <div className='mb-6'>
+                            <h3 className='text-md font-semibold text-slate-700 mb-3'>Password</h3>
+                            <div className='flex w-full gap-2 md:gap-5'>
+                                <div className='w-full'>
+                                    <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Current Password</p>
+                                    <input 
+                                        type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                        onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, current: e.target.value}})}
+                                    />
+                                </div>
+                                <div className='w-full'>
+                                    <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">New Password</p>
+                                    <input 
+                                        type="password" 
+                                        className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                        onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, new: e.target.value}})}
+                                    />
+                                </div>
+                            </div>
+                            <div className='flex flex-col text-sm text-red-600 font-medium mt-1'>
+                                {
+                                    errors.password.length > 0 &&(
+                                        errors.password.map((error, index) => (
                                             <p key={error+index}>{error}</p>
-                                    ))
-                                )
-                            }
+                                        ))
+                                    )
+                                }
+                            </div>
                         </div>
-                        {
-                            emailAvailable && (
-                                <div className="text-sm  font-medium mt-1">
-                                    <p className="text-green-600">Email is available</p>
-                                </div>
-                            )
-                        }
-                    </div>
-                </div>
 
-                <div className="border-b-2 border-slate-200 w-full mb-6"></div>
+                        <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
-                <div className='mb-6'>
-                    <h3 className='text-md font-semibold text-slate-700 mb-3'>Password</h3>
-                    <div className='flex w-full gap-2 md:gap-5'>
-                        <div className='w-full'>
-                            <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Current Password</p>
-                            <input 
-                                type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'
-                                onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, current: e.target.value}})}
-                            />
+                        <div className="w-full flex gap-3 md:gap-5 mb-6 justify-center md:justify-end text-sm md:text-md">
+                            <button disabled={loading} className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
+                            <button 
+                                disabled={loading}
+                                onClick={handleSubmit} 
+                                className="border border-blue-700 rounded-lg px-2 py-1 text-white font-semibold bg-blue-600 hover:bg-blue-700 hover:shadow-sm"
+                            >
+                                    Save Changes
+                            </button>
                         </div>
-                        <div className='w-full'>
-                            <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">New Password</p>
-                            <input 
-                                type="password" 
-                                className='border py-1 rounded-lg w-full shadow-sm px-2'
-                                onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, new: e.target.value}})}
-                            />
-                        </div>
-                    </div>
-                    <div className='flex flex-col text-sm text-red-600 font-medium mt-1'>
-                        {
-                            errors.password.length > 0 &&(
-                                errors.password.map((error, index) => (
-                                    <p key={error+index}>{error}</p>
-                                ))
-                            )
-                        }
-                    </div>
-                </div>
+                    </form>
+                )
+            }
 
-                <div className="border-b-2 border-slate-200 w-full mb-6"></div>
-
-                <div className="w-full flex gap-3 md:gap-5 mb-6 justify-center md:justify-end text-sm md:text-md">
-                    <button disabled={loading} className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
-                    <button 
-                        disabled={loading}
-                        onClick={handleSubmit} 
-                        className="border border-blue-700 rounded-lg px-2 py-1 text-white font-semibold bg-blue-600 hover:bg-blue-700 hover:shadow-sm"
-                    >
-                            Save Changes
-                    </button>
-                </div>
-                </form>
         </div>
         {
             displayModal &&(
