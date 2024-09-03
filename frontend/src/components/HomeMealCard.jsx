@@ -22,7 +22,7 @@ const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId,
                         <img className='w-full h-full object-cover' src={picture} alt={mealName} />
                     ) : (
                         <div className='w-full h-full flex items-center justify-center bg-slate-100'>
-                            <p className='text-slate-300'>Your picture is being processed.</p>
+                            <p className='text-slate-500'>Your picture is being processed.</p>
                         </div>
                     )
                 }

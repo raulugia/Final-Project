@@ -1079,9 +1079,16 @@ app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
 
         })
 
+        //case no logs were found
+        if(mealLogs.length === 0) {
+            return res.status(404).json({error: "No logs found for the specified meal."})
+        }
+
+        //return logs
         res.json(mealLogs)
     } catch(err) {
         console.log(err)
+        res.status(500).json({error: "An error occurred while getting the data. Please try again."})
     }
 })
 

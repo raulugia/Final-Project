@@ -4,12 +4,14 @@ import axiosInstance from '../../utils/axiosInstance'
 import { useParams } from 'react-router-dom'
 import MealLogCard from '../components/MealLogCard';
 import SkeletonMealLogCard from '../components/SkeletonMealLogCard';
+import Error from '../components/Error';
 
 const MealLogs = () => {
     const user = auth.currentUser
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(true)
     const { username, mealId }= useParams()
+    const [error, setError] = useState("")
 
     useEffect(() => {
         (
@@ -29,7 +31,13 @@ const MealLogs = () => {
                     setLogs(displayData)
                     setLoading(false)
                 } catch(err) {
-                    console.error(err)
+                    if(err.response && err.response.data && err.response.data.error){
+                        setError(err.response.data.error)
+                    } else {
+                        setError("Failed to load meal logs. Please try again later.")
+                    }
+                } finally {
+                    setLoading(false)
                 }
             }
         )()
@@ -62,12 +70,14 @@ const MealLogs = () => {
                 </div>
             ) : (
                 <div className='mt-20'>
-                    <h1 className='text-2xl font-semibold  ml-[5%] text-slate-800'>Logs for {logs[0]?.meal.name}</h1>
+                    <h1 className='text-2xl font-semibold  ml-[5%] text-slate-800'>
+                        { error ? "No Logs Found" : `Logs for ${logs[0]?.meal.name}`}
+                    </h1>
                     <h3 className='text-lg font-semibold ml-[5%] text-slate-600'>{logs[0]?.meal.restaurant.name}</h3>
                 </div>
             )
         }
-        <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
+        <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] md:min-h-[180px] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
             {   
                 loading ? (
                     <SkeletonMealLogCard />
@@ -76,6 +86,13 @@ const MealLogs = () => {
                         <MealLogCard key={log.id} {...log} mealName={log.meal.name} restaurantName={log.meal.restaurant.name} username={ username}/>
                     ))
                 )   
+            }
+            {
+                error && (
+                    <div className="px-10 my-auto">
+                        <Error message={error} />
+                    </div>
+                )
             }
         </div>
     </div>

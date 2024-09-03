@@ -35,6 +35,7 @@ const Home = () => {
   const [hasMoreLogs, setHasMoreLogs] = useState(true)
   //get pending requests from context
   const { pendingRequests } = useStateContext()
+  //state to needed to fetch the image of the meal log that is still being processed by tasks
   const [pendingPic, setPendingPic] = useState({logId: "", mealId: "", url: ""})
   
   //method to format the createdAt date
@@ -80,8 +81,9 @@ const Home = () => {
         if(!ignore){
           //format date of every log
           const displayData = data.logs.map(log => {
+            //case the image is not ready
             if(!log.picture){
-              console.log("picture not ready")
+              //update state with the log details so the image can be fetched - Polling mechanism
               setPendingPic({logId: log.logId, mealId: log.mealId, url: ""})
             }
 
@@ -111,8 +113,11 @@ const Home = () => {
     }
   }, [page])
 
+  //polling mechanism to get the image of a log being processed by tasks
   useEffect(() => {
+    //case image is being processed
     if(!pendingPic.url && pendingPic.logId && pendingPic.mealId){
+
       const intervalId = setInterval(async() =>{
         console.log("Inside interval")
         try{
@@ -126,8 +131,6 @@ const Home = () => {
             }
 
             })
-
-          console.log(data)
 
           if(data.picture && !pendingPic.url){
             setPendingPic(prevPendingPic => ({...prevPendingPic, url: data.picture}))
