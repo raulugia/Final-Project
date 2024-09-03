@@ -686,14 +686,11 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
       //add job to queue for image processing
       //as a result, a thumbnail will be created and both the original image and thumbnail will be uploaded to
       //Clodinary and their URLs will be added to the database in Railway
-      const job = await imageQueue.add({
+      await imageQueue.add({
         filePath: picture.path,
         mealId: mealLog.id,
         userUid: req.user.uid,
       });
-
-      const result = await job.finished()
-      console.log("finished", result)
 
     } catch (err) {
         console.log(err)
@@ -1110,7 +1107,8 @@ app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
                             select: {
                                 name: true
                             }
-                        }
+                        },
+                        id: true
                     }
                 }
             }

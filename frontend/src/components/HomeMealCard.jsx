@@ -17,7 +17,16 @@ const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId,
                 <p className='text-white font-semibold'>{restaurantName}</p>
             </div>
             <div className='w-[250px] min-h-[250px] rounded-3xl overflow-hidden z-10 shadow-md'>
-                <img className='w-full h-full object-cover' src={picture} alt={mealName} />
+                {
+                    picture ? (
+                        <img className='w-full h-full object-cover' src={picture} alt={mealName} />
+                    ) : (
+                        <div className='w-full h-full flex items-center justify-center bg-slate-100'>
+                            <p className='text-slate-300'>Your picture is being processed.</p>
+                        </div>
+                    )
+                }
+                
             </div>
             <div className='flex items-center justify-center border rounded-3xl bg-white w-[340px] h-[320px] absolute top-[130px] shadow-lg'>
                 <div className='flex flex-col gap-2 mt-[163px]'>

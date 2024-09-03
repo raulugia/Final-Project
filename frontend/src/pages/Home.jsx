@@ -35,6 +35,7 @@ const Home = () => {
   const [hasMoreLogs, setHasMoreLogs] = useState(true)
   //get pending requests from context
   const { pendingRequests } = useStateContext()
+  const [pendingPic, setPendingPic] = useState({logId: "", mealId: "", url: ""})
   
   //method to format the createdAt date
   const formatDate = (dateString) => {
@@ -78,7 +79,14 @@ const Home = () => {
         //only update states if ignore is false
         if(!ignore){
           //format date of every log
-          const displayData = data.logs.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
+          const displayData = data.logs.map(log => {
+            if(!log.picture){
+              console.log("picture not ready")
+              setPendingPic({logId: log.logId, mealId: log.mealId, url: ""})
+            }
+
+            return {...log, createdAt: formatDate(log.createdAt)}
+          })
           //update logs state with formatted logs
           setLogs(prevLogs => [...prevLogs, ...displayData])
           setUserData(data.user)
@@ -102,6 +110,46 @@ const Home = () => {
       ignore = true
     }
   }, [page])
+
+  useEffect(() => {
+    if(!pendingPic.url && pendingPic.logId && pendingPic.mealId){
+      const intervalId = setInterval(async() =>{
+        console.log("Inside interval")
+        try{
+          //get the id token
+          const token = await user.getIdToken();
+
+          //fetch first 5 meal logs - page is needed to calculate the offset in the server
+          const { data } = await axiosInstance.get(`/api/my-meals/${pendingPic.mealId}/log/${pendingPic.logId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+
+            })
+
+          console.log(data)
+
+          if(data.picture && !pendingPic.url){
+            setPendingPic(prevPendingPic => ({...prevPendingPic, url: data.picture}))
+
+            setLogs(prevLogs => prevLogs.map(log => {
+              if(log.logId === pendingPic.logId) {
+                return {...log, picture: data.picture}
+              }
+
+              return log
+            }))
+
+            setPendingPic({logId: "", mealId: "", url: ""})
+          }
+        }catch(err){
+          alert(err.message)
+        }
+      }, 5000)
+
+      return () => clearInterval(intervalId)
+    }
+  },[pendingPic])
 
   //set up intersection observer and track last HomeMealCard
   useEffect(() => {
@@ -138,16 +186,8 @@ const Home = () => {
       if (notReadyToReview.length > 0) setMealCountdowns(notReadyToReview)
     })
 
-    socket.on("imageReady", ({id, pictureUlr, thumbnailUlr}) => {
-      console.log("event recieved: ", id, pictureUlr, thumbnailUlr)
-      setLogs(prevLogs => prevLogs.map(log => {
-        return log.id === id ? ({...log, pictureUlr: pictureUlr, thumbnailUlr: thumbnailUlr}) : log
-      }))
-    })
-
     return () => {
       socket.off("pendingMealLogs")
-      socket.off("imageReady")
     }
 
   },[])
