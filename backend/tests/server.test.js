@@ -13,9 +13,18 @@ jest.mock("../authMiddleware", () => jest.fn((req, res, next) => {
     next()
 }))
 
+//socket
+jest.mock("../socket", () => ({
+    //mock initialization
+    initializeSocket: jest.fn(),
+    //mock method to send notifications
+    notifyUserNewReq: jest.fn()
+}))
+
 const request = require("supertest")
 const { PrismaClient } = require("@prisma/client")
 const { app, server } = require("../server")
+const { notifyUserNewReq, initializeSocket } = require("../socket")
 
 
 //mock the Prisma Client instance
@@ -29,6 +38,10 @@ jest.mock("@prisma/client", () => {
         },
         meal : {
             findMany: jest.fn()
+        },
+        friendRequest: {
+            findFirst: jest.fn(),
+            create: jest.fn(),
         }
     }
     return { PrismaClient: jest.fn(() => mockPrisma) }
@@ -254,6 +267,109 @@ describe("GET /api/my-restaurants/:restaurantId", () => {
     })
 })
 
+
+describe("GET /api/meals/:mealId", () => {
+    it("should return the logs linked to a specific meal for the current user", async() => {
+        //mock the return value for mealLog.findMany
+        prisma.mealLog.findMany.mockResolvedValue([
+            {
+                id: 1,
+                mealId: 1,
+                userUid: "test-uid",
+                meal: {
+                    name: "Meal 1",
+                    restaurant: {
+                        name: "Restaurant A"
+                    }
+                },
+                carbEstimate: 50,
+                description: "Description 1",
+                createdAt: new Date(),
+            },
+            {
+                id: 2,
+                mealId: 1,
+                userUid: "test-uid",
+                meal: {
+                    name: "Meal 1",
+                    restaurant: {
+                        name: "Restaurant A"
+                    }
+                },
+                carbEstimate: 40,
+                description: "Description 2",
+                createdAt: new Date(),
+            }
+        ])
+
+        //send a get request to the api endpoint
+        const response = await request(app).get("/api/meals/1").set("Authorization", "Bearer faketoken").expect(200)
+
+        //ensure that both logs are returned
+        expect(response.body.length).toBe(2)
+
+        //ensure that the logs data is correct
+        expect(response.body[0].meal.name).toBe("Meal 1")
+        expect(response.body[1].meal.name).toBe("Meal 1")
+
+        expect(response.body[0].meal.restaurant.name).toBe("Restaurant A")
+        expect(response.body[1].meal.restaurant.name).toBe("Restaurant A")
+
+        expect(response.body[0].carbEstimate).toBe(50)
+        expect(response.body[1].carbEstimate).toBe(40)
+    })
+
+    
+    it("should return 404 if no logs are found for the specified meal", async() => {
+        //mock findUnique to return null - user not found
+        prisma.mealLog.findMany.mockResolvedValue([])
+
+        //send a get request to the api endpoint
+        const response = await request(app).get("/api/meals/1").set("Authorization", "Bearer faketoken").expect(404)
+
+        //assert that the response contains the error message
+        expect(response.body.error).toBe("No logs found for the specified meal.")
+    })
+})
+
+
+describe("POST /api/friend-request", () => {
+    it("should create a new friend request if one does not exist already", async () => {
+        //mock user.findUnique to return sender and recipient
+        prisma.user.findUnique
+            .mockResolvedValue({uid: "test-uid"})
+            .mockResolvedValue({uid: "recipient-uid"})
+        
+        //mock findRequest.findFirst so there is no pre-existing friend request
+        prisma.friendRequest.findFirst.mockResolvedValue(null)
+
+        //mock friendRequest.create to simulate the creation of a new friend request
+        prisma.friendRequest.create.mockResolvedValue({
+            id: 1,
+            senderUid: "test-uid",
+            receiverUid: "recipient-uid",
+            status: "PENDING",
+            sender: {
+                id: 1,
+                name: "Sender",
+                surname: "User",
+                username: "sender.user"
+            }
+        });
+
+        //send a post request to the api endpoint
+        const response = await request(app).post("/api/friend-request").send({ recipientUid: "recipient-uid"}).set("Authorization", "Bearer faketoken").expect(200)
+
+        //check if the friend request has been created correctly
+        expect(response.body.sender.name).toBe("Sender")
+        expect(response.body.sender.surname).toBe("User")
+        expect(response.body.receiverUid).toBe("recipient-uid")
+        expect(response.body.status).toBe("PENDING")
+
+        //check that the method to send a notification to the receiver was called
+        expect(require("../socket").notifyUserNewReq).toHaveBeenCalledWith("recipient-uid", expect.anything())
+    })
+})
 
 //close the server after all the tests are finished
 afterAll(async() => {
