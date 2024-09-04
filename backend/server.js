@@ -1551,7 +1551,16 @@ app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
     }
 })
 
-//start express server
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// //start express server
+// server.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+if(process.env.NODE_ENV !== 'test') {
+    //start express server
+    server.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+module.exports = { app, server, isFriend}

@@ -10,7 +10,7 @@ const MealCard = ({id, mealName, restaurantName, thumbnailUrl, username}) => {
     >
         <div className='flex gap-3 md:gap-10 justify-start items-center w-full'>
             <div className='min-h-24 h-24 w-24 min-w-24 rounded-md overflow-hidden border'>
-                <img src={thumbnailUrl} alt="" className='h-full w-full object-cover'/>
+                <img src={thumbnailUrl} alt={mealName} className='h-full w-full object-cover'/>
             </div>
             <div className='flex flex-col justify-center gap-2'>
                 <p className='text-md md:text-lg font-semibold leading-[18px]'>{mealName}</p>

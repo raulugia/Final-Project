@@ -309,7 +309,7 @@ const Home = () => {
         </div>
       </div>
           {/* Right */}
-      <div class="mt-[135px] pr-4 md:flex md:justify-end">
+      <div className="mt-[135px] pr-4 md:flex md:justify-end">
         <div className="hidden md:flex md:flex-col md:items-end md:gap-8  md:fixed">
           {
             pendingRequests.length > 0 && (
