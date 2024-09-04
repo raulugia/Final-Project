@@ -81,7 +81,8 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
         }
         
     }catch(err){
-        return res.status(500).json({error: "Internal server error"})
+        console.log("error in isFriend" , err)
+        throw new Error("Internal server error in isFriend")
     }
     
 }
@@ -161,6 +162,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
         const offset = (page - 1) * limit
 
         if(areFriends){
+            console.log("users are friends")
             const otherUserAndMeals = await prisma.user.findUnique({
                 where: {
                     username: username
@@ -224,7 +226,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
             //send response to client
             res.json(response)
         }else{
-
+            console.log("Not friends")
             const isRequestPending = await prisma.friendRequest.findFirst({
                 where: {
                     OR: [
@@ -241,7 +243,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                     ]
                 }
             })
-            console.log(req.user)
+            console.log("current user", req.user)
             let requestStatus = ""
             if(isRequestPending){
                 if(isRequestPending.senderUid === req.user.uid){
@@ -256,6 +258,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
             res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending?.id })
         }
     }catch(err){
+        console.error(err)
         return res.status(500).json({error: "Internal server error"})
     }
     
@@ -926,7 +929,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
 //endpoint for getting the user's restaurants
 app.get("/api/restaurants", authenticateUser, async(req, res,) => {
     try {
-        //
+        //get the user's restaurants
         const mealLogs = await prisma.mealLog.findMany({
             where: {
                 userUid: req.user.uid
@@ -940,9 +943,10 @@ app.get("/api/restaurants", authenticateUser, async(req, res,) => {
             }
         })
 
-        
+        //create a new map
         const restaurantsMap = new Map()
         
+        //
         mealLogs.forEach(log => {
             restaurantsMap.set(log.meal.restaurant.id, log.meal.restaurant)
         })
