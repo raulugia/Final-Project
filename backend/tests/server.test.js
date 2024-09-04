@@ -41,6 +41,11 @@ jest.mock("@prisma/client", () => {
         },
         friendRequest: {
             findFirst: jest.fn(),
+            findUnique: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+        },
+        friendship: {
             create: jest.fn(),
         }
     }
@@ -368,6 +373,60 @@ describe("POST /api/friend-request", () => {
 
         //check that the method to send a notification to the receiver was called
         expect(require("../socket").notifyUserNewReq).toHaveBeenCalledWith("recipient-uid", expect.anything())
+    })
+
+
+    it("should return 400 if there is an existing pending/rejected friend request", async () => {
+        //mock user.findUnique to return sender and recipient
+        prisma.user.findUnique
+            .mockResolvedValue({uid: "test-uid"})
+            .mockResolvedValue({uid: "recipient-uid"})
+        
+        //mock findRequest.findFirst so there is a pre-existing pending friend request
+        prisma.friendRequest.findFirst.mockResolvedValue({
+            id: 1,
+            senderUid: "test-uid",
+            receiverUid: "recipient-uid",
+            status: "PENDING"
+        })
+
+        //send a post request to the api endpoint
+        const response = await request(app).post("/api/friend-request").send({ recipientUid: "recipient-uid"}).set("Authorization", "Bearer faketoken").expect(400)
+
+        //ensure that the response contains the error message
+        expect(response.body.error).toBe("Friend request already sent.")
+    })
+})
+
+
+describe("POST /api/friend-request-/accept/:requestId", () => {
+    it("should accept a pending friend request and create a friendship", async() => {
+        //mock friendRequest.findUnique to return a pending friend request
+        prisma.friendRequest.findUnique.mockResolvedValue({
+            id: 1,
+            sender: { uid: "sender-uid"},
+            receiver: { uid: "recipient-uid"},
+            status: "PENDING"
+        });
+
+        //mock friendRequest.update to simulate accepting the request
+        prisma.friendRequest.update.mockResolvedValue({
+            id: 1,
+            status: "ACCEPTED"
+        });
+
+        //mock prisma.friendShip.create to simulate the creation of a new friendship:
+        prisma.friendship.create.mockResolvedValue({
+            id: 1,
+            userUid: "receiver-uid",
+            friendUid: "sender-uid"
+        })
+
+        //send a post request to the api endpoint
+        const response = await request(app).post("/api/friend-request/accept/1").set("Authorization", "Bearer faketoken").expect(200)
+
+        //check if the response contains the correct message
+        expect(response.body.message).toBe("Friend request accepted.")
     })
 })
 

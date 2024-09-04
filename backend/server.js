@@ -1468,7 +1468,7 @@ app.post("/api/friend-request/accept/:requestId", authenticateUser, async(req, r
         })
 
         //return a message confirming the friend request has been created
-        res.json({ message: "Friend request accepted,"})
+        res.json({ message: "Friend request accepted."})
     } catch(err) {
         return res.status(500).json({error: "Internal server error"})
     }
