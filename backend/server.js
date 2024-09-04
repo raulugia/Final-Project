@@ -81,7 +81,7 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
         }
         
     }catch(err){
-        throw new Error(err)
+        return res.status(500).json({error: "Internal server error"})
     }
     
 }
@@ -145,12 +145,12 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 
         res.json(response)
     }catch(err){
-
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
 //endpoint for displaying data linked to a certain user
-app.get("/user/:username", authenticateUser, async(req, res) => {
+app.get("/api/user/:username", authenticateUser, async(req, res) => {
     try{
         const { username } = req.params
         //find out if users are friends and get the other user's uid
@@ -256,14 +256,14 @@ app.get("/user/:username", authenticateUser, async(req, res) => {
             res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending?.id })
         }
     }catch(err){
-        console.log(err)
+        return res.status(500).json({error: "Internal server error"})
     }
     
 
 })
 
 //endpoint for displaying other users' meals
-app.get("/user/:username/meals", authenticateUser, async(req, res) => {
+app.get("/api/user/:username/meals", authenticateUser, async(req, res) => {
     //get the other user's username
     const { username } = req.params
     
@@ -310,7 +310,7 @@ app.get("/user/:username/meals", authenticateUser, async(req, res) => {
             res.json(mealLogs)
             }
     }catch(err){
-        console.log(err)
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
@@ -343,12 +343,12 @@ app.get("/api/user/:username/meals/:mealId", authenticateUser, async(req, res) =
             return res.json( {error: "Users are not friends"})
         }
     }catch(err){
-        console.log(err)
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
 //endpoint for displaying other user's log details
-app.get("/user/:username/meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
+app.get("/api/user/:username/meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
     try{
         //extract username, meal id and log id
         const { username, mealId, logId } = req.params
@@ -381,7 +381,7 @@ app.get("/user/:username/meals/:mealId/log/:logId", authenticateUser, async(req,
             res.json(log)
         }
     }catch(err){
-
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
@@ -426,7 +426,7 @@ app.get("/api/user/:username/restaurants", authenticateUser, async(req, res) => 
         }
 
     }catch(err){
-        console.log(err)
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
@@ -489,7 +489,7 @@ app.get("/api/user/:username/friends", authenticateUser, async(req, res) => {
             res.json(friends)
         }
     }catch(err){
-        console.error(err)
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
@@ -576,13 +576,12 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
             return res.status(400).json({ usernameError: "Username is not available"})
         }
     }catch(err){
-        console.error(err)
         return res.status(500).json({error: "Internal server error"})
     }
 })
 
 //endpoint for updating user's data
-app.put("/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
+app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
         
@@ -845,7 +844,8 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
     }
 })
 
-app.get("/user-data", authenticateUser, async (req, res) => {
+//endpoint for getting the user's account details
+app.get("/api/user-data", authenticateUser, async (req, res) => {
     try {
         //get the user's details
         const user = await prisma.user.findUnique({
@@ -866,7 +866,8 @@ app.get("/user-data", authenticateUser, async (req, res) => {
     }
 })
 
-app.get("/friends", authenticateUser, async (req, res) => {
+//endpoint for getting the user's friends
+app.get("/api/friends", authenticateUser, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where : { uid: req.user.uid },
@@ -922,9 +923,10 @@ app.get("/friends", authenticateUser, async (req, res) => {
     }
 })
 
-
-app.get("/restaurants", authenticateUser, async(req, res,) => {
+//endpoint for getting the user's restaurants
+app.get("/api/restaurants", authenticateUser, async(req, res,) => {
     try {
+        //
         const mealLogs = await prisma.mealLog.findMany({
             where: {
                 userUid: req.user.uid
@@ -954,7 +956,7 @@ app.get("/restaurants", authenticateUser, async(req, res,) => {
 })
 
 //endpoint for returning all the meals linked to a certain restaurant
-app.get("/my-restaurants/:restaurantId", authenticateUser, async(req, res) => {
+app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) => {
     const { restaurantId } = req.params
 
     try{
@@ -1012,7 +1014,7 @@ app.get("/my-restaurants/:restaurantId", authenticateUser, async(req, res) => {
     }
 })
 
-app.get("/meals", authenticateUser, async(req, res,) => {
+app.get("/api/meals", authenticateUser, async(req, res,) => {
     try{
         //get the most recent meal logs avoiding duplicates
         const latestLogs = await prisma.mealLog.findMany({
@@ -1086,11 +1088,12 @@ app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
     }
 })
 
-//endpoint for getting a meal log's information
+//endpoint for getting the details og a meal log submitted by the current user
 app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) => {
     const { logId } = req.params
 
     try{
+        //get the log using the provided id and the user's uid
         const log = await prisma.mealLog.findUnique({
             where: {
                 id: Number(logId),
@@ -1120,7 +1123,7 @@ app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
             }
         })
 
-        //case log was not found
+        //case log was not found - return an error
         if(!log){
             return res.status(404).json({error: "The specified log could not be found"})
         }
@@ -1364,23 +1367,25 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
 //endpoint to handle friend requests
 app.post("/api/friend-request", authenticateUser, async(req, res) => {
-    
+    //get the uid of the user who is receiving the friend request
     const { recipientUid } = req.body;
 
     try{
+        //fetch the user who is sending the friend request
         const sender = await prisma.user.findUnique({
             where: {
                 uid: req.user.uid
             }
         });
 
-
+        //fetch the user who is receiving the friend request
         const recipient = await prisma.user.findUnique({
             where: {
                 uid: recipientUid
             }
         });
 
+        //case user who receives the friend request does not exist
         if( !recipient) {
             return res.status(404).json({error: "Recipient user not found"})
         }
@@ -1399,6 +1404,7 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
             return res.status(400).json({ error: "Friend request already sent." })
         }
 
+        //create a new friend request
         const friendRequest = await prisma.friendRequest.create({
             data: {
                 sender: { connect: { uid: sender.uid }},
@@ -1423,20 +1429,22 @@ app.post("/api/friend-request", authenticateUser, async(req, res) => {
         //send the response to the client
         res.json(friendRequest)
     } catch(err) {
-        console.log(err)
-        res.status(400).json({error: err.message})
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
+//endpoint for accepting a friend request - update existing friend request status
 app.post("/api/friend-request/accept/:requestId", authenticateUser, async(req, res) => {
     const { requestId } = req.params;
 
     try{
+        //fetch the friend request
         const friendRequest = await prisma.friendRequest.findUnique({
             where: { id: Number(requestId) },
             include: {sender: true, receiver: true},
         })
 
+        //return an error if the request does not exist or it is not pending
         if(!friendRequest || friendRequest.status !== "PENDING") {
             return res.status(400).json({ error: "Invalid or already processed request."})
         }
@@ -1455,48 +1463,60 @@ app.post("/api/friend-request/accept/:requestId", authenticateUser, async(req, r
             }
         })
 
+        //return a message confirming the friend request has been created
         res.json({ message: "Friend request accepted,"})
     } catch(err) {
-        console.log(err)
-        res.json({ error: err.message})
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
+//endpoint for rejecting a friend request
 app.post("/api/friend-request/reject/:requestId", authenticateUser, async(req, res) => {
+    //extract the friend request id
     const { requestId } = req.params;
 
     try{
+        //fetch the friend request
         const friendRequest = await prisma.friendRequest.findUnique({
             where: { id: Number(requestId) },
         })
 
+        //return an error if the request does not exist or it is not pending
         if(!friendRequest || friendRequest.status !== "PENDING") {
             return res.status(400).json({ error: "Invalid or already processed request."})
         }
 
-        //await the friend request status to accepted
+        //update the friend request status to rejected - it will always be displayed as pending to the user who sent it
         await prisma.friendRequest.update({
             where: {id: Number(requestId)},
             data: {status: "REJECTED"}
         })
 
+        //return a message to the client indicating that the friend request was rejected
         res.json({ message: "Friend request rejected,"})
     } catch(err) {
-        console.log(err)
-        res.json({ error: err.message})
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 
+//endpoint for getting the chat messages between current user and another user indicated by their username
 app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
+    //extract the other user's username
     const { username } = req.params
-    console.log(username)
+    
+    //extract the elements needed to fetch the right data - infinite scrolling implemented in the client
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20
+    //calculate the offset to avoid retrieving messages that the client has already
     const offset = (page - 1) * limit
+
+    //check if the users are friends 
     const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
 
     try{
+        //case users are friends
         if(areFriends){
+            //get the messages between both users
             const messages = await prisma.message.findMany({
                 where: {
                     OR: [
@@ -1513,17 +1533,21 @@ app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
                     orderBy: {
                         timestamp: "desc"
                     },
+                    //only take the right number of messages
                     take: limit,
+                    //skip the messages the client already has
                     skip: offset,
             })
 
+            //return all the messages between current user and other user
             res.json(messages)
+        //case users are not friends
         }else{
-            return res.json({ error: "Users are not friends"})
+            return res.status(403).json({ error: "Users are not friends"})
         }
 
     }catch(err){
-        console.log(err)
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 

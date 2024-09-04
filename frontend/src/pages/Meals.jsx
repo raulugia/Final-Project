@@ -25,7 +25,7 @@ const Meals = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get(`${username ? `/user/${username}/meals` : "/meals"}`, {
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/meals` : "/api/meals"}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },

@@ -32,7 +32,7 @@ const Friends = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get current user's/other user's friends passing the id token for verification
-                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/friends` : "/friends"}`, {
+                    const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/friends` : "/api/friends"}`, {
                         headers: {
                         Authorization: `Bearer ${token}`,
                         },

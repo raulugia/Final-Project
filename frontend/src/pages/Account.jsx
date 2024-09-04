@@ -55,7 +55,7 @@ const Account = () => {
                     const token = await user.getIdToken()
 
                     //send a get request to get the user's data
-                    const { data } = await axiosInstance.get("/user-data", {
+                    const { data } = await axiosInstance.get("/api/user-data", {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -155,7 +155,7 @@ const Account = () => {
             }
             console.log(formData)
             //api call to update user'd details
-            const { data } = await axiosInstance.put("/update-user", formData, {
+            const { data } = await axiosInstance.put("/api/update-user", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

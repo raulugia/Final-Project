@@ -65,7 +65,7 @@ const Profile = () => {
         //get the id token
         const token = await user.getIdToken();
         //fetch first 5 meal logs - page is needed to calculate the offset in the server
-        const { data } = await axiosInstance.get(`/user/${username}`, {
+        const { data } = await axiosInstance.get(`/api/user/${username}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

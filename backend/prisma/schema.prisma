@@ -15,11 +15,11 @@ datasource db {
 
 model User {
   id Int @id @default(autoincrement())
-  uid String @unique
-  email String @unique
-  username String @unique
-  name String
-  surname String
+  uid String @unique 
+  email String @unique @db.VarChar(255)
+  username String @unique @db.VarChar(25)
+  name String @db.VarChar(100)
+  surname String @db.VarChar(100)
   profilePicUrl String?
   profileThumbnailUrl String?
   meals MealLog[]

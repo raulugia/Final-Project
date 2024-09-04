@@ -38,7 +38,7 @@ const Log = () => {
                 console.log("in try")
                 //send a get request and store data from the request object
                 //route will vary based on whose data the system is fetching (current user vs other user)
-                const { data } = await axiosInstance.get(username ? `/user/${username}/meals/${mealId}/log/${logId}` : `/api/my-meals/${mealId}/log/${logId}`, { 
+                const { data } = await axiosInstance.get(username ? `/api/user/${username}/meals/${mealId}/log/${logId}` : `/api/my-meals/${mealId}/log/${logId}`, { 
                     headers: {
                         "Authorization": `Bearer ${token}`,
                     }

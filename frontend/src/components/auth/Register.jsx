@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import axiosInstance from "../../../utils/axiosInstance"
 import { MdOutlineCameraAlt } from "react-icons/md";
+import Error from "../Error"
 
 //reducer function to manage state updates based on action types
 const reducer = (newUser, action) => {
@@ -27,6 +28,70 @@ const reducer = (newUser, action) => {
       return newUser;
   }
 };
+//method to validate password
+export const validatePassword = password => {
+  //password must be at least 8 characters long and have at least one uppercase and lowercase letter and one number
+  const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d.!@#$%^&*()_+-=]{8,}$/;
+  //return boolean representing if password is valid
+  return passwordPattern.test(password)
+}
+
+//method to validate email
+export const validatedEmail = email => {
+  //standard pattern for email addresses
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  //case email has a pattern that is not allowed
+  if(!emailPattern.test(email)){
+    return "Email addressed not valid"
+  }
+
+  //case email is too long
+  if(email.length > 255){
+    return "Email address cannot be more than 255 characters"
+  }
+
+  //case validated successfully 
+  return true
+}
+
+//method to validate the username
+export const validateUsername = (username) => {
+  //username pattern - letters, numbers, underscores, hyphens or periods allowed
+  let usernamePattern = /^[a-zA-Z0-9._-]+$/
+
+  //case username has characters that are not allowed
+  if(!usernamePattern.test(username)){
+    return "Usernames can only have letters, numbers, underscores, hyphens and periods"
+  }
+
+  //case username is too long
+  if(username.length > 25){
+    return "Username cannot exceed 25 characters"
+  }
+
+  //case validated successfully
+  return true
+}
+
+//method to validate the name and surname
+export const validateNameSurname = (inputValue, inputType) => {
+  //only letters, apostrophes and hyphens allowed
+  let inputPattern = /^[a-zA-Z'-]/g
+  
+  //case name/surname has characters that are not allowed
+  if(!inputPattern.test(inputValue)){
+    return `${inputType} can only have letters, apostrophes and hyphens`
+  }
+
+  //case name/surname too long
+  if(inputValue.length > 100){
+    return `${inputType} cannot exceed 100 characters`
+  }
+
+  //case validated successfully
+  return true
+}
 
 const Register = () => {
   //state to store errors
@@ -47,45 +112,76 @@ const Register = () => {
 
     //if all the details were provided 
     if (newUser.name && newUser.surname && newUser.email && newUser.password) {
-        try{
-            //create a new user with the email and password provided in the form - new user will be signed in
-            const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
-            //store new user
-            const user = userCredential.user;
+      //case password is not valid
+      if(!validatePassword(newUser.password)) {
+        //update state to display error and return to avoid submission
+        setError("Password not valid. Ensure your password is at least 8 characters long, have at least one uppercase and lowercase letter and one number")
+        return
+      }
 
-            //create a FormData object so the data can be sent to the server
-            const data = new FormData();
-            data.append("email", newUser.email);
-            data.append("name", newUser.name);
-            data.append("surname", newUser.surname);
-            data.append("username", newUser.username);
-            data.append("uid", user.uid);
+      //case name is not valid
+      if(validateNameSurname(newUser.name, "Name") !== true){
+        //update state to display error and return to avoid submission
+        setError(validateNameSurname(newUser.name, "Name"))
+        return
+      }
 
-            if(file){
-              data.append("profilePicUrl", file);
-            }
+      //case surname is not valid
+      if(validateNameSurname(newUser.surname, "Surname") !== true){
+        //update state to display error and return to avoid submission
+        setError(validateNameSurname(newUser.surname, "Surname"))
+        return
+      }
 
-            //send a POST request with the user's data so it can be saved in the database in Railway
-            await axiosInstance.post("/api/register", data)
-            // await axiosInstance.post("/api/register", {
-            //   email: newUser.email,
-            //   name: newUser.name,
-            //   surname: newUser.surname,
-            //   username: newUser.username,
-            //   uid: user.uid,
-            //   profilePicUrl: "",
-            // })
+      //case username is not valid
+      if(validateUsername(newUser.username) !== true){
+        //update state to display error and return to avoid submission
+        setError(validateUsername(newUser.username))
+        return
+      }
 
+      try{
+          //create a new user with the email and password provided in the form - new user will be signed in
+          const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
+          //store new user
+          const user = userCredential.user;
+
+          //create a FormData object so the data can be sent to the server
+          const data = new FormData();
+          data.append("email", newUser.email);
+          data.append("name", newUser.name);
+          data.append("surname", newUser.surname);
+          data.append("username", newUser.username);
+          data.append("uid", user.uid);
+
+          if(file){
+            data.append("profilePicUrl", file);
+          }
+
+          //send a POST request with the user's data so it can be saved in the database in Railway
+          const response = await axiosInstance.post("/api/register", data)
+
+          //case database updated successfully
+          if(response.status === 200){
             //update the user's name in Firebase
             await updateProfile(user, { displayName: newUser.name })
-
+            
             //navigate to "/home"
             navigate("/home")
+          }
+        //catch errors
         } catch(err) {
-            console.log(err.message)
-            setError(err.message)
+            if(err.code && err.code === "auth/email-already-in-use"){
+              setError("Email address already in use")
+            } else if(err.code && err.code === "auth/weak-password"){
+              setError("Password not strong enough")
+            } else if(err.response && err.response.data && err.response.data.error){
+              setError(err.response.data.error)
+            } else {
+              setError("Failed to create account. Please try again later.")
+            }
         }
-    }
+      }
   };
 
   //method to update the file state when the file input changes
@@ -108,12 +204,13 @@ const Register = () => {
     }
   };
 
+
   return (
     <div className="flex justify-center items-center h-full bg-slate-50 min-h-screen">
       <div className="border py-5 px-3 rounded-lg shadow-md bg-white">
         <p className="mb-5 text-2xl font-semibold">Register Now!</p>
 
-        <form action="" className="flex flex-col gap-3">
+        <form action="" className="flex flex-col gap-3 max-w-[446px]">
         <div className="flex items-center justify-center w-[50%] mx-auto mb-2">
             <label
               htmlFor="dropzone-file"
@@ -154,6 +251,7 @@ const Register = () => {
               onChange={(e) =>
                 dispatch({ type: "name", payload: e.target.value })
               }
+              required
             />
             <input
               type="text"
@@ -162,6 +260,7 @@ const Register = () => {
               onChange={(e) =>
                 dispatch({ type: "surname", payload: e.target.value })
               }
+              required
             />
           </div>
 
@@ -174,6 +273,7 @@ const Register = () => {
             onChange={(e) =>
               dispatch({ type: "username", payload: e.target.value })
             }
+            required
           />
           <input
             type="email"
@@ -184,6 +284,7 @@ const Register = () => {
             onChange={(e) =>
               dispatch({ type: "email", payload: e.target.value })
             }
+            required
           />
           <input
             type="password"
@@ -194,7 +295,16 @@ const Register = () => {
             onChange={(e) =>
               dispatch({ type: "password", payload: e.target.value })
             }
+            required
           />
+
+          {
+            error && (
+              <div className="text-sm truncate text-wrap max-w-full">
+                <Error message={error} />
+              </div>
+            )
+          }
 
           <button
             type="submit"

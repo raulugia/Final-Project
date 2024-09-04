@@ -32,7 +32,7 @@ const RestaurantMeals = () => {
                     const token = await user.getIdToken();
 
                     //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get(`/my-restaurants/${restaurantId}`, {
+                    const { data } = await axiosInstance.get(`/api/my-restaurants/${restaurantId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },

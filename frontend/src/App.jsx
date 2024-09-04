@@ -30,19 +30,6 @@ function App() {
   const { pendingRequests, setPendingRequests } = useStateContext()
   const location = useLocation()
 
-  //method to ensure no expired tokens are used
-  // const refreshToken = async() => {
-  //   try{
-  //     const user = auth.currentUser
-  //     if(user){
-  //       //console.log(await user.getIdToken())
-  //       return await user.getIdToken()
-  //     }
-  //   }catch(err){
-  //     console.log(err)
-  //   }
-  // }
-
   //get the current user once when the component mounts
   useEffect(() => {
     //set up a listener to check for authentication state changes
