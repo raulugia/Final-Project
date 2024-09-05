@@ -50,7 +50,7 @@ const Chat = () => {
                     //get id token
                     const token = await user.getIdToken()
                     //make api call to fetch all friends passing the token for authentication
-                    const { data } = await axiosInstance.get("/friends", { 
+                    const { data } = await axiosInstance.get("/api/friends", { 
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
