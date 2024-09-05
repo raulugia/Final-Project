@@ -11,6 +11,8 @@ const authenticateUser = require("./authMiddleware");
 const { types } = require("pg");
 const http = require("http");
 const { initializeSocket, notifyUserNewReq} = require("./socket");
+const admin = require('./firebaseAdmin');
+const { validateEmail, validateUsername, validateNameSurname } = require("./validators")
 
 //initialize the Prisma client
 const prisma = new PrismaClient();
@@ -81,20 +83,20 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
         }
         
     }catch(err){
-        console.log("error in isFriend" , err)
         throw new Error("Internal server error in isFriend")
     }
     
 }
 
-//
+//endpoint for getting all the data needed by the Home component
 app.get("/api/home", authenticateUser, async(req, res) => {
     try{
+        //infinite scrolling params
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5
         const offset = (page - 1) * limit
 
-
+        //get the user's logs - fetch 5 logs each time ignoring the already fetched logs(offset)
         const logs = await prisma.mealLog.findMany({
             where: { 
                 userUid: req.user.uid
@@ -114,6 +116,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 
         })
 
+        //fetch the current user's data
         const userData = await prisma.user.findUnique({
             where: {
                 uid: req.user.uid
@@ -127,8 +130,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             }
         })
 
-        console.log("user data: ", userData)
-
+        //structure the data
         const responseLogs = logs.map(log => ({
             logId: log.id,
             mealId: log.meal.id,
@@ -142,6 +144,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             user: userData
         }))
 
+        //combine the logs and user data and return
         const response = {logs: responseLogs, user: userData}
 
         res.json(response)
@@ -153,16 +156,19 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 //endpoint for displaying data linked to a certain user
 app.get("/api/user/:username", authenticateUser, async(req, res) => {
     try{
+        //get the other user's username
         const { username } = req.params
         //find out if users are friends and get the other user's uid
         const { areFriends, otherUserUid, name, surname } = await isFriend(req.user.uid, username)
 
+        //infinite scrolling params
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5
         const offset = (page - 1) * limit
 
+        //case users are friends
         if(areFriends){
-            console.log("users are friends")
+            //get the user's logs - fetch 5 logs each time ignoring the already fetched logs(offset)
             const otherUserAndMeals = await prisma.user.findUnique({
                 where: {
                     username: username
@@ -209,7 +215,6 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                 //create an array of the restaurants that both users have in common
                 .filter(restaurant => currentUserRestaurantIds.has(restaurant.id))
 
-                console.log(otherUserAndMeals.meals)
             //create the response object    
             const response = {
                 user: {
@@ -225,8 +230,9 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
 
             //send response to client
             res.json(response)
+        //case users are not friends
         }else{
-            console.log("Not friends")
+            //find out if there is a pending or rejected friend request
             const isRequestPending = await prisma.friendRequest.findFirst({
                 where: {
                     OR: [
@@ -243,26 +249,29 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                     ]
                 }
             })
-            console.log("current user", req.user)
+            
+            //flag needed by client to decide what buttons to display
             let requestStatus = ""
+            //case there is a pending/rejected request
             if(isRequestPending){
+                //case the sender is the current user
                 if(isRequestPending.senderUid === req.user.uid){
+                    //ensure the client always displays pending even if the request was rejected by the other user
                     requestStatus = "pending"
+                //case the request was sent by the other user
                 }else if(isRequestPending.receiverUid === req.user.uid){
+                    //ensure client can either display accept/reject buttons or add friend button
                     requestStatus = isRequestPending.status === "PENDING" ? "action" : "rejected"
                 }
             }
 
-            console.log(isRequestPending)
-
-            res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending?.id })
+            //return data to client
+            return res.json({ error: "Users are not friends", name, surname, otherUserUid, requestStatus, requestId: isRequestPending?.id })
         }
     }catch(err){
         console.error(err)
         return res.status(500).json({error: "Internal server error"})
     }
-    
-
 })
 
 //endpoint for displaying other users' meals
@@ -327,6 +336,7 @@ app.get("/api/user/:username/meals/:mealId", authenticateUser, async(req, res) =
 
         //case users are friends
         if(areFriends){
+            //get other user's logs for the given meal
             const logs = await prisma.mealLog.findMany({
                 where: {
                     mealId: Number(mealId),
@@ -340,10 +350,11 @@ app.get("/api/user/:username/meals/:mealId", authenticateUser, async(req, res) =
                     }
                 }
             })
-
+            //return the logs
             res.json(logs)
+        //case users are not friends
         } else {
-            return res.json( {error: "Users are not friends"})
+            return res.status(403).json( {error: "Users are not friends"})
         }
     }catch(err){
         return res.status(500).json({error: "Internal server error"})
@@ -382,6 +393,9 @@ app.get("/api/user/:username/meals/:mealId/log/:logId", authenticateUser, async(
             
             //return log to the client
             res.json(log)
+        //case users are not friends
+        }else {
+            return res.status(403).json( {error: "Users are not friends"})
         }
     }catch(err){
         return res.status(500).json({error: "Internal server error"})
@@ -426,6 +440,9 @@ app.get("/api/user/:username/restaurants", authenticateUser, async(req, res) => 
             
             //return array with other user's restaurants
             res.json(uniqueRestaurants)
+        //case users are not friends
+        }else {
+            return res.status(403).json( {error: "Users are not friends"})
         }
 
     }catch(err){
@@ -490,6 +507,8 @@ app.get("/api/user/:username/friends", authenticateUser, async(req, res) => {
             
             //return array containing other user's friends
             res.json(friends)
+        }else {
+            return res.status(403).json( {error: "Users are not friends"})
         }
     }catch(err){
         return res.status(500).json({error: "Internal server error"})
@@ -515,6 +534,7 @@ app.post("/api/register", upload.single("profilePicUrl"),async (req, res) => {
       },
     });
 
+    //trigger the task to create a thumbnail, upload pictures and update the database with the URLs
     if(req.file) {
         const file  = req.file
         
@@ -528,17 +548,19 @@ app.post("/api/register", upload.single("profilePicUrl"),async (req, res) => {
     //respond with the new user object
     res.json(user);
   } catch (err) {
-    console.log(err)
     //respond with a 400 status code if there was an error
     res.status(400).json({ error: err.message });
   }
 });
 
+//endpoint for checking if the email/username entered by the user in the Account component are unique - triggered on blur on client
 app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
+    //get the user's email and username
     const { email, username} = req.body
 
     try{
         if(email){
+            //ensure email is unique
             const uniqueEmail = await prisma.user.findFirst({
                 where: {
                     email: email,
@@ -551,14 +573,17 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
                 }
             })
 
+            //case email is unique
             if(!uniqueEmail){
                 return res.status(200).json({ email: "Email is available"})
             }
 
+            //case email is not unique - return an error
             return res.status(400).json({emailError: "Email is not available"})
         }
 
         if(username){
+            //try to fetch an existing username
             const uniqueUsername = await prisma.user.findFirst({
                 where: {
                     username: username,
@@ -570,12 +595,13 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
                     uid: true
                 }
             })
-            console.log("uniquesuername: ", uniqueUsername)
+            
+            //case username is unique
             if(!uniqueUsername){
-                console.log("username unique")
                 return res.status(200).json({ username: "Username is available"})
             }
 
+            //case username is not unique - return an error
             return res.status(400).json({ usernameError: "Username is not available"})
         }
     }catch(err){
@@ -587,7 +613,28 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
 app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
+
+        //validate data and return an error if it does not match the criteria
+        const validatedName = validateNameSurname(name, "Name")
+        const validatedSurname = validateNameSurname(name, "Surname")
+        const validatedUsername = validateUsername(username)
+        const validatedEmail = validateEmail(email)
         
+        if(name && validatedName !== true){
+            return res.status(400).json({error: validatedName})
+        }
+
+        if(surname && validatedSurname !== true){
+            return res.status(400).json({error: validatedSurname})
+        }
+
+        if(username && validatedUsername !== true){
+            return res.status(400).json({error: validatedUsername})
+        }
+
+        if(email && validatedEmail !== true){
+            return res.status(400).json({error: validatedEmail})
+        }
 
         //store only the fields that need updating
         const dataToUpdate = {}
@@ -627,6 +674,48 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
         res.json(updatedUser);
     }catch(err){
         res.status(500).json({ error: "Failed to update user details"})
+    }
+})
+
+//endpoint for deleting a user
+app.delete("/api/delete-user/:username", authenticateUser, async(req, res) => {
+    const { username } = req.params
+
+    try{
+        //fetch the user to be deleted
+        const userToDelete = await prisma.user.findUnique({
+            where: { username: username}
+        })
+
+        //return an error if the user is not found
+        if(!userToDelete){
+            return res.status(404).json({error: "User not found"})
+        }
+
+        //return an error if the current user is not the user that will be deleted
+        if(req.user.uid !== userToDelete.uid){
+            return res.status(403).json({error: "Unauthorized request"})
+        }
+
+        //use a database transaction to ensure user is deleted from both the database and firebase
+        await prisma.$transaction(async(prismaTransaction) => {
+            //delete the user from firebase
+            await admin.auth().deleteUser(userToDelete.uid)
+
+            //delete user from database and  any associated data
+            await prismaTransaction.user.delete({
+                where: {uid: userToDelete.uid}
+            })
+        })
+
+        //return a success message
+        return res.status(200).json({ message: "User deleted successfully"})
+    }catch(err){
+        if(err.code && err.code.startsWith("auth/")){
+            return res.status(500).json({error: "Failed to delete your account."})
+        }
+
+        res.status(500).json({error: "Internal server error"})
     }
 })
 
@@ -704,7 +793,6 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
       
 
     } catch (err) {
-        console.log(err)
       //respond with a 400 status code if there was an error  
       res.status(400).json({ error: "There was a problem logging your meal. Please, try again." });
     }
@@ -713,13 +801,11 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
 
 //endpoint for updating a log
 app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("picture"),async(req, res) => {
-    console.log("updating...")
+    //extract params
     const { mealId, logId } = req.params;
-    console.log("params", req.params)
-    console.log("body", req.body)
+    //extract log data
     const { mealName, restaurantName, carbEstimate, description, rating} = req.body
     const picture = req.file
-    console.log(picture)
 
     try{
         //find the existing meal log
@@ -736,15 +822,16 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
             }
         })
 
+        //return an error if the provided log does not exist
         if(!existingLog){
             return res.status(404).json({ error: "Meal log not found" })
         }
-        console.log("log found: ", existingLog)
+        
+        //initialize the object that will store the data that needs updating
         const updatedData = {}
 
         //case the new meal name is different or the new restaurant is different
         if((mealName && mealName !== existingLog.meal.name) || (restaurantName && restaurantName !== existingLog.meal.restaurant.name)){
-            console.log("new meal name: ", mealName)
             //find the restaurant by name or create a new one
             let restaurant = await prisma.restaurant.upsert({
                 where: {
@@ -753,8 +840,6 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
                 update: {},
                 create: { name: restaurantName }
             })
-
-            console.log("restaurant: ", restaurant)
 
             //find the meal by name and restaurant id or create a new one
             const meal = await prisma.meal.upsert({
@@ -773,12 +858,10 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
 
             //add the meal id to updatedData
             updatedData.mealId = meal.id
-            console.log("updated meal: ", updatedData)
         }
 
         //case the new carb estimate is different
         if(carbEstimate && carbEstimate !== existingLog.carbEstimate.toString()) {
-            console.log("new carb estimate")
             //add the new carb estimate to updatedData
             updatedData.carbEstimate = Number(carbEstimate)
         }
@@ -797,7 +880,6 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
 
         //case the user uploaded a new picture
         if(picture) {
-            console.log("PICTURE IS NEW")
             //set the new picture and thumbnail placeholders
             updatedData.picture = ""
             updatedData.thumbnail = ""
@@ -813,7 +895,6 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
 
         //case the user uploaded a new picture - log has already been updated
         if(picture) {
-            console.log("PICTURE IS NEW")
             //add job to queue so a thumbnail is created, picture and thumbnail uploaded to cloudinary and database updated
             await imageUpdateQueue.add({
                 filePath: picture.path,
@@ -825,23 +906,24 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
             }, {attempts: 3, backoff: 5000, timeout: 120000})
         }
 
+        //check if there are logs linked to the provided meal
         const remainingLogs = await prisma.mealLog.findMany({
             where: {
                 mealId: Number(existingLog.mealId)
             }
         })
 
+        //there are no logs linked to the provided meal - delete meal as meals without logs should not exist
         if(remainingLogs.length === 0) {
             await prisma.meal.delete({
                 where: {
                     id: Number(existingLog.mealId)
                 }
             })
-            console.log("meal deleted", existingLog)
         }
 
+        //return the updated log
         res.json(updatedLog)
-        console.log("response sent")
     }catch(err) {
         return res.status(500).json({ error: "Log could not be updated" })
     }
@@ -862,6 +944,7 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
             return res.status(404).json({ error: "User not found" })
         }
 
+        //return the user's details
         res.json(user)
 
     } catch(err) {
@@ -919,6 +1002,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
             ...user.friendOf.map(data => data.user),
         ]
 
+        //return all user's friends
         res.json(friends)
 
     } catch(err) {
@@ -1018,6 +1102,7 @@ app.get("/api/my-restaurants/:restaurantId", authenticateUser, async(req, res) =
     }
 })
 
+//endpoint for getting all the user's meals
 app.get("/api/meals", authenticateUser, async(req, res,) => {
     try{
         //get the most recent meal logs avoiding duplicates
@@ -1064,6 +1149,7 @@ app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
     const { mealId } = req.params;
 
     try{
+        //get the logs created by the user and linked to the given meal
         const mealLogs = await prisma.mealLog.findMany({
             where: {
                 userUid: req.user.uid,
@@ -1087,7 +1173,6 @@ app.get("/api/meals/:mealId", authenticateUser, async(req, res,) => {
         //return logs
         res.json(mealLogs)
     } catch(err) {
-        console.log(err)
         res.status(500).json({error: "An error occurred while getting the data. Please try again."})
     }
 })
@@ -1135,12 +1220,11 @@ app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
         //return the log details
         res.json(log)
     }catch(err){
-        console.error(err)
         return res.status(500).json({error: "The specified log could not be found"})
     }
 })
 
-//endpoint to get the restaurants and meals requested by the user
+//endpoint to get the restaurants, meals and users requested by the user - search bar
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
 
@@ -1274,8 +1358,8 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             }
         })
 
-        console.log("USERS: ", users.friendOf)
-
+        
+        //shape the meals data
         const mealResults = [
             ...meals.map(meal => {
                 const latestLog = meal.logs[0];
@@ -1293,6 +1377,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             })
         ]
 
+        //shape restaurants data
         const restaurantResults = [
             ...restaurants.map(restaurant => {
                 //get the total number of meal logs linked to a restaurant 
@@ -1307,45 +1392,33 @@ app.get("/api/search", authenticateUser, async(req, res) => {
         ]
 
         const userResults = users.map(user => {
-            //console.log(`User name: ${user.name} friends of ${JSON.stringify(user)}`)
             //if the length of friends or friendsOf is < 0, users are not friends
             const isFriend = user.friends.length > 0 || user.friendOf.length > 0
             
-            //console.log(`User name: ${user.name} received requests ${JSON.stringify(user.receivedRequests)}`)
+            //initialize variables
             let friendRequestStatus = ""
             let requestId = ""
 
+            //combine the friend requests between both users
             const combinedRequests = [...user.sentRequests, ...user.receivedRequests].sort((a,b) => b.createdAt - a.createdAt)
 
+            //case there are friend requests
             if(combinedRequests.length > 0) {
+                //get the most recent one
                 const latestRequest = combinedRequests[0]
-                console.log("latest req: ", latestRequest)
 
+                //case the sender is the current user
                 if(latestRequest.senderUid === req.user.uid) {
+                    //ensure "pending" is displayed in the client even if the request was rejected
                     friendRequestStatus = "pending"
                     requestId = latestRequest.id
+                //case the current user received the friend request
                 } else if(latestRequest.receiverUid === req.user.uid) {
+                    //store the status so client can display accept/reject buttons or add friend button
                     friendRequestStatus = latestRequest.status === "PENDING" ? "action" : "rejected"
                     requestId = latestRequest.id 
                 }
             }
-            // //case user sent current user a friend request
-            // if(user.sentRequests.length > 0) {
-            //     const request = user.sentRequests[0]
-            //     //if the status is pending, the friend request will have to be actioned in the client
-            //     friendRequestStatus = request.status === "PENDING" ? "action" : "rejected"
-            //     requestId = request.id
-            // }
-            
-            // //case current user sent user a friend request
-            // if(user.receivedRequests.length > 0) {
-            //     const request = user.receivedRequests[0]
-            //     //users will not be notified when a friend request is rejected, it will be shown as pending in the client
-            //     if(request.status === "PENDING" || request.status === "REJECTED"){
-            //         friendRequestStatus = "pending"
-            //     }
-            //     requestId = request.id
-            // }
 
             return {
                 id: user.id,
@@ -1353,6 +1426,7 @@ app.get("/api/search", authenticateUser, async(req, res) => {
                 surname: user.surname,
                 username: user.username,
                 uid: user.uid,
+                profile_pic: user.profileThumbnailUrl,
                 type: "user",
                 isFriend,
                 friendRequestStatus,
@@ -1360,12 +1434,12 @@ app.get("/api/search", authenticateUser, async(req, res) => {
             }
         })
         
+        //combine results and return
         const results = [{meals: mealResults}, {restaurants: restaurantResults}, {users: userResults}]
 
         res.json(results)
     } catch(err) {
-        console.log(err)
-        res.status(400).json({error: err.message})
+        return res.status(500).json({error: "Internal server error"})
     }
 })
 

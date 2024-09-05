@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { auth } from '../../utils/firebase'
-import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "firebase/auth";
 import axiosInstance from '../../utils/axiosInstance'
 import UpdateUserModal from '../components/UpdateUserModal';
 import Error from '../components/Error'
+import { useNavigate } from 'react-router-dom';
 
 const Account = () => {
     const user = auth.currentUser
@@ -43,6 +44,7 @@ const Account = () => {
     //state to store an error message
     const [serverError, setServerError] = useState("")
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+    const navigate = useNavigate()
     
 
 
@@ -180,8 +182,61 @@ const Account = () => {
         }catch(err){
             //update state to provide feedback
             setDisplayMessage({error: "Details could not be updated"})
-            console.log(err)
             //reset loading state
+            setLoading(false)
+        }
+    }
+
+    const handleDelete = async(e) => {
+        e.preventDefault()
+        //update loading state - submit button disabled
+        setLoading(true)
+        //reset modal state
+        setDisplayModal(false)
+
+        try{
+            //get token for server authentication
+            const token = await user.getIdToken()
+
+
+            //case user has not re-authenticated
+            if(!credentialDetails.email || !credentialDetails.password ){
+                //display modal so user enters email and password
+                setDisplayModal(true)
+                //reset loading state - submit button enabled
+                setLoading(false)
+
+                //stop submission process
+                return
+            }
+
+            //get credential using details entered by user in the modal
+            const credential = EmailAuthProvider.credential(credentialDetails.email, credentialDetails.password)
+            //re-authenticate user and update their email on firebase
+            await reauthenticateWithCredential(user, credential)
+
+            const response = await axiosInstance.delete(`/api/delete-user/${userData.username}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+
+            if(response.statusCode === 200) {
+                //await deleteUser(user)
+                navigate("/")
+            }
+            
+            setLoading(false)  
+            
+        }catch(err){
+            //update state to display an error message
+            if(err.response && err.response.data && err.response.data.error){
+                setServerError(err.response.data.error)
+            } else {
+                setServerError("Failed to delete your account. Please try again.")
+            }
+        } finally {
+            //hide loading state
             setLoading(false)
         }
     }
@@ -309,7 +364,7 @@ const Account = () => {
                     </div>
                 ) : (
 
-                    <form className="bg-white px-8 border rounded-xl shadow-md">
+                    <form className="bg-white px-4 md:px-8 border rounded-xl shadow-md">
                         <div className="my-6">
                             <h1 className="text-lg font-semibold text-slate-700">Manage Your Account</h1>
                             <p className='text-sm text-slate-600'>Click on the Save button to save your changes.</p>
@@ -327,7 +382,7 @@ const Account = () => {
                         </div>
                         <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
-                        <div className="flex justify-between md:justify-start md:gap-16 items-center mb-6">
+                        <div className="flex justify-between md:justify-start gap-5 md:gap-16 items-center mb-6">
                             <div>
                                 <div className="bg-slate-700 h-20 w-20 rounded-full overflow-hidden">
                                     <img 
@@ -388,13 +443,13 @@ const Account = () => {
                                         )
                                     }
                                 </div>
-                                {
-                                    usernameAvailable && (
-                                        <div className="text-sm  font-medium mt-1">
-                                            <p className="text-green-600">Username is available</p>
-                                        </div>
-                                    )
-                                }
+                                    {
+                                        usernameAvailable && (
+                                            <div className="text-sm  font-medium mt-1">
+                                                <p className="text-green-600">Username is available</p>
+                                            </div>
+                                        )
+                                    }
                             </div>
 
                         </div>
@@ -471,7 +526,13 @@ const Account = () => {
                         <div className="border-b-2 border-slate-200 w-full mb-6"></div>
 
                         <div className="w-full flex gap-3 md:gap-5 mb-6 justify-center md:justify-end text-sm md:text-md">
-                            <button disabled={loading} className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm">Delete Account</button>
+                            <button 
+                                disabled={loading} 
+                                className="border border-red-700 rounded-lg px-2 py-1 text-white font-semibold bg-red-600 hover:bg-red-700 hover:shadow-sm"
+                                onClick={handleDelete}
+                            >
+                                Delete Account
+                            </button>
                             <button 
                                 disabled={loading}
                                 onClick={handleSubmit} 
@@ -481,9 +542,9 @@ const Account = () => {
                             </button>
                         </div>
                     </form>
-                )
-            }
-
+                    )
+                 }
+                
         </div>
         {
             displayModal &&(

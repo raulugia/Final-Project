@@ -68,13 +68,13 @@ const Navbar = ({ name }) => {
                 />
                 <button type="submit"><FaSearch color={"white"} className='hover:cursor-pointer'/></button>
             </form>
-            <div className={`md:relative md:select-none hidden ${displayOptions ? "bg-slate-100" : ""}`}>
+            <div className={`md:relative md:block md:select-none hidden ${displayOptions ? "bg-slate-100" : ""}`}>
                 <div className="flex items-center">
                     {
                         displayOptions ? (
-                            <IoIosArrowUp />
+                            <IoIosArrowUp className="hover:cursor-pointer" onClick={() => setDisplayOptions(!displayOptions)}/>
                         ) : (
-                            <IoIosArrowDown />
+                            <IoIosArrowDown className="hover:cursor-pointer" onClick={() => setDisplayOptions(!displayOptions)}/>
                         )
                     }
                     <p className={`text-sm text-black px-1 hover:cursor-pointer`} onClick={() => setDisplayOptions(!displayOptions)}> Hello, {name}</p>

@@ -4,7 +4,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
-const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, requestId}) => {
+const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, requestId, profile_pic}) => {
     const user = auth.currentUser
     const [isHovered, setIsHovered] = useState(null)
     const [buttonMessage, setButtonMessage] = useState("")
@@ -107,7 +107,13 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
         <div className="flex items-center flex-grow justify-between">
             <div className="flex items-center justify-between gap-2 md:gap-10">
                 <div>
-                    <div className="bg-slate-500 rounded-full w-14 h-14 md:w-20 md:h-20"></div>
+                    <div className="bg-slate-500 rounded-full w-14 h-14 md:w-20 md:h-20 overflow-hidden">
+                        {
+                            profile_pic && (
+                                <img src={profile_pic} alt="profile picture" />
+                            )
+                        }
+                    </div>
                 </div>
                 <Link to={`/${username}`} className='flex flex-col items-center'>
                     <p className={`text-sm md:text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p>

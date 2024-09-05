@@ -23,7 +23,7 @@ model User {
   profilePicUrl String?
   profileThumbnailUrl String?
   meals MealLog[]
-  friends Friendship[] @relation("UserFriends")
+  friends Friendship[] @relation("UserFriends") //friendships initiated by the user
   friendOf Friendship[] @relation("FriendFriends")
   chatsSent Message[] @relation("SentMessages")
   chatsReceived Message[] @relation("ReceivedMessages")
@@ -40,7 +40,7 @@ model Restaurant {
 model Meal {
   id Int @id @default(autoincrement())
   name String
-  restaurant Restaurant @relation("RestaurantMeals" ,fields: [restaurantId], references: [id])
+  restaurant Restaurant @relation("RestaurantMeals" ,fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId Int
   logs MealLog[]
   @@unique([name, restaurantId]) //ensure the same meal name can only be logged once per restaurant
@@ -48,7 +48,7 @@ model Meal {
 
 model MealLog {
   id Int @id @default(autoincrement())
-  user User @relation(fields:[userUid], references: [uid])
+  user User @relation(fields:[userUid], references: [uid], onDelete: Cascade)
   userUid String
   meal Meal @relation(fields:[mealId], references: [id])
   mealId Int
@@ -69,9 +69,9 @@ enum Rating {
 
 model Friendship {
   id Int @id @default(autoincrement())
-  user User @relation("UserFriends", fields: [userUid], references: [uid])
+  user User @relation("UserFriends", fields: [userUid], references: [uid], onDelete: Cascade)
   userUid String
-  friend User @relation("FriendFriends", fields: [friendUid], references: [uid])
+  friend User @relation("FriendFriends", fields: [friendUid], references: [uid], onDelete: Cascade)
   friendUid String
 
   @@unique([userUid, friendUid])
@@ -79,9 +79,9 @@ model Friendship {
 
 model FriendRequest {
   id Int @id @default(autoincrement())
-  sender User @relation("SentRequests", fields: [senderUid], references: [uid])
+  sender User @relation("SentRequests", fields: [senderUid], references: [uid], onDelete: Cascade)
   senderUid String
-  receiver User @relation("ReceivedRequests", fields: [receiverUid], references: [uid])
+  receiver User @relation("ReceivedRequests", fields: [receiverUid], references: [uid], onDelete: Cascade)
   receiverUid String
   status RequestStatus
   createdAt DateTime @default(now())
@@ -95,9 +95,9 @@ enum RequestStatus {
 
 model Message {
   id Int @id @default(autoincrement())
-  sender User @relation("SentMessages", fields: [senderUid], references: [uid])
+  sender User @relation("SentMessages", fields: [senderUid], references: [uid], onDelete: Cascade)
   senderUid String
-  receiver User @relation("ReceivedMessages", fields: [receiverUid], references: [uid])
+  receiver User @relation("ReceivedMessages", fields: [receiverUid], references: [uid], onDelete: Cascade)
   receiverUid String
   content String
   timestamp DateTime @default(now())
