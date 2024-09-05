@@ -58,7 +58,6 @@ const Chat = () => {
 
                     //case server responds
                     if(data){
-                        console.log(data)
                         //update states to display friends
                         setFriends(data)
                         setFilteredFriends(data)
@@ -98,7 +97,6 @@ const Chat = () => {
             async() => {
                 try{
                     setLoading(true)
-                    console.log("FETCHING...",  page)
                     //get id token
                     const token = await user.getIdToken()
                     //make api call to fetch the firsy 20 messages between current user and other user

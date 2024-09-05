@@ -11,17 +11,18 @@ import { CgLogOut } from "react-icons/cg";
 
 const Navbar = ({ name }) => {
     const [searchInput, setSearchInput] = useState("")
+    //state to toggle the visibility of the options element
     const [displayOptions, setDisplayOptions] = useState(false)
+    //state to toggle the visibility of the navbar on small screens - triggered by hamburger button
     const [displayLinks, setDisplayLinks] = useState(false)
     const navigate = useNavigate()
     
-
     const handleSubmit = e => {
-        console.log("here")
         e.preventDefault()
         navigate(`/search?query=${searchInput}`, {replace: true})
     }
 
+    //method to log the user out
     const logOut = async() => {
         signOut(auth).then(() => {
             navigate("/")

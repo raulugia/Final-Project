@@ -15,7 +15,6 @@ const Log = () => {
     const user = auth.currentUser
     //get location object
     const logLocation = useLocation()
-    console.log("LOCATION|: ", logLocation)
     //state to store the meal log data
     const [log, setLog] = useState(logLocation.state || {})
     //get username, meal id and log id
@@ -35,7 +34,6 @@ const Log = () => {
             //get user's id token for authorization in the server
             const token = await user.getIdToken()
             try{
-                console.log("in try")
                 //send a get request and store data from the request object
                 //route will vary based on whose data the system is fetching (current user vs other user)
                 const { data } = await axiosInstance.get(username ? `/api/user/${username}/meals/${mealId}/log/${logId}` : `/api/my-meals/${mealId}/log/${logId}`, { 
@@ -47,7 +45,7 @@ const Log = () => {
                 if(data){
                     //format and store the date of the log
                     const displayData = {...data, createdAt: formatDate(data.createdAt)}
-                    console.log(`log has been fetched: ${data}`)
+
                     //update state so the log data is displayed
                     setLog(displayData)
     

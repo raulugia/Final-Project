@@ -38,7 +38,7 @@ const Friends = () => {
                         Authorization: `Bearer ${token}`,
                         },
                     })
-                    console.log(data)
+
                     //update states
                     setUserFriends(data)
                     setFilteredFriends(data)

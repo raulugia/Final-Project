@@ -6,8 +6,8 @@ import { auth } from "../../utils/firebase";
 import socket from "../../utils/socket";
 
 const LogMeal = () => {
-  //state to store the meal rating
-  const [mealRating, setMealRating] = useState("");
+  //get the current user
+  const user = auth.currentUser;
   //state to store the meal data as an object
   const [mealData, setMealData] = useState({
     mealName: "",
@@ -17,9 +17,10 @@ const LogMeal = () => {
   });
   //state to store the picture uploaded by the user
   const [file, setFile] = useState(null);
-  //
+  //states to display the preview image
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-
+  //state to display error message
+  const [error, setError] = useState("");
   //hook for navigating withing the web app
   const navigate = useNavigate();
 
@@ -71,44 +72,52 @@ const LogMeal = () => {
     data.append("picture", file);
 
     try {
-      //get the current user
-      const user = auth.currentUser;
-      //case user is authenticated
-      if (user) {
-        //get the id token
-        const token = await user.getIdToken();
-        
-        //send a POST request with the form data and authorization header
-        const response = await axiosInstance.post("/api/log-meal", data, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("response", response);
-        const { id: mealLogId } = response.data
-        //
-        if(mealLogId){
-          setTimeout(() => {
-            socket.emit("accuracyReviewNotification", {
-              mealLogId,
-              userUid: user.uid,
-            })
-          }, 60000)
-        }
+      //get the id token
+      const token = await user.getIdToken();
+      
+      //send a POST request with the form data and authorization header
+      const response = await axiosInstance.post("/api/log-meal", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      //extract the log id
+      const { id: mealLogId } = response.data
 
-        //navigate to the /home route
-        navigate("/home");
-      } else {
-        console.log("User not authenticated");
+      //case log was saved to the database
+      if(mealLogId){
+        //send an event to the websocket to send a notification to the user saying a new meal is ready to be reviewed (accuracy)
+        //set to 1 minute so web app can be marked otherwise it would be 4 hours
+        setTimeout(() => {
+          socket.emit("accuracyReviewNotification", {
+            mealLogId,
+            userUid: user.uid,
+          })
+        }, 60000)
       }
-    } catch (err) {
-      console.error(err.message);
+
+      //navigate to the /home route
+      navigate("/home");
+    } catch(err) {
+      //update state to display an error message
+      if(err.response && err.response.data && err.response.data.error){
+          setError(err.response.data.error)
+      } else {
+          setError("Failed to log the meal. Please try again later.")
+      }
     }
   };
 
   return (
     <div className="flex justify-center items-center px-2 md:px-0 min-h-screen bg-slate-200">
       <div className="border mt-12 py-5 px-3 rounded-lg lg:w-[50%] md:w-1/3 shadow-md bg-white">
+      {
+        error && (
+          <div className="mb-3 border border-red-700 bg-red-100 text-red-900 font-semibold rounded-sm px-3 py-1">
+            <p>{error}</p>
+          </div>
+        )
+      }
         <form action="" className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex items-center justify-center w-[280px] md:w-[50%] mx-auto mb-2 ">
             <label

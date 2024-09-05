@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { auth } from '../../utils/firebase'
-import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "firebase/auth";
+import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import axiosInstance from '../../utils/axiosInstance'
 import UpdateUserModal from '../components/UpdateUserModal';
 import Error from '../components/Error'
@@ -34,8 +34,10 @@ const Account = () => {
     const [loading, setLoading] = useState(true)
     //sates to provide error feedback to user
     const [errors, setErrors] = useState({email: [], username: [], password: []})
+    //states to know if new email/username is available
     const [emailAvailable, setEmailAvailable] = useState()
     const [usernameAvailable, setUsernameAvailable] = useState()
+    //states to display feedback
     const [displayMessage, setDisplayMessage] = useState()
     //state to display/hide modal
     const [displayModal, setDisplayModal] = useState(false)
@@ -43,6 +45,7 @@ const Account = () => {
     const [credentialDetails, setCredentialDetails] = useState({email: "", password: ""})
     //state to store an error message
     const [serverError, setServerError] = useState("")
+    //state to display a preview image of the new image
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const navigate = useNavigate()
     
@@ -187,6 +190,7 @@ const Account = () => {
         }
     }
 
+    //method to delete a user and its data
     const handleDelete = async(e) => {
         e.preventDefault()
         //update loading state - submit button disabled
@@ -215,12 +219,14 @@ const Account = () => {
             //re-authenticate user and update their email on firebase
             await reauthenticateWithCredential(user, credential)
 
+            //send a delete request to the api
             const response = await axiosInstance.delete(`/api/delete-user/${userData.username}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
 
+            //case success
             if(response.statusCode === 200) {
                 //await deleteUser(user)
                 navigate("/")
