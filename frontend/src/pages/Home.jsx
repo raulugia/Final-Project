@@ -314,14 +314,14 @@ const Home = () => {
           {
             pendingRequests.length > 0 && (
 
-              <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden w-[230px]'>
-                <div className='flex gap-2 items-center px-3'>
-                  <FaUserFriends size={20} className='text-sky-800'/>
-                  <h1 className='text-lg text-sky-700 font-semibold mb-2 mt-1'>Friend Requests</h1>
+              <div className='bg-white border border-sky-700 sticky top-[138px] rounded-md shadow-md overflow-hidden w-[260px]'>
+                <div className='flex gap-2 items-center px-3 bg-sky-900 text-white'>
+                  <FaUserFriends size={20} className='text-white'/>
+                  <h1 className='text-lg font-semibold mb-2 mt-1'>Friend Requests</h1>
                 </div>
                 {
                   pendingRequests.map(request => (
-                    <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id}/>
+                    <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id} profile_pic={request.profileThumbnailUrl}/>
                   ))
                 }
               </div>

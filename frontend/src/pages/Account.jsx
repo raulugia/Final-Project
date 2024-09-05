@@ -25,7 +25,7 @@ const Account = () => {
         email: "",
         profileThumbnailUrl: "",
         profilePicUrl: "",
-        password: {},
+        password: {current: "", new: ""},
     })
     //state to store new profile picture
     const [file, setFile] = useState("")
@@ -127,8 +127,10 @@ const Account = () => {
             }
             
             //case user entered current and new password and they are different
-            if(dataToUpdate.password.current && dataToUpdate.password.new &&
+            if(dataToUpdate.password && dataToUpdate.password.current && dataToUpdate.password.new &&
                 dataToUpdate.password.current !== dataToUpdate.password.new){
+                    console.log("current password: ", dataToUpdate.password.current)
+                    console.log("current password: ", dataToUpdate.password.new)
                 //update password    
                 await handlePassword()
             }
@@ -178,6 +180,7 @@ const Account = () => {
         }catch(err){
             //update state to provide feedback
             setDisplayMessage({error: "Details could not be updated"})
+            console.log(err)
             //reset loading state
             setLoading(false)
         }
@@ -440,16 +443,17 @@ const Account = () => {
                                 <div className='w-full'>
                                     <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">Current Password</p>
                                     <input 
-                                        type="password" className='border py-1 rounded-lg w-full shadow-sm px-2'
-                                        onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, current: e.target.value}})}
+                                        type="password" name="current" className='border py-1 rounded-lg w-full shadow-sm px-2'
+                                        onChange={(e) => setDataToUpdate(prevDataToUpdate => ({ ...prevDataToUpdate, password: {...prevDataToUpdate.password, current: e.target.value}}))}
                                     />
                                 </div>
                                 <div className='w-full'>
                                     <p className="text-sm font-semibold text-slate-600 mb-[0.5px]">New Password</p>
                                     <input 
-                                        type="password" 
+                                        type="password"
+                                        name="new" 
                                         className='border py-1 rounded-lg w-full shadow-sm px-2'
-                                        onChange={(e) => setDataToUpdate({...dataToUpdate, password:{...dataToUpdate.password, new: e.target.value}})}
+                                        onChange={(e) => setDataToUpdate(prevDataToUpdate => ({ ...prevDataToUpdate, password: {...prevDataToUpdate.password, new: e.target.value}}))}
                                     />
                                 </div>
                             </div>

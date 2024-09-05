@@ -84,6 +84,7 @@ const initializeSocket = server => {
                                 name: true,
                                 surname: true,
                                 username: true,
+                                profileThumbnailUrl: true,
                             }
                         }
                     }
