@@ -8,8 +8,8 @@ const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, tot
   return (
     <>
       {type === "meal"  ? (
-        <Link to={""} className="shadow-md bg-slate-50 text-slate-800 w-[70%] h-[185px] mx-auto py-4 px-4 flex gap-10 rounded-lg hover:cursor-pointer">
-          <div className="w-[30%]">
+        <Link to={""} className="shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-[185px] mx-auto py-4 px-4 flex gap-10 rounded-lg hover:cursor-pointer">
+          <div className="hidden md:block md:w-[30%]">
             <img src={imgUrl} alt="" className="rounded-md w-full h-full" />
           </div>
           <div className="flex flex-col justify-between">
@@ -33,7 +33,7 @@ const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, tot
           </div>
         </Link>
       ) : (
-        <Link to={""} className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer">
+        <Link to={""} className="shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer">
             <div className='flex flex-col'>
                 <p className="text-xl font-semibold">{restaurantName}</p>
                 <p className="text-xs">Number of logs: {totalLogs}</p>

@@ -102,34 +102,34 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
     <div
         onMouseEnter={() => setIsHovered(username)}
         onMouseLeave={() => setIsHovered(null)}
-        className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-4 px-4 flex items-center justify-between gap-5 rounded-lg"
+        className="shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] mx-auto mt-4 py-4 pl-4 pr-1 flex items-center justify-between gap-5 rounded-lg"
     >   
         <div className="flex items-center flex-grow justify-between">
-            <div className="flex items-center justify-between gap-10">
+            <div className="flex items-center justify-between gap-2 md:gap-10">
                 <div>
-                    <div className="bg-slate-500 rounded-full w-20 h-20"></div>
+                    <div className="bg-slate-500 rounded-full w-14 h-14 md:w-20 md:h-20"></div>
                 </div>
                 <Link to={`/${username}`} className='flex flex-col items-center'>
-                <p className={`lg:text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p>
-                    <p className={"lg:text-lg text-slate-400"}>@{username}</p>
+                    <p className={`text-sm md:text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p>
+                    <p className={"text-sm md:text-lg text-slate-400"}>@{username}</p>
                 </Link>
             </div>
-            <div className="mr-10">
+            <div className="md:mr-10">
                 {
                     displayRequestOptions ? (
-                        <div className="flex gap-3">
-                            <button onClick={() => handleRequest("accept", requestId)} id="acceptBtn" className='text-md px-2 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-sm'>Accept</button>
-                            <button onClick={() => handleRequest("reject", requestId)} id="rejectBtn" className='text-md border px-2 rounded-md bg-slate-200 hover:bg-slate-300 hover:shadow-sm'>Reject</button>
+                        <div className="flex md:flex-row flex-col gap-3">
+                            <button onClick={() => handleRequest("accept", requestId)} id="acceptBtn" className='text-sm md:text-md px-2 rounded-md text-white bg-blue-600 hover:bg-blue-500 hover:shadow-sm'>Accept</button>
+                            <button onClick={() => handleRequest("reject", requestId)} id="rejectBtn" className='text-sm md:text-md border px-2 rounded-md bg-slate-200 hover:bg-slate-300 hover:shadow-sm'>Reject</button>
                         </div>
                     ) : (
-                        <button disabled={isDisabled} onClick={handleClick} className='text-md border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm disabled:bg-gray-200'>{buttonMessage}</button>
+                        <button disabled={isDisabled} onClick={handleClick} className='text-sm md:text-md border px-2 py-1 rounded-md hover:bg-slate-100 hover:shadow-sm disabled:bg-gray-200'>{buttonMessage}</button>
                     )
                 }
             </div>
+            <Link to={`/user/${username}`} className="text-slate-800">
+                <MdKeyboardArrowRight size={40} />
+            </Link>
         </div>
-        <Link to={`/${username}`} className="text-slate-800">
-            <MdKeyboardArrowRight size={40} />
-        </Link>
 </div>
   )
 }

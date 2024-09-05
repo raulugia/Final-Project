@@ -11,15 +11,15 @@ import { CgLogOut } from "react-icons/cg";
 
 const Navbar = ({ name }) => {
     const [searchInput, setSearchInput] = useState("")
-    const [displayName, setDisplayName] = useState("")
     const [displayOptions, setDisplayOptions] = useState(false)
     const [displayLinks, setDisplayLinks] = useState(false)
     const navigate = useNavigate()
     
 
     const handleSubmit = e => {
+        console.log("here")
         e.preventDefault()
-        navigate(`/search?query=${searchInput}`)
+        navigate(`/search?query=${searchInput}`, {replace: true})
     }
 
     const logOut = async() => {
