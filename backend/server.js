@@ -216,12 +216,12 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                     name: otherUserAndMeals.name,
                     surname: otherUserAndMeals.surname,
                     username: otherUserAndMeals.username,
-                    profilePicUrl: otherUserAndMeals.profilePicUrl,
+                    profilePicUrl: otherUserAndMeals.profileThumbnailUrl,
                     uid: otherUserAndMeals.uid,
                 },
                 logs: otherUserAndMeals.meals,
                 commonRestaurants,
-            }    
+            }
 
             //send response to client
             res.json(response)
@@ -884,7 +884,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
                                 name: true,
                                 surname: true,
                                 username: true,
-                                profilePicUrl: true,
+                                profileThumbnailUrl: true,
                                 uid: true,
                             },
                         },
@@ -899,7 +899,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
                                 name: true,
                                 surname: true,
                                 username: true,
-                                profilePicUrl: true,
+                                profileThumbnailUrl: true,
                                 uid: true,
                             },
                         },

@@ -75,8 +75,8 @@ const Restaurants = () => {
   return (
     <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
         <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>My Restaurants</h1>
-        <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
-            <div action="" className='absolute h-fit inset-0 mt-[-30px] mx-10'>
+        <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
+            <div action="" className='absolute h-fit inset-0 mt-[-30px] mx-5 md:mx-10'>
                 <input type="search" name="" id="" value={searchInput} placeholder='Search for restaurants...' 
                     className='py-3 px-6 text-lg w-full rounded-full shadow-md'
                     onChange={handleInputChange}
@@ -89,7 +89,7 @@ const Restaurants = () => {
                     <Link to={`/my-restaurants/${restaurant.id}`} key={restaurant.id+restaurant.name}
                         onMouseEnter={() => setHoveredRestaurant(restaurant.id)} 
                         onMouseLeave={() => setHoveredRestaurant(null)} 
-                        className={`shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer ${hoveredRestaurant === restaurant.id ? "underline" : ""}`}
+                        className={`shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer ${hoveredRestaurant === restaurant.id ? "underline" : ""}`}
                     >
                         <div className='flex flex-col'>
                             <p className="text-xl font-semibold">{restaurant.name}</p>

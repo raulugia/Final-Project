@@ -271,7 +271,7 @@ const Home = () => {
 
         <div className='bg-white py-5 sticky top-56 w-[270px] h-[160px] rounded-lg shadow-md z-20 '>
           
-          <div className="rounded-full w-[160px] h-[160px] absolute z-21 inset-0 top-[-100px] overflow-hidden mx-auto shadow-md outline outline-2 outline-sky-900">
+          <div className="rounded-full w-[160px] h-[160px] absolute z-21 inset-0 top-[-100px] overflow-hidden mx-auto shadow-md outline outline-1 outline-slate-300">
             <img src={userData.profileThumbnailUrl} alt="" />
           </div>
           <div className="px-6 mt-14 w-full relative">
@@ -321,7 +321,7 @@ const Home = () => {
                 </div>
                 {
                   pendingRequests.map(request => (
-                    <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id} profile_pic={request.profileThumbnailUrl}/>
+                    <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id} profile_pic={request.sender.profileThumbnailUrl}/>
                   ))
                 }
               </div>

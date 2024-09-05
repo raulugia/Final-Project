@@ -89,7 +89,7 @@ const initializeSocket = server => {
                         }
                     }
                 })
-                //console.log("requests", pendingRequests)
+                console.log("requests", pendingRequests)
                 socket.emit("pendingFriendRequests", pendingRequests)
             } catch(err) {
                 console.log(err)

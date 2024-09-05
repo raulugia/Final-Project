@@ -6,7 +6,7 @@ const MealCard = ({id, mealName, restaurantName, thumbnailUrl, username}) => {
   return (
     <Link 
       to={`${username ? `/user/${username}/meals/${id}` : `/my-meals/${id}`}`} 
-      className='shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between rounded-lg'
+      className='shadow-md bg-slate-50 text-slate-900 w-[88%] md:w-[70%] h-32 mx-auto mt-4 py-4 px-4 flex items-center justify-between rounded-lg'
     >
         <div className='flex gap-3 md:gap-10 justify-start items-center w-full'>
             <div className='min-h-24 h-24 w-24 min-w-24 rounded-md overflow-hidden border'>

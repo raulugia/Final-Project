@@ -77,7 +77,7 @@ const Profile = () => {
 
         if(data.error) {
           if(data.error === "Users are not friends"){
-            setOtherUser({name: data.name, surname: data.surname, otherUserUid: data.otherUserUid, requestStatus: data.requestStatus, requestId: data.requestId})
+            setOtherUser({name: data.name, surname: data.surname, otherUserUid: data.otherUserUid, requestStatus: data.requestStatus, requestId: data.requestId, profilePicUrl: data.profilePicUrl})
             setDisplayPartialProfile(true)
           }
         }
@@ -162,7 +162,7 @@ const Profile = () => {
               <div className='flex flex-col gap-4 px-5 mt-20'>
                 {
                   !error && (
-                    <h1 className='text-2xl font-bold text-slate-700 mb-2'>Recent Logs</h1>
+                    <h1 className='text-2xl font-bold text-sky-900 mb-2'>Recent Logs</h1>
                   )
                 }
                 <div className='flex flex-col gap-5'>
@@ -193,22 +193,24 @@ const Profile = () => {
               </div>
               </div>
 
-              <div className="hidden md:block">
-                {
-                  restaurantsInCommon.length > 0 && (
-
-                    <div className='bg-white pt-1 sticky top-[138px] rounded-md shadow-md overflow-hidden'>
-                      <div className='flex gap-2 items-center px-3'>
-                        <h1 className='text-lg text-slate-700 font-semibold mb-2 mt-1'>Restaurants in common</h1>
-                      </div>
-                      {
-                        restaurantsInCommon.map(restaurant => (
-                          <CommonRestaurantCard key={restaurant.id} {...restaurant} />
-                        ))
-                      }
-                    </div>
-                  )
-                }
+              <div className="hidden md:flex md:flex-col md:items-end">
+                <div className='bg-white sticky top-[138px] rounded-md shadow-md overflow-hidden border w-[280px] border-sky-700'>
+                  <div className='flex gap-2 items-center px-3 bg-sky-900 text-white'>
+                    <h1 className='text-lg font-semibold mb-2 mt-1'>Restaurants in common</h1>
+                  </div>
+                    {
+                      restaurantsInCommon.map(restaurant => (
+                        <CommonRestaurantCard key={restaurant.id} {...restaurant} />
+                      ))
+                    }
+                    {
+                      restaurantsInCommon.length === 0 && (
+                        <div className="px-3 py-3 bg-white text-sky-900">
+                          <p>No restaurants in common</p>  
+                        </div>
+                      )
+                    }
+                </div>
             </div>
           </div>
         )

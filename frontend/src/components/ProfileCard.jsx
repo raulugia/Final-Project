@@ -6,27 +6,29 @@ import { FaUserFriends } from "react-icons/fa";
 import { Link } from 'react-router-dom'
 
 
-const ProfileCard = ({name, surname, username}) => {
+const ProfileCard = ({name, surname, username, profilePicUrl}) => {
   return (
-    <div className='flex flex-col bg-white py-5 sticky px-5 top-[138px] rounded-lg shadow-md'>
+    <div className='flex flex-col bg-white py-5 sticky px-5 top-[138px] rounded-lg shadow-md border border-sky-700'>
         <div className='flex gap-10 items-center'>
-            <div className='bg-slate-700 w-24 h-24 rounded-full'></div>
+            <div className='bg-slate-700 w-24 h-24 rounded-full overflow-hidden'>
+                <img src={profilePicUrl} alt="profile picture" />
+            </div>
             <div>
-                <p className='text-2xl text-slate-700 font-semibold'>{name} {surname}</p>
+                <p className='text-2xl text-sky-900 font-semibold'>{name} {surname}</p>
                 <p className='text-slate-400'>@{username}</p>
             </div>
         </div>
 
-        <div className='flex flex-col mt-16 text-xl text-slate-700'>
-        <Link to={`/user/${username}/meals`} className='flex items-start gap-2 border-y-2 border-slate-200 py-2'>
+        <div className='flex flex-col mt-16 text-xl text-sky-900'>
+        <Link to={`/user/${username}/meals`} className='flex items-start gap-2 border-y-2 border-slate-300 py-2'>
             <GiHotMeal />
             <p>Meals</p>
         </Link>
-        <Link to={`/user/${username}/restaurants`} className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
+        <Link to={`/user/${username}/restaurants`} className='flex items-center gap-3 border-b-2 border-slate-300 py-2'>
             <MdOutlineRestaurant />
             <p>Restaurants</p>
         </Link>
-        <Link to={`/user/${username}/friends`} className='flex items-center gap-3 border-b-2 border-slate-200 py-2'>
+        <Link to={`/user/${username}/friends`} className='flex items-center gap-3 border-b-2 border-slate-300 py-2'>
             <FaUserFriends />
             <p>Friends</p>
         </Link>

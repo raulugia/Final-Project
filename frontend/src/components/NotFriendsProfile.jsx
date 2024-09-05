@@ -10,14 +10,16 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
     const [buttonMessage, setButtonMessage] = useState(requestStatus === "pending" ? "Pending..." : "Add Friend")
     const [friendRequest, setFriendRequest] = useState(requestStatus)
     const [isDisabled, setIsDisabled] = useState(requestStatus === "pending")
+    const [error, setError] = useState("")
     const navigate = useNavigate()
 
-    //method to handle button click
+    //method to send a friend request
     const handleClick = async(e) => {
         e.preventDefault()
         //get token for authentication in the server 
         const token = await user.getIdToken();
-
+        //reset error
+        setError("")
         try {
             //update the button message to "Pending..." and disable it
             setButtonMessage("Pending...")
@@ -35,7 +37,12 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
         } catch (err) {
             //if there was an error, reset button to its original form
             setButtonMessage("Add Friend")
-            console.error(err)
+            //display error
+            if(err.response && err.response.data && err.response.data.error){
+                setError(err.response.data.error)
+            } else {
+                setError("Internal server error. Please try again.")
+            }
         }
     }
 
@@ -57,8 +64,7 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
             if(response.status === 200){
                 //case user accepted the friend request
                 if(action === "accept"){
-                    //display Message button
-                    //setButtonMessage("Message")
+                    //refresh page
                     navigate(0)
                 //case user rejected the friend request    
                 } else if(action === "reject") {
@@ -70,7 +76,12 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
                 setIsDisabled(false)
             }
         }catch(err) {
-            console.error(err)
+            //display error
+            if(err.response && err.response.data && err.response.data.error){
+                setError(err.response.data.error)
+            } else {
+                setError("Internal server error. Please try again.")
+            }
         }
     }
 
@@ -92,6 +103,13 @@ const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestI
             </div>
 
             <div className='mt-16 w-full'>
+                {
+                    error && (
+                        <div className='mb-4 border border-red-700 py-2 px-3 rounded-md bg-red-100 text-red-900 font-semibold'>
+                            <p>{error}</p>
+                        </div>
+                    )
+                }
                  {
                     friendRequest === "action" ? (
                         <div className="flex flex-col gap-3">

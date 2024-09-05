@@ -4,6 +4,7 @@ import { auth } from '../../utils/firebase'
 import FriendCard from '../components/FriendCard'
 import { useParams } from 'react-router-dom'
 import Error from '../components/Error'
+import SkeletonFriends from '../components/SkeletonFriends'
 
 
 const Friends = () => {
@@ -37,7 +38,7 @@ const Friends = () => {
                         Authorization: `Bearer ${token}`,
                         },
                     })
-
+                    console.log(data)
                     //update states
                     setUserFriends(data)
                     setFilteredFriends(data)
@@ -76,38 +77,42 @@ const Friends = () => {
         }
     }
 
-    if(loading) {
-        return <p>Loading...</p>
-    }
 
   return (
    <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200 pt-20'>
-    <h1 className='text-2xl font-semibold mb-4 ml-[5%] text-slate-800'>Friends</h1>
-    <div className='flex flex-col gap-4 py-10 mx-auto w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
-        <form action="" className='absolute h-fit inset-0 mt-[-30px] mx-10'>
+    <h1 className='text-2xl font-semibold mb-10 md:mb-4 ml-[5%] text-slate-800'>Friends</h1>
+    <div className='flex flex-col gap-2 md:gap-4 py-10 mx-auto w-[85%] md:w-[70%] min-h-[500px] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
+        <form action="" className='absolute h-fit inset-0 mt-[-30px] mx-5 md:mx-10'>
             <input type="search" name="" id="" value={searchInput} placeholder='Search for friends...' 
                 className='py-3 px-6 text-lg w-full rounded-full shadow-md'
                 onChange={handleInputChange}
             />
         </form>
-    {
-        filteredFriends.length > 0 ? (
-            filteredFriends.map(friend => (
-                <FriendCard name={friend.name} surname={friend.surname} username={friend.username} key={friend.id+friend.name}/>
-            ))
-        ) : (
-
-            error ? (
-                <div className="mx-8 mt-5">
-                    <Error message={error} />
-                </div>
+        {
+            loading ? (
+                <SkeletonFriends />
             ) : (
-                <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
-                    <p>We couldn't find any friends that match your search.</p>
-                </div>
+                filteredFriends.length > 0 ? (
+                    filteredFriends.map(friend => (
+                        <FriendCard name={friend.name} surname={friend.surname} username={friend.username} profile_pic={friend.profileThumbnailUrl} key={friend.id+friend.name}/>
+                    ))
+                ) : (
+        
+                    error ? (
+                        <div className="mx-8 mt-5">
+                            <Error message={error} />
+                        </div>
+                    ) : (
+                        <div className="shadow-md bg-slate-50 text-slate-800 w-[70%] mx-auto mt-4 py-10 px-4 flex items-center rounded-lg">
+                            <p>We couldn't find any friends that match your search.</p>
+                        </div>
+                    )
+                   
+                )
             )
-           
-        )
+        }
+    {
+        
         }
     </div>
    </div>
