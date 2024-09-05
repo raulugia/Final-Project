@@ -21,10 +21,26 @@ jest.mock("../socket", () => ({
     notifyUserNewReq: jest.fn()
 }))
 
+//mock the isFriend method
+jest.mock("../server", () => ({
+    ...jest.requireActual("../server"),
+    isFriend: jest.fn(),
+}))
+
+//mock the image queue
+jest.mock("../queue", () => ({
+    imageQueue: {
+        add: jest.fn(),
+    },
+}))
+
 const request = require("supertest")
 const { PrismaClient } = require("@prisma/client")
 const { app, server } = require("../server")
 const { notifyUserNewReq, initializeSocket } = require("../socket")
+const { imageQueue } = require("../queue")
+const fs = require("fs")
+const path = require("path")
 
 
 //mock the Prisma Client instance
@@ -34,10 +50,12 @@ jest.mock("@prisma/client", () => {
             findUnique: jest.fn()
         },
         mealLog: {
-            findMany: jest.fn()
+            findMany: jest.fn(),
+            create: jest.fn(),
         },
         meal : {
-            findMany: jest.fn()
+            findMany: jest.fn(),
+            upsert: jest.fn()
         },
         friendRequest: {
             findFirst: jest.fn(),
@@ -46,6 +64,14 @@ jest.mock("@prisma/client", () => {
             update: jest.fn(),
         },
         friendship: {
+            create: jest.fn(),
+            findFirst: jest.fn(),
+        },
+        message: {
+            findMany: jest.fn(),
+        },
+        restaurant: {
+            findUnique: jest.fn(),
             create: jest.fn(),
         }
     }
@@ -338,6 +364,75 @@ describe("GET /api/meals/:mealId", () => {
 })
 
 
+describe("POST /api/log-meal", () => {
+    beforeEach(() => {
+        //mock the imageQueue
+        require("../queue").imageQueue.add.mockResolvedValue()
+
+        //mock the restaurant lookup to return null implying that the restaurant is new
+        prisma.restaurant.findUnique.mockResolvedValue(null)
+
+        //mock the creation of a new restaurant
+        prisma.restaurant.create.mockResolvedValue({
+            id: 1,
+            name: "Test Restaurant"
+        })
+
+        //mock the meal upsert
+        prisma.meal.upsert.mockResolvedValue({
+            id: 1,
+            name: "Test Meal",
+            restaurantId: 1
+        })
+
+        //mock the meal log creation
+        prisma.mealLog.create.mockResolvedValue({
+            id: 1,
+            mealId: 1,
+            userUid: "test-uid",
+            carbEstimate: 50,
+            description: "Test Description",
+            rating: "PENDING",
+            picture: "",
+            thumbnail: "",
+        })
+    })
+
+    it("should log a meal and add a job to the image processing queue", async () => {
+        const fakeImagePath = path.join(__dirname, "fake-image.jpg")
+        //create a temp mock image file
+        fs.writeFileSync(fakeImagePath, "")
+
+        //send post request to create a log
+        const response = await request(app)
+            .post("/api/log-meal")
+            .set("Authorization", "Bearer faketoken")
+            .field("mealName", "Test Meal")
+            .field("mealName", "Test Meal")
+            .field("restaurantName", "Test Restaurant")
+            .field("carbEstimate", 50)
+            .field("description", "Test Description")
+            .attach("picture", fakeImagePath)
+            .expect(200)
+
+        //ensue that the response contains the meal log
+        expect(response.body.mealId).toBe(1)
+        expect(response.body.userUid).toBe("test-uid")
+
+        //ensure that the imageQueue.add method was called with the right data
+        expect(imageQueue.add).toHaveBeenCalledTimes(1)
+        expect(imageQueue.add).toHaveBeenCalledWith({
+            filePath: expect.any(String),
+            mealId: 1,
+            userUid: "test-uid"
+        }, {"attempts": 3, "backoff": 5000, "timeout": 120000}),
+
+        //clean the mock file
+        fs.unlinkSync(fakeImagePath)
+    })
+})
+
+
 describe("POST /api/friend-request", () => {
     it("should create a new friend request if one does not exist already", async () => {
         //mock user.findUnique to return sender and recipient
@@ -427,6 +522,107 @@ describe("POST /api/friend-request-/accept/:requestId", () => {
 
         //check if the response contains the correct message
         expect(response.body.message).toBe("Friend request accepted.")
+    })
+})
+
+
+describe("GET /api/chat/:username/messages", () => {
+    beforeEach(() => {
+        //mock isFriend to return that users are friends
+        require("../server").isFriend.mockResolvedValue({
+            areFriends: true,
+            otherUserUid: "other-user-uid"
+        })
+
+        //mock friendship.findFirst to simulate that users are friends
+        prisma.friendship.findFirst.mockResolvedValue({
+            id: 1,
+            userUid: "test-uid",
+            friendUid: "other-user-uid"
+        })
+    })
+
+    it("should return the chat messages between current user and another user if they are friends", async () => {
+        //mock the messages returned by prisma
+        prisma.message.findMany.mockResolvedValue([
+            {
+                id: 1,
+                senderUid: "test-uid",
+                receiverUid: "other-user-uid",
+                content: "Hello",
+                timestamp: new Date(),
+            },
+            {
+                id: 2,
+                senderUid: "other-user-uid",
+                receiverUid: "test-uid",
+                content: "Hi",
+                timestamp: new Date(),
+            },
+        ]);
+
+        //send a get request to the api endpoint
+        const response = await request(app).get("/api/chat/other.user/messages").set("Authorization", "Bearer faketoken").expect(200)
+
+        //ensure the response contains the messages
+        expect(response.body.length).toBe(2)
+        expect(response.body[0].content).toBe("Hello")
+        expect(response.body[1].content).toBe("Hi")
+    })
+})
+
+
+describe("GET /api/user/:username/restaurants", () => {
+    beforeEach(() => {
+        //mock isFriend to return that users are friends
+        require("../server").isFriend.mockResolvedValue({
+            areFriends: true,
+            otherUserUid: "other-user-uid"
+        })
+
+        //mock friendship.findFirst to simulate that users are friends
+        prisma.friendship.findFirst.mockResolvedValue({
+            id: 1,
+            userUid: "test-uid",
+            friendUid: "other-user-uid"
+        })
+
+        //mock the meal logs returned by prisma
+        prisma.mealLog.findMany.mockResolvedValue([
+            {
+                id: 1,
+                meal: {
+                    id: 1,
+                    name: "Pizza",
+                    restaurant: {
+                        id: 1,
+                        name: "Italian Restaurant"
+                    }
+                }
+            },
+            {
+                id: 2,
+                meal: {
+                    id: 2,
+                    name: "Burger",
+                    restaurant: {
+                        id: 2,
+                        name: "Burger Restaurant"
+                    }
+                }
+            },
+        ])
+    })
+
+
+    it("should return the restaurants logged by another user if users are friends", async () => {
+        //send a get request to the api endpoint
+        const response = await request(app).get("/api/user/other.user/restaurants").set("Authorization", "Bearer faketoken").expect(200)
+
+        //ensure that the response contains all the restaurants
+        expect(response.body.length).toBe(2)
+        expect(response.body[0].name).toBe("Italian Restaurant")
+        expect(response.body[1].name).toBe("Burger Restaurant")
     })
 })
 
