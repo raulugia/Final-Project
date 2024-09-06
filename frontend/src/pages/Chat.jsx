@@ -6,6 +6,7 @@ import ChatMessageBubble from '../components/ChatMessageBubble'
 import socket from "../../utils/socket"
 import { VscSend } from "react-icons/vsc";
 
+//All the code in this file was written without assistance 
 
 const Chat = () => {
     //get current user
@@ -20,9 +21,9 @@ const Chat = () => {
     const [filteredFriends, setFilteredFriends] = useState(friends)
     //state to enable/disable the send button - button will be disabled if no chatroom has been selected
     const [btnDisabled, setBtnDisabled] = useState(true)
-    //
+    //state needed for responsiveness
     const [windowWidth, setWindowWidth] = useState(window.innerWidth)
-    //
+    //flag to ensure only friends are displayed when the component rendered on small screens - when a friend is selected, the chats appear
     const [displayMessages, setDisplayMessages] = useState(window.innerWidth > 600)
     //state needed to join a chat room (websocket)
     const [currentChat, setCurrentChat] = useState()
@@ -41,6 +42,8 @@ const Chat = () => {
     const oldestMessageRef = useRef()
     //ref to scroll to the bottom of the chat container each time a new message appears
     const chatWindowRef = useRef()
+    //state to show errors
+    const [error, setError] = useState("")
 
     //get user's friends so user can message them
     useEffect(() => {
@@ -62,8 +65,13 @@ const Chat = () => {
                         setFriends(data)
                         setFilteredFriends(data)
                     }
-                }catch(err){
-                    console.log(err)
+                }catch(err) {
+                    //update state to display an error message
+                    if(err.response && err.response.data && err.response.data.error){
+                        setError(err.response.data.error)
+                    } else {
+                        setError("Failed to load data. Please try again.")
+                    }
                 }
             }
         )()
@@ -93,42 +101,54 @@ const Chat = () => {
 
     //fetch messages between current user and selected friend (currentChat)
     useEffect(() => {
-        (
-            async() => {
-                try{
-                    setLoading(true)
-                    //get id token
-                    const token = await user.getIdToken()
-                    //make api call to fetch the firsy 20 messages between current user and other user
-                    const { data } = await axiosInstance.get(`/api/chat/${currentChat.username}/messages`, { 
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                        params: {
-                            page,
-                            limit: 20
-                        }
-                    })
+        setLoading(false)
+        if(currentChat && currentChat.username){
+            (
+                async() => {
+                    try{
+                        setLoading(true)
+                        setError("")
+                        //get id token
+                        const token = await user.getIdToken()
+                        //make api call to fetch the first 20 messages between current user and other user
+                        const { data } = await axiosInstance.get(`/api/chat/${currentChat.username}/messages`, { 
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                            params: {
+                                page,
+                                limit: 20
+                            }
+                        })
 
-                    //case the server responds
-                    if(data){
-                        console.log(data.reverse())
-                        const displayMessages = data.map(message => ({...message, timestamp: formatTime(message.timestamp)}))
-                        //update state with newly fetched messages
-                        setMessages(prevMessages => [...displayMessages, ...prevMessages])
-                        setLoading(false)
-                        //case the array of messages has a length less than 20
-                        if(data.length < 20){
-                            //update state to stop infinite scrolling as there are no more messages to fetch
-                            setHasMoreMessages(false)
+                        //case the server responds
+                        if(data){
+                            console.log(data.reverse())
+                            const displayMessages = data.map(message => ({...message, timestamp: formatTime(message.timestamp)}))
+                            //update state with newly fetched messages
+                            setMessages(prevMessages => [...displayMessages, ...prevMessages])
+                            setLoading(false)
+                            //case the array of messages has a length less than 20
+                            if(data.length < 20){
+                                //update state to stop infinite scrolling as there are no more messages to fetch
+                                setHasMoreMessages(false)
+                            }
                         }
+                    }catch(err) {
+                        console.log("error: ", err)
+                        //update state to display an error message
+                        if(err.response && err.response.data && err.response.data.error){
+                            setError(err.response.data.error)
+                        } else {
+                            setError("Failed to load messages. Please try again.")
+                        }
+                    } finally {
+                        //hide loading state
+                        setLoading(false)
                     }
-                }catch(err){
-                    console.log(err)
-                    setLoading(false)
                 }
-            }
-        )()
+            )()
+        }
     }, [currentChat, page])
 
     //scroll to the bottom every time a new message appears
@@ -161,13 +181,14 @@ const Chat = () => {
         console.log("oldest mess", oldestMessageRef)
     }, [hasMoreMessages, loading, messages])
 
+    //add event listener for responsiveness - screen resize
     useEffect(() => {
         const handleResize = () => { 
             setWindowWidth(window.innerWidth)
+            //only show both friends and messages on medium/big screens
             setDisplayMessages(window.innerWidth > 600)
-            console.log("innder width: ", window.innerWidth)
         }
-
+        //add event listener to window
         window.addEventListener("resize", handleResize)
 
         return () => window.removeEventListener("resize", handleResize)
@@ -229,6 +250,13 @@ const Chat = () => {
 
   return (
     <div className="flex min-h-screen pb-28 justify-center px-5 max-h-[675px]">
+        {
+            error && (
+                <div className="absolute top-[65px] bg-red-100 border border-red-700 text-red-900 px-3 py-1 rounded-md font-semibold">
+                    <p>{error}</p>
+                </div>
+            )
+        }
         {/* Left side */}
         <div className={`mt-28 flex flex-col border rounded-l-lg bg-white shadow-md w-full ${windowWidth < 600 ? "rounded-lg" : "max-w-[395px]"} ${displayMessages && windowWidth < 600 ? "hidden" : ""}`}>
             <div className="w-full flex items-center justify-center border-b-2 min-h-[75px]">

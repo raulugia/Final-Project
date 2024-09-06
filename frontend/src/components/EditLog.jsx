@@ -5,25 +5,36 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../utils/firebase";
 
+//Component used to edit an existing log - this component is also used when users needs to review the accuracy of a log after 4 hours (1 min for testing the web app)
+
 const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt, mealId, logId, setEdit}) => {
+    //get current user
     const user = auth.currentUser
     //hook used for navigating withing the web app
     const navigate = useNavigate();
+    //state to hold log data
     const [logData, setLogData] = useState({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt})
+    //state to display the new image preview
     const [imagePreviewUrl, setImagePreviewUrl] = useState(picture);
+    //state to store the new picture
     const [file, setFile] = useState("")
+    //state to display errors
     const [error, setError] = useState()
+    //state to display options
     const [displayOption, setDisplayOption] = useState(true)
+    //state to trigger focus event
     const inputRef = useRef(null)
 
+    //method to update the state that holds the log data
     const handleInputChange = (e, key) => {
+        //ensure carb estimate is a number
         if(key === "carbEstimate" && !Number(e.target.value)){
             setError("Carb estimate must be a number")
             return
         }
-
+        //update states
         setLogData({...logData, [key]: e.target.value})
-        setError()
+        setError("")
     }
 
     //focus the first input when the component renders
@@ -56,13 +67,11 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
 
     const handleSubmit = async(e) => {
         e.preventDefault()
+        setError("")
 
         const {mealName, restaurantName, rating, description, carbEstimate, picture} = logData
-        // const formData = {mealName, restaurantName, rating, description, carbEstimate, picture}
         
-        // if(file){
-        //     formData.picture= file;
-        // }
+        //create a new FormData object and append log data to it
         const formData = new FormData()
         formData.append("mealName", mealName)
         formData.append("restaurantName", restaurantName)
@@ -70,14 +79,19 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
         formData.append("description", description)
         formData.append("carbEstimate", carbEstimate)
 
+        //case user uploaded a new picture
         if(file) {
             formData.append("picture", file)
+        //no new picture - append old one
         }else{
             formData.append("picture", picture)
         }
+
         try{
+            //get token for authentication in the server
             const token = await user.getIdToken()
 
+            //send a get put request to update the log
             await axiosInstance.put(`/api/my-meals/${mealId}/log/${logId}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -88,8 +102,13 @@ const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, p
                 navigate(`/my-meals/${response.data.mealId}/log/${response.data.id}`, { state: null, replace: true })
             })
 
-        }catch(err){
-            console.log(err)
+        }catch(err) {
+            //update state to display an error message
+            if(err.response && err.response.data && err.response.data.error){
+                setError(err.response.data.error)
+            } else {
+                setError("Failed to update log. Please try again later.")
+            }
         }
     }
 

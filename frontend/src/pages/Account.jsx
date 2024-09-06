@@ -6,6 +6,8 @@ import UpdateUserModal from '../components/UpdateUserModal';
 import Error from '../components/Error'
 import { useNavigate } from 'react-router-dom';
 
+//All the code in this file was written without assistance
+
 const Account = () => {
     const user = auth.currentUser
     //state to store user data fetched from server
@@ -134,8 +136,6 @@ const Account = () => {
             //case user entered current and new password and they are different
             if(dataToUpdate.password && dataToUpdate.password.current && dataToUpdate.password.new &&
                 dataToUpdate.password.current !== dataToUpdate.password.new){
-                    console.log("current password: ", dataToUpdate.password.current)
-                    console.log("current password: ", dataToUpdate.password.new)
                 //update password    
                 await handlePassword()
             }
@@ -152,7 +152,6 @@ const Account = () => {
 
             //case user uploaded a new profile picture
             if(file) {
-                console.log("there is a file", file)
                 //append file
                 formData.append("picture", file)
 
@@ -160,7 +159,7 @@ const Account = () => {
                 formData.append("profileThumbnailUrl", userData.profileThumbnailUrl)
                 formData.append("profilePicUrl", userData.profilePicUrl)
             }
-            console.log(formData)
+
             //api call to update user'd details
             const { data } = await axiosInstance.put("/api/update-user", formData, {
                 headers: {
@@ -249,24 +248,26 @@ const Account = () => {
 
   //method to update the file state when the file input changes
   const handleFileChange = (e) => {
-        const selectedFile = e.target.files[0]
-        console.log("selected file: ", selectedFile)
-        setFile(selectedFile);
+    //extract file
+    const selectedFile = e.target.files[0]
+    //update state with file
+    setFile(selectedFile);
 
-        const reader = new FileReader();
+    //create a file reader
+    const reader = new FileReader();
 
-        //set up an event handler to be called when the reading process has finished
-        reader.onloadend = () => {
-            //update state to store the image url
-            setImagePreviewUrl(reader.result)
-        }
-
-        //case a file was chosen by the user
-        if(selectedFile) {
-            //read file and convert it to url
-            reader.readAsDataURL(selectedFile)
-        }
+    //set up an event handler to be called when the reading process has finished
+    reader.onloadend = () => {
+        //update state to store the image url
+        setImagePreviewUrl(reader.result)
     }
+
+    //case a file was chosen by the user
+    if(selectedFile) {
+        //read file and convert it to url
+        reader.readAsDataURL(selectedFile)
+    }
+  }
 
 
     //method to update the data that needs to be updated
