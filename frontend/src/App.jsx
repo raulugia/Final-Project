@@ -93,7 +93,7 @@ function App() {
   return (
     <div className='bg-slate-200'>
       {
-        location.pathname !== "/" && <Navbar name={user?.displayName}/>
+        location.pathname !== "/" && location.pathname !== "/register"   && <Navbar name={user?.displayName}/>
       }
     <div className='max-w-[1200px] mx-auto'>
      <Routes>
@@ -109,6 +109,7 @@ function App() {
         <Route path='/user/:username/meals/:mealId' element={<MealLogs />}/>
         <Route path='/user/:username/meals/:mealId/log/:logId' element={<Log />}/>
         <Route path='/user/:username/restaurants' element={<Restaurants />}/>
+        <Route path='/user/:username/restaurants/:restaurantId' element={<RestaurantMeals />}/>
         <Route path='/user/:username/friends' element={<Friends />}/>
 
         <Route path='/log-meal' element={<LogMeal />}/>

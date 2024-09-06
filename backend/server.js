@@ -143,6 +143,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             createdAt: log.createdAt,
             rating: log.rating,
             description: log.description,
+            imgStatus: log.imgStatus,
             user: userData
         }))
 
@@ -452,6 +453,74 @@ app.get("/api/user/:username/restaurants", authenticateUser, async(req, res) => 
     }
 })
 
+//endpoint for getting the meals linked to a friends's restaurants
+app.get("/api/user/:username/restaurants/:restaurantId", authenticateUser, async(req, res) => {
+    //get the other user's username
+    const { username, restaurantId } = req.params
+
+    try{
+        //find out if users are friends and get the other user's uid
+        const { areFriends, otherUserUid } = await isFriend(req.user.uid, username)
+
+        //case users are friends
+        if(areFriends){
+            const otherUserRestaurants = await prisma.meal.findMany({
+                where: {
+                    restaurantId: Number(restaurantId),
+                    logs: {
+                        some: {
+                            userUid: otherUserUid
+                        }
+                    }
+                },
+                //include restaurant and the thumbnail of the most recent log
+                include: {
+                    logs: {
+                        where: {
+                            userUid: otherUserUid
+                        },
+                        orderBy: {
+                            createdAt: "desc"
+                        },
+                        take: 1,
+                        select: {
+                            thumbnail: true
+                        }
+                    },
+                    restaurant: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            })
+
+            //case no meals were found 
+            if(otherUserRestaurants.length === 0){
+                return res.status(404).json({error: "No meals were found for the specified restaurant."})
+            }
+
+            //object that will be returned to the client
+            const result = otherUserRestaurants.map(meal => ({
+                mealId: meal.id,
+                mealName: meal.name,
+                thumbnail: meal.logs[0]?.thumbnail || "",
+                restaurantName: meal.restaurant.name,
+            }))
+
+
+            //send response to client
+            res.json(result)
+        //case users are not friends
+        }else{
+            return res.status(403).json( {error: "Users are not friends"})
+        }
+    }catch(err){
+        //return an error
+        res.status(500).json({error: "An error occurred while getting the data. Please try again."})
+    }
+})
+
 //endpoint for displaying other users' friends
 app.get("/api/user/:username/friends", authenticateUser, async(req, res) => {
     //get the other user's username
@@ -618,25 +687,29 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
 
         //validate data and return an error if it does not match the criteria
-        const validatedName = validateNameSurname(name, "Name")
-        const validatedSurname = validateNameSurname(name, "Surname")
-        const validatedUsername = validateUsername(username)
-        const validatedEmail = validateEmail(email)
-        
-        if(name && validatedName !== true){
-            return res.status(400).json({error: validatedName})
+        if(name){
+            const validatedName = validateNameSurname(name, "Name")
+            if(validatedName !== true){
+                return res.status(400).json({error: validatedName})
+            }
         }
-
-        if(surname && validatedSurname !== true){
-            return res.status(400).json({error: validatedSurname})
+        if(surname){
+            const validatedSurname = validateNameSurname(name, "Surname")
+            if(validatedSurname !== true){
+                return res.status(400).json({error: validatedSurname})
+            }
         }
-
-        if(username && validatedUsername !== true){
-            return res.status(400).json({error: validatedUsername})
+        if(username){
+            const validatedUsername = validateUsername(username)
+            if(validatedUsername !== true){
+                return res.status(400).json({error: validatedUsername})
+            }
         }
-
-        if(email && validatedEmail !== true){
-            return res.status(400).json({error: validatedEmail})
+        if(email){
+            const validatedEmail = validateEmail(email)
+            if(validatedEmail !== true){
+                return res.status(400).json({error: validatedEmail})
+            }
         }
 
         //store only the fields that need updating
@@ -678,6 +751,7 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
         //return the updated user
         res.json(updatedUser);
     }catch(err){
+        console.log(err)
         res.status(500).json({ error: "Failed to update user details"})
     }
 })

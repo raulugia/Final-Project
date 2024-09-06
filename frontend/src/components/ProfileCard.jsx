@@ -14,7 +14,11 @@ const ProfileCard = ({name, surname, username, profilePicUrl}) => {
     <div className='flex flex-col bg-white py-5 sticky px-5 top-[138px] rounded-lg shadow-md border border-sky-700'>
         <div className='flex gap-10 items-center'>
             <div className='bg-slate-700 w-24 h-24 rounded-full overflow-hidden'>
-                <img src={profilePicUrl} alt="profile picture" />
+                {
+                    profilePicUrl && (
+                        <img src={profilePicUrl} alt="profile picture" />
+                    )
+                }
             </div>
             <div>
                 <p className='text-2xl text-sky-900 font-semibold'>{name} {surname}</p>

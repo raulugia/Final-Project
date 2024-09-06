@@ -83,7 +83,14 @@ const Restaurants = () => {
 
   return (
     <div className='flex flex-col min-h-screen pb-16 gap-4 bg-slate-200'>
-        <h1 className='text-2xl font-semibold mt-20 mb-4 ml-[5%] text-slate-800'>My Restaurants</h1>
+        {
+            username ? (
+                <h1 className='text-2xl font-semibold mt-20 mb-8 ml-[8%] text-slate-800'>@{username}'s Restaurants</h1>
+            ) : (
+                <h1 className='text-2xl font-semibold mt-20 mb-8 ml-[8%] text-slate-800'>My Restaurants</h1>
+            )
+        }
+        
         <div className='flex flex-col gap-4 py-10 mx-auto mt-5 w-[85%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/30 shadow-lg ring-1 ring-slate-200'>
             <div action="" className='absolute h-fit inset-0 mt-[-30px] mx-5 md:mx-10'>
                 <input type="search" name="" id="" value={searchInput} placeholder='Search for restaurants...' 
@@ -95,7 +102,7 @@ const Restaurants = () => {
         {   
             filteredRestaurants.length > 0 && !loading ? (
                 filteredRestaurants.map(restaurant => (
-                    <Link to={`/my-restaurants/${restaurant.id}`} key={restaurant.id+restaurant.name}
+                    <Link to={username ? `/user/${username}/restaurants/${restaurant.id}` : `/my-restaurants/${restaurant.id}`} key={restaurant.id+restaurant.name}
                         onMouseEnter={() => setHoveredRestaurant(restaurant.id)} 
                         onMouseLeave={() => setHoveredRestaurant(null)} 
                         className={`shadow-md bg-slate-50 text-slate-800 w-[88%] md:w-[70%] mx-auto py-4 px-4 flex items-center justify-between gap-5 rounded-lg hover:cursor-pointer ${hoveredRestaurant === restaurant.id ? "underline" : ""}`}

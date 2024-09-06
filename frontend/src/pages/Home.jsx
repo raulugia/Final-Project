@@ -83,8 +83,9 @@ const Home = () => {
         if(!ignore){
           //format date of every log
           const displayData = data.logs.map(log => {
+            console.log(log.imgStatus)
             //case the image is not ready
-            if(!log.picture){
+            if(log.imgStatus === "PROCESSING"){
               //update state with the log details so the image can be fetched - Polling mechanism
               setPendingPic({logId: log.logId, mealId: log.mealId, url: ""})
             }
@@ -121,34 +122,41 @@ const Home = () => {
     if(!pendingPic.url && pendingPic.logId && pendingPic.mealId){
 
       const intervalId = setInterval(async() =>{
-        console.log("Inside interval")
         try{
           //get the id token
           const token = await user.getIdToken();
 
-          //fetch first 5 meal logs - page is needed to calculate the offset in the server
+          //fetch first meal log
           const { data } = await axiosInstance.get(`/api/my-meals/${pendingPic.mealId}/log/${pendingPic.logId}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             }
 
             })
-
-          if(data.picture && !pendingPic.url){
-            setPendingPic(prevPendingPic => ({...prevPendingPic, url: data.picture}))
-
+          
+          //case image has been processed successfully
+          if(data.imgStatus === "COMPLETED" && !pendingPic.url){
+            //update the log that did not have a picture
             setLogs(prevLogs => prevLogs.map(log => {
               if(log.logId === pendingPic.logId) {
-                return {...log, picture: data.picture}
+                return {...log, picture: data.thumbnail}
               }
 
               return log
             }))
-
+            //reset state
             setPendingPic({logId: "", mealId: "", url: ""})
+          }else if(data.imgStatus === "FAILED" && !pendingPic.url){
+            setLogs(prevLogs => prevLogs.map(log => {
+              if(log.logId === pendingPic.logId) {
+                return {...log, imgStatus: "FAILED"}
+              }
+
+              return log
+            }))
           }
         }catch(err){
-          alert(err.message)
+          alert("There was an error with a meal log.")
         }
       }, 5000)
 

@@ -115,8 +115,6 @@ const Profile = () => {
           } else {
               setError("Failed to load profile. Please try again later.")
           }
-      } finally {
-          //hide loading state
           setLoading(false)
       }
     })()

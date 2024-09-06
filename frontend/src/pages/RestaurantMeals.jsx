@@ -21,10 +21,11 @@ const RestaurantMeals = () => {
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
     //extract restaurant id
-    const { restaurantId } = useParams()
+    //get username - case current user viewing other user's data
+    const { restaurantId, username } = useParams()
     //state to store an error message
     const [error, setError] = useState("")
-
+    
     //fetch meals linked to a certain restaurant and display them
     useEffect(() => {
         (
@@ -34,8 +35,8 @@ const RestaurantMeals = () => {
                     //get the id token
                     const token = await user.getIdToken();
 
-                    //make a get request to get the user's restaurants passing the id token for verification
-                    const { data } = await axiosInstance.get(`/api/my-restaurants/${restaurantId}`, {
+                    //make a get request to get user's restaurants passing the id token for verification
+                    const { data } = await axiosInstance.get(username ? `/api/user/${username}/restaurants/${restaurantId}` : `/api/my-restaurants/${restaurantId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -118,7 +119,7 @@ const RestaurantMeals = () => {
                         </div>
                     ): (
                         filteredMeals.map(meal => (
-                            <MealCard key={meal.mealId} id={meal.mealId} mealName={meal.mealName} thumbnailUrl={meal.thumbnail}/>
+                            <MealCard key={meal.mealId} id={meal.mealId} mealName={meal.mealName} thumbnailUrl={meal.thumbnail} username={username}/>
                         ))
                     )
                 )

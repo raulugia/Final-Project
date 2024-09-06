@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 
 //ref needed for infinite scrolling to observe the last meal
 
-const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId, createdAt, rating, picture, carbEstimate, isOtherUser, user, description}, ref) => {
+const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId, createdAt, rating, picture, carbEstimate, isOtherUser, user, description, imgStatus}, ref) => {
     return (
     <Link 
         ref={ref}
@@ -24,13 +24,17 @@ const HomeMealCard = React.forwardRef(({mealName, restaurantName, logId, mealId,
             </div>
             <div className='w-[250px] min-h-[250px] rounded-3xl overflow-hidden z-10 shadow-md'>
                 {
-                    picture ? (
+                    imgStatus === "COMPLETED" ? (
                         <img className='w-full h-full object-cover' src={picture} alt={mealName} />
-                    ) : (
-                        <div className='w-full h-full flex items-center justify-center bg-slate-100'>
-                            <p className='text-slate-500'>Your picture is being processed.</p>
+                    ) : imgStatus === "PROCESSING" ? (
+                        <div className='w-full h-full flex items-center text-sm justify-center bg-slate-100'>
+                            <p className='text-slate-500'>Your picture is being processed</p>
                         </div>
-                    )
+                    ) : (
+                        <div className='w-full h-full flex items-center text-sm justify-center bg-slate-100'>
+                            <p className='text-red-900'>There was a problem with this picture</p>
+                        </div>
+                    )   
                 }
                 
             </div>

@@ -97,69 +97,72 @@ const Login = () => {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-slate-100">
-      <div className="border py-5 px-3 rounded-lg lg:w-[35%] md:w-1/3 shadow-md bg-white">
-        <form action="" className="flex flex-col gap-3">
-          <input
-            type="email"
-            name=""
-            id=""
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border py-2 px-3 rounded-md"
-          />
-          <input
-            type="password"
-            name=""
-            id=""
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border py-2 px-3 rounded-md"
-          />
+    <div className="flex flex-col justify-center items-center min-h-screen">
+      <div className="shadow-lg md:w-[400px] w-[90%] flex flex-col items-center px-5 py-6 rounded-md bg-white/50">
+        <h1 className="text-3xl md:text-[35px] font-bold mb-4 md:mb-[40px] text-sky-900">Welcome to DiaMate</h1>
+        <div className="border py-5 px-3 rounded-lg shadow-md bg-white w-[100%]">
+          <form action="" className="flex flex-col gap-3">
+            <input
+              type="email"
+              name=""
+              id=""
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border py-2 px-3 rounded-md"
+            />
+            <input
+              type="password"
+              name=""
+              id=""
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border py-2 px-3 rounded-md"
+            />
 
-          {error && (
-            <div class="flex items-center gap-1 border py-1 rounded-md text-sm font-semibold text-red-700 bg-red-100 border-red-900 px-2">
-              <VscError />
-              <p className="">{error}</p>
+            {error && (
+              <div class="flex items-center gap-1 border py-1 rounded-md text-sm font-semibold text-red-700 bg-red-100 border-red-900 px-2">
+                <VscError />
+                <p className="">{error}</p>
+              </div>
+              )
+            }
+
+            <button
+              type="submit"
+              className="border py-1.5 rounded-md mt-4 bg-sky-900 text-white font-semibold"
+              onClick={handleSubmit}
+            >
+              Sign In
+            </button>
+
+            <div className="flex justify-end">
+              <p className="text-xs">
+                Don't have an account?
+                <span className="font-bold cursor-pointer text-blue-500 hover:underline" onClick={() => navigate("/register")}>
+                  Register
+                </span>
+              </p>
             </div>
-            )
-          }
 
-          <button
-            type="submit"
-            className="border py-1.5 rounded-md mt-4 bg-black text-white font-semibold"
-            onClick={handleSubmit}
-          >
-            Sign In
-          </button>
-
-          <div className="flex justify-end">
-            <p className="text-xs">
-              Don't have an account?
-              <span className="font-bold cursor-pointer text-blue-500 hover:underline" onClick={() => navigate("/register")}>
-                Register
-              </span>
-            </p>
-          </div>
-
-          <div className="flex justify-around items-center gap-1.5 my-2">
-            <div className="flex-grow border-t"></div>
-            <p className="text-sm text-gray-400">or</p>
-            <div className="flex-grow border-t"></div>
-          </div>
-
-          <button
-            type="button"
-            className="border py-1.5 rounded-md bg-white text-black font-semibold hover:bg-gray-50"
-            onClick={googleSignIn}
-          >
-            <div className="flex justify-center items-center gap-4">
-              <FcGoogle size={24} /> Sign In with Google
+            <div className="flex justify-around items-center gap-1.5 my-2">
+              <div className="flex-grow border-t"></div>
+              <p className="text-sm text-gray-400">or</p>
+              <div className="flex-grow border-t"></div>
             </div>
-          </button>
-        </form>
+
+            <button
+              type="button"
+              className="border py-1.5 rounded-md bg-white text-black font-semibold hover:bg-gray-50"
+              onClick={googleSignIn}
+            >
+              <div className="flex justify-center items-center gap-4">
+                <FcGoogle size={24} /> Sign In with Google
+              </div>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
