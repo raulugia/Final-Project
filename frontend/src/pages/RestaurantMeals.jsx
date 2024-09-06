@@ -6,6 +6,8 @@ import SkeletonMealCard from '../components/SkeletonMealCard'
 import { useParams } from 'react-router-dom'
 import Error from '../components/Error'
 
+//All the code in this file was written without assistance 
+
 //this component displays the meals linked to a certain restaurant
 //rendered by route "/my-restaurants/:restaurantId"
 const RestaurantMeals = () => {
@@ -18,7 +20,7 @@ const RestaurantMeals = () => {
     //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
-    //const [hoveredMeal, setHoveredMeal] = useState(null)
+    //extract restaurant id
     const { restaurantId } = useParams()
     //state to store an error message
     const [error, setError] = useState("")
@@ -28,6 +30,7 @@ const RestaurantMeals = () => {
         (
             async() => {
                 try{
+                    setError("")
                     //get the id token
                     const token = await user.getIdToken();
 

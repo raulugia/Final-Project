@@ -6,25 +6,33 @@ import SkeletonMealCard from '../components/SkeletonMealCard'
 import { useParams } from 'react-router-dom'
 import Error from '../components/Error'
 
+//All the code in this file was written without assistance 
+
 const Meals = () => {
+    //get current user
     const user = auth.currentUser
+    //state to store meals
     const [meals, setMeals] = useState([])
+    //state to store filtered meals
     const [filteredMeals, setFilteredMeals] = useState([])
     //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
     const [loading, setLoading] = useState(true)
-    //const [hoveredMeal, setHoveredMeal] = useState(null)
+    //get username from url
     const { username } = useParams()
+    //state to display errors
     const [error, setError] = useState("")
 
+    //fetch meals
     useEffect(() => {
         (
             async() => {
                 try{
+                    setError("")
                     //get the id token
                     const token = await user.getIdToken();
 
-                    //make a get request to get the user's restaurants passing the id token for verification
+                    //make a get request to get the the current user/other user's restaurants
                     const { data } = await axiosInstance.get(`${username ? `/api/user/${username}/meals` : "/api/meals"}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,

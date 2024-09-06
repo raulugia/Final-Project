@@ -6,6 +6,8 @@ import SearchResultCard from '../components/SearchResultCard'
 import SkeletonSearchResultCard from '../components/SkeletonSearchResultCard'
 import UserCard from '../components/UserCard'
 
+//All the code in this file was written without assistance 
+
 const SearchResults = () => {
     //get current user
     const user = auth.currentUser

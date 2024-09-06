@@ -6,9 +6,16 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link, useParams } from "react-router-dom"
 import Error from '../components/Error'
 
+//All the code in this file was written without assistance 
+
+//component to display the restaurants linked to a user
+
 const Restaurants = () => {
+    //get current user
     const user = auth.currentUser
+    //state to store restaurants
     const [restaurants, setRestaurants] = useState([])
+    //state to store filtered restaurants
     const [filteredRestaurants, setFilteredRestaurants] = useState([])
     //state to store the search input value
     const [searchInput, setSearchInput] = useState("")
@@ -24,6 +31,7 @@ const Restaurants = () => {
         (
             async() => {
                 try{
+                    setError("")
                     //get the id token
                     const token = await user.getIdToken();
 
@@ -34,6 +42,7 @@ const Restaurants = () => {
                         },
                     })
 
+                    //update states
                     setRestaurants(data)
                     setFilteredRestaurants(data)
                     setLoading(false)

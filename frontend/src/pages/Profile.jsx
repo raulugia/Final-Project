@@ -9,8 +9,12 @@ import NotFriendsProfile from '../components/NotFriendsProfile';
 import SkeletonProfile from '../components/SkeletonProfile';
 import Error from '../components/Error'
 
+//All the code in this file was written without assistance 
+
 const Profile = () => {
+  //get current user
   const user = auth.currentUser
+  //state to store other user's data
   const [otherUser, setOtherUser] = useState({})
   //state used to hold the logs returned by the server
   const [logs, setLogs] = useState([])
@@ -29,9 +33,9 @@ const Profile = () => {
   const observer = useRef()
   //ref to keep a reference to the last HomeMealCard
   const lastLogRef = useRef()
-  //
+  //flag to render a different component if users are not friends
   const [displayPartialProfile, setDisplayPartialProfile] = useState(false)
-  //
+  //extract the username
   const { username } = useParams()
   //state to store an error message
   const [error, setError] = useState("")
@@ -55,10 +59,11 @@ const Profile = () => {
     return `Logged on ${day}/${month}/${year} at ${hours}:${minutes}`
 }
 
+//fetch other user's data
   useEffect(() => {
     //flag to avoid updating data twice on render due to strict mode
     let ignore = false;
-
+    setError("")
     //fetch meal logs and update states
     (async() => {
       try {
@@ -75,8 +80,11 @@ const Profile = () => {
           }
         })
 
+        //case there is an error
         if(data.error) {
+          //case users are not friends
           if(data.error === "Users are not friends"){
+            //store other user's data and display a limited profile view component
             setOtherUser({name: data.name, surname: data.surname, otherUserUid: data.otherUserUid, requestStatus: data.requestStatus, requestId: data.requestId, profilePicUrl: data.profilePicUrl})
             setDisplayPartialProfile(true)
           }

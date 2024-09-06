@@ -6,19 +6,29 @@ import MealLogCard from '../components/MealLogCard';
 import SkeletonMealLogCard from '../components/SkeletonMealLogCard';
 import Error from '../components/Error';
 
+//All the code in this file was written without assistance 
+
 const MealLogs = () => {
+    //get current user
     const user = auth.currentUser
+    //state to store meal logs
     const [logs, setLogs] = useState([])
+    //state to show/hide loading skeleton
     const [loading, setLoading] = useState(true)
+    //get params from url
     const { username, mealId }= useParams()
+    //state to show errors
     const [error, setError] = useState("")
 
+    //fetch logs linked to a meal
     useEffect(() => {
         (
             async() => {
                 try{
+                    setError("")
+                    //get token for backend authentication
                     const token = await user.getIdToken()
-
+                    //send a get request to get logs
                     const { data } = await axiosInstance.get(username ? `/api/user/${username}/meals/${mealId}` : `/api/meals/${mealId}`, { 
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -27,7 +37,8 @@ const MealLogs = () => {
 
                     //format the date of every log
                     const displayData = data.map(log => ({...log, createdAt: formatDate(log.createdAt)}))
-                    //console.log(displayData)
+                    
+                    //update states
                     setLogs(displayData)
                     setLoading(false)
                 } catch(err) {
