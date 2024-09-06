@@ -10,6 +10,8 @@ import { FaUserFriends } from "react-icons/fa";
 import { useStateContext } from '../context/ContextProvider'
 import socket from '../../utils/socket';
 
+//All the code in this file was written without assistance 
+
 const Home = () => {
   //get current user
   const user = auth.currentUser

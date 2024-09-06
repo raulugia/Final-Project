@@ -7,6 +7,8 @@ import { IoMdClose } from "react-icons/io";
 import EditLog from '../components/EditLog'
 import Error from '../components/Error'
 
+//All the code in this file was written without assistance 
+
 //this component renders all the data linked to a particular meal log
 //in order to avoid redundant database queries, the data will only be fetched if it is not in the location object
 
@@ -21,8 +23,11 @@ const Log = () => {
     const { username, mealId, logId } = useParams()
     //states to control when loading element and overlay should be displayed
     const [loading, setLoading] = useState(!logLocation.state)
+    //state to hide/show overlay with log picture
     const [displayOverlay, setDisplayOverlay] = useState(false)
+    //state to control edit mode
     const [edit, setEdit] = useState(false)
+    //state to display errors
     const [error, setError] = useState("")
     
     //request data from the server only if it was not passed in the location object
@@ -56,7 +61,6 @@ const Log = () => {
                     setLoading(false)
                 }
             }catch(err){
-                console.error(err)
                 if(err.response && err.response.data && err.response.data.error){
                     setError(err.response.data.error)
                 } else {
@@ -93,6 +97,7 @@ const Log = () => {
         return `on ${day}/${month}/${year} at ${hours}:${minutes}`
     }
 
+    //case edit mode - display component that allows user to update the log
     if(edit) {
         return <EditLog mealName={log.mealName || log.meal?.name} restaurantName={log.restaurantName || log.meal?.restaurant?.name} {...log} mealId={mealId} logId={logId} setEdit={setEdit}/>
     }

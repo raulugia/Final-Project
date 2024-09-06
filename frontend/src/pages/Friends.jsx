@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom'
 import Error from '../components/Error'
 import SkeletonFriends from '../components/SkeletonFriends'
 
+//All the code in this file was written without assistance 
 
 const Friends = () => {
     //get current user
