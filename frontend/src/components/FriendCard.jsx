@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from 'react-router-dom'
 
+//All the code in this file was written without assistance 
+
+//UI component
+
 const FriendCard = ({ name, surname, username, profile_pic}) => {
     //flag to underline friend's name and surname if card is hovered
     const [isHovered, setIsHovered] = useState(null)

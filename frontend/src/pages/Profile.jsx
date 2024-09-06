@@ -63,7 +63,7 @@ const Profile = () => {
   useEffect(() => {
     //flag to avoid updating data twice on render due to strict mode
     let ignore = false;
-    setError("")
+
     //fetch meal logs and update states
     (async() => {
       try {

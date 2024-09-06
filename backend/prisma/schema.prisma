@@ -4,6 +4,8 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+//All the code in this file was written without assistance 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,6 +24,7 @@ model User {
   surname String @db.VarChar(100)
   profilePicUrl String?
   profileThumbnailUrl String?
+  imgStatus ImgStatus? @default(COMPLETED)
   meals MealLog[]
   friends Friendship[] @relation("UserFriends") //friendships initiated by the user
   friendOf Friendship[] @relation("FriendFriends")
@@ -29,6 +32,12 @@ model User {
   chatsReceived Message[] @relation("ReceivedMessages")
   sentRequests FriendRequest[] @relation("SentRequests")
   receivedRequests FriendRequest[] @relation("ReceivedRequests")
+}
+
+enum ImgStatus {
+  PROCESSING
+  FAILED
+  COMPLETED
 }
 
 model Restaurant {
@@ -54,6 +63,7 @@ model MealLog {
   mealId Int
   picture String
   thumbnail String
+  imgStatus ImgStatus @default(COMPLETED)
   carbEstimate Int
   description String?
   rating Rating

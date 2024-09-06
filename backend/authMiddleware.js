@@ -1,6 +1,8 @@
 //import Firebase Admin SDK, initialised in "firebaseAdmin.js"
 const admin = require('./firebaseAdmin');
 
+//All the code in this file was written without assistance 
+
 //middleware method to authenticate users based on the token provided in the request header
 const authenticateUser = async (req, res, next) => {
     //extract the token from the header

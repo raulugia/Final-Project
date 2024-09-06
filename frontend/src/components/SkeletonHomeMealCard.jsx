@@ -1,5 +1,9 @@
 import React from 'react'
 
+//All the code in this file was written without assistance
+
+//UI loading component
+
 const SkeletonHomeMealCard = () => {
   return (
     <>

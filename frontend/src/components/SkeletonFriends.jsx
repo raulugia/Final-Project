@@ -1,6 +1,10 @@
 import React from 'react'
 import { MdKeyboardArrowRight } from "react-icons/md";
 
+//All the code in this file was written without assistance
+
+//UI loading component
+
 const SkeletonFriends = () => {
   return (
     <>

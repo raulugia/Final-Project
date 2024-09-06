@@ -4,12 +4,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
+//All the code in this file was written without assistance 
+
+//Component that simulates a profile with placeholders - users are not friends
+
 const NotFriendsProfile = ({name, surname, otherUserUid, requestStatus, requestId}) => {
+    //get current user
     const user = auth.currentUser
+    //extract username
     const { username } = useParams()
+    //state to set the button message and action
     const [buttonMessage, setButtonMessage] = useState(requestStatus === "pending" ? "Pending..." : "Add Friend")
+    //state to store the fetched friend request
     const [friendRequest, setFriendRequest] = useState(requestStatus)
+    //state to enable/disable buttons
     const [isDisabled, setIsDisabled] = useState(requestStatus === "pending")
+    //state to display errors
     const [error, setError] = useState("")
     const navigate = useNavigate()
 

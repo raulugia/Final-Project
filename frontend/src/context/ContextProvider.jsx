@@ -1,5 +1,7 @@
 import React, { useContext, createContext, useState } from 'react'
 
+//context with the pending friend requests
+
 const StateContext = createContext()
 
 export const ContextProvider = ({ children }) => {

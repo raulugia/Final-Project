@@ -1,4 +1,6 @@
 
+//All the code in this file was written without assistance 
+
 //method to validate email
 const validateEmail = email => {
     //standard pattern for email addresses

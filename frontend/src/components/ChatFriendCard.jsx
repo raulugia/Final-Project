@@ -1,5 +1,8 @@
 import React from 'react'
 
+//All the code in this file was written without assistance 
+
+//UI component
 
 const ChatFriendCard = ({name, surname, username, joinRoom, currentChat, profileThumbnailUrl}) => {
 

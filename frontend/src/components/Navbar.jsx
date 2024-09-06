@@ -2,14 +2,18 @@ import React, { useState } from 'react'
 import { Outlet, Link } from 'react-router-dom'
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 import { signOut } from "firebase/auth"
 import { auth } from '../../utils/firebase';
 import { CgLogOut } from "react-icons/cg";
 
+//All the code in this file was written without assistance 
+
+//Navbar is responsive - hamburger menu will appear on small screens
+
 const Navbar = ({ name }) => {
+    //state to store the search query
     const [searchInput, setSearchInput] = useState("")
     //state to toggle the visibility of the options element
     const [displayOptions, setDisplayOptions] = useState(false)
@@ -17,6 +21,7 @@ const Navbar = ({ name }) => {
     const [displayLinks, setDisplayLinks] = useState(false)
     const navigate = useNavigate()
     
+    //method to navigate user on submit - search bar
     const handleSubmit = e => {
         e.preventDefault()
         navigate(`/search?query=${searchInput}`, {replace: true})

@@ -1,5 +1,9 @@
 import React from 'react'
 
+//All the code in this file was written without assistance 
+
+//UI component
+
 const Accuracy = ({accuracy, style}) => {
     const accuracyStyles = {
         "ACCURATE": "bg-green-100 text-green-700 border-green-700",

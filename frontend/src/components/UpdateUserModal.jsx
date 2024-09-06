@@ -1,9 +1,13 @@
 import React from 'react'
 
+//All the code in this file was written without assistance
+
+//UI loading component
+
 const UpdateUserModal = ({credentialDetails, setCredentialDetails, setDisplayModal, handleSubmit, setLoading}) => {
     
+    //method to close modal
     const handleCancel = () => {
-        console.log("here")
         setCredentialDetails({email: "", password: ""})
         setDisplayModal(false)
         setLoading(false)

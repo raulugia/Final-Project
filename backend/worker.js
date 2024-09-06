@@ -4,11 +4,13 @@ const cloudinary = require("cloudinary").v2;
 const { PrismaClient } = require("@prisma/client");
 const { redisConfig, cloudinaryConfig } = require("./config");
 
+//All the code in this file was written without assistance 
+
 //initialize a new queue to process images with redis configuration
 const imageQueue = new Queue("image-processing", { redis: redisConfig });
-//
+//initialize a new queue to update images
 const imageUpdateQueue = new Queue("image-update", { redis: redisConfig })
-//
+//initialize a new queue to process profile pictures
 const profilePictureQueue = new Queue("profile-picture-update", { redis: redisConfig })
 
 //configure cloudinary
@@ -61,6 +63,7 @@ imageQueue.process(async (job) => {
       data: {
         picture: originalUpload.secure_url,
         thumbnail: thumbnailUpload.secure_url,
+        imgStatus: "COMPLETED",
       },
     });
 
@@ -69,9 +72,12 @@ imageQueue.process(async (job) => {
       picture: updatedMealLog.picture,
       thumbnail: updatedMealLog.thumbnail,
     }
-    console.log(`Updated meal log: ${JSON.stringify(updatedMealLog)}`);
   } catch (err) {
-    console.error(`Failed to process job for meal ID: ${mealId}`, err);
+    //update imgStatus to FAILED
+    await prisma.mealLog.update({
+      where: {id: mealId},
+      data: {imgStatus: 'FAILED'}
+    })
     throw err
   }
 });
@@ -79,20 +85,16 @@ imageQueue.process(async (job) => {
 imageUpdateQueue.process(async(job) => {
   //extract the data from job
   const { filePath, newLogId, oldLogId, oldPictureUrl, oldThumbnailUrl } = job.data
-  console.log("job data: ", job.data)
-  try{
-    console.log(`Processing update job for meal log ID ${newLogId}`)
 
+  try{
     //delete old image from cloudinary
     if(oldPictureUrl) {
       await cloudinary.uploader.destroy(oldPictureUrl, { resource_type: "image"})
-      console.log(`Deleted old picture: ${oldPictureUrl}`)
     }
 
     //delete old thumbnail from cloudinary
     if(oldThumbnailUrl) {
       await cloudinary.uploader.destroy(oldThumbnailUrl, { resource_type: "image"})
-      console.log(`Deleted old picture: ${oldThumbnailUrl}`)
     }
 
     //read the original image into a buffer
@@ -106,42 +108,41 @@ imageUpdateQueue.process(async(job) => {
         uploadToCloudinary(thumbnailBuffer),
     ])
 
-    console.log("here", originalUpload)
-
     //update meal log in the database with the Cloudinary urls
     const updatedMealLog = await prisma.mealLog.update({
       where: { id: newLogId },
       data: {
         picture: originalUpload.secure_url,
         thumbnail: thumbnailUpload.secure_url,
+        imgStatus: "COMPLETED",
       },
     });
-    console.log("updated in db", updatedMealLog)
 
     console.log(`Updated meal log: ${JSON.stringify(updatedMealLog)}`);
   }catch(err){
-    console.error(`Failed to process job for meal ID: ${mealLogId}`, err);
+    //update imgStatus to FAILED
+    await prisma.mealLog.update({
+      where: {id: newLogId},
+      data: {imgStatus: 'FAILED'}
+    })
     throw err
   }
-}) //retry 5 times with a 5-second delay
+})
 
 profilePictureQueue.process(async(job) => {
   //extract the data from job
   const { filePath, userUid, oldPictureUrl, oldThumbnailUrl } = job.data
-  console.log("job data: ", job.data)
   try{
     console.log(`Processing update job for user ID ${userUid}`)
 
     //delete old image from cloudinary
     if(oldPictureUrl) {
       await cloudinary.uploader.destroy(oldPictureUrl, { resource_type: "image"})
-      console.log(`Deleted old picture: ${oldPictureUrl}`)
     }
 
     //delete old thumbnail from cloudinary
     if(oldThumbnailUrl) {
       await cloudinary.uploader.destroy(oldThumbnailUrl, { resource_type: "image"})
-      console.log(`Deleted old picture: ${oldThumbnailUrl}`)
     }
 
     //read the original image into a buffer
@@ -161,13 +162,17 @@ profilePictureQueue.process(async(job) => {
       data: {
         profilePicUrl: originalUpload.secure_url,
         profileThumbnailUrl: thumbnailUpload.secure_url,
+        imgStatus: "COMPLETED",
       },
     });
-    console.log("updated in db", updatedUser)
 
     console.log(`Updated user: ${JSON.stringify(updatedUser)}`);
   }catch(err){
-    console.error(`Failed to process job for user ID: ${userUid}`, err);
+    //update imgStatus to FAILED
+    await prisma.user.update({
+      where: {uid: userUid},
+      data: {imgStatus: 'FAILED'}
+    })
     throw err
   }
 })

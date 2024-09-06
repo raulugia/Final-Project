@@ -5,6 +5,8 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../utils/firebase";
 
+//All the code in this file was written without assistance 
+
 //Component used to edit an existing log - this component is also used when users needs to review the accuracy of a log after 4 hours (1 min for testing the web app)
 
 const EditLog = ({mealName, restaurantName, rating, description, carbEstimate, picture, createdAt, mealId, logId, setEdit}) => {

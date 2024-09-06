@@ -1,5 +1,9 @@
 import React from 'react'
 
+//All the code in this file was written without assistance
+
+//UI loading component
+
 const SkeletonSearchResultCard = () => {
   return (
     <div className='flex flex-col gap-4 py-10 mx-auto w-[88%] md:w-[70%] rounded-lg backdrop-blur-sm bg-white/40 shadow-lg'>

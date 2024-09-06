@@ -37,6 +37,8 @@ app.use(express.json());
 //configure multer for file uploads using "uploads/" as the destination directory
 const upload = multer({ dest: "uploads/" });
 
+//All the code in this file was written without assistance 
+
 //method to check if current user and other user are friends
 const isFriend = async(currentUserUid, otherUserUsername) => {
     try{
@@ -531,6 +533,7 @@ app.post("/api/register", upload.single("profilePicUrl"),async (req, res) => {
         uid,
         profilePicUrl: "",
         profileThumbnailUrl: "",
+        imgStatus: req.file ? "PROCESSING" : "COMPLETED"
       },
     });
 
@@ -660,6 +663,8 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
             //ensure pre-existing urls are deleted
             dataToUpdate.profilePicUrl = ""
             dataToUpdate.profileThumbnailUrl = ""
+            //set image status
+            dataToUpdate.imgStatus = "PROCESSING"
         }
         
         //update user details in the database
@@ -770,6 +775,7 @@ app.post("/api/log-meal", authenticateUser, upload.single("picture"), async (req
           //associate the meal log with the authenticated user
           user: { connect: { uid: req.user.uid } },
           rating: "PENDING",
+          imgStatus: "PROCESSING",
           //placeholders - picture and thumbnail will be added in worker.js once 
           //they have been processed
           picture: "",
@@ -883,6 +889,8 @@ app.put("/api/my-meals/:mealId/log/:logId", authenticateUser, upload.single("pic
             //set the new picture and thumbnail placeholders
             updatedData.picture = ""
             updatedData.thumbnail = ""
+            //set the image status to processing
+            updatedData.imgStatus = "PROCESSING"
         }
 
         //update the existing log using the data that was changed

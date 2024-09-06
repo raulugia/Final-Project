@@ -4,11 +4,17 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { auth } from '../../utils/firebase';
 import axiosInstance from '../../utils/axiosInstance';
 
+//All the code in this file was written without assistance
+
+//UI component rendered in search results
+
 const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, requestId, profile_pic}) => {
+    //get current user
     const user = auth.currentUser
     const [isHovered, setIsHovered] = useState(null)
     const [buttonMessage, setButtonMessage] = useState("")
     const [displayRequestOptions, setDisplayRequestOptions] = useState(false)
+    //control when a button should be disabled
     const [isDisabled, setIsDisabled] = useState(false)
 
     //code to set the set of the card button
@@ -59,7 +65,6 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
                 //if there was an error, reset button to its original form
                 setButtonMessage("Add Friend")
                 setIsDisabled(false)
-                console.error(err)
             }
         }
     }
@@ -94,7 +99,10 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
                 setIsDisabled(false)
             }
         }catch(err) {
-            console.error(err)
+            //error
+            setDisplayRequestOptions(false)
+            setButtonMessage("Error. Try again.")
+            setIsDisabled(true)
         }
     }
 
@@ -115,7 +123,7 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
                         }
                     </div>
                 </div>
-                <Link to={`/${username}`} className='flex flex-col items-center'>
+                <Link to={`/user/${username}`} className='flex flex-col items-center'>
                     <p className={`text-sm md:text-xl font-semibold text-slate-800 ${isHovered === username ? "underline" : ""}`}>{name} {surname}</p>
                     <p className={"text-sm md:text-lg text-slate-400"}>@{username}</p>
                 </Link>

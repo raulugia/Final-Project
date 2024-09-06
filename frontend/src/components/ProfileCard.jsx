@@ -5,6 +5,9 @@ import { RiMessage2Line } from "react-icons/ri";
 import { FaUserFriends } from "react-icons/fa";
 import { Link } from 'react-router-dom'
 
+//All the code in this file was written without assistance
+
+//UI component
 
 const ProfileCard = ({name, surname, username, profilePicUrl}) => {
   return (

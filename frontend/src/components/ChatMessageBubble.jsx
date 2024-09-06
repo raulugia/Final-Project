@@ -1,5 +1,9 @@
 import React from 'react'
 
+//All the code in this file was written without assistance 
+
+//UI component used for every message in a chat
+
 const ChatMessageBubble = React.forwardRef(({content, timestamp, sender}, ref) => {
     const styles = {
         currentUser: "ml-auto bg-blue-600 text-white rounded-l-xl rounded-tr-xl",

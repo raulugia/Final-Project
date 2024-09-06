@@ -3,6 +3,10 @@ import Accuracy from "./Accuracy"
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from 'react-router-dom';
 
+//All the code in this file was written without assistance
+
+//UI component
+
 
 const SearchResultCard = ({ mealName, restaurantName, carbs, accuracy, date, totalLogs, imgUrl, type }) => {
   return (

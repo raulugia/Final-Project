@@ -5,6 +5,10 @@ import { FaUserFriends } from "react-icons/fa";
 import SkeletonHomeMealCard from './SkeletonHomeMealCard';
 import { MdKeyboardArrowRight } from "react-icons/md";
 
+//All the code in this file was written without assistance
+
+//UI loading component
+
 const SkeletonProfile = () => {
   return (
     <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
