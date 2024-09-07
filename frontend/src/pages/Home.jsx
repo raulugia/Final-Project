@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
-import { signOut } from "firebase/auth";
+import React, { useEffect, useState, useRef} from 'react'
 import {auth} from '../../utils/firebase'
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
@@ -275,14 +274,14 @@ const Home = () => {
   }
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-[1fr_1.4fr_1fr] min-h-screen pb-16 bg-slate-200'>
+    <div className='grid grid-cols-1 lg:grid-cols-[1fr_1.4fr_1fr] md:grid-cols-[1fr_1.4fr] min-h-screen pb-16 bg-slate-200'>
       {/* //Left */}
       <div className="border hidden md:block mt-[100px] pl-4">
 
         <div className='bg-white py-5 sticky top-56 w-[270px] h-[160px] rounded-lg shadow-md z-20 '>
           
           <div className="rounded-full w-[160px] h-[160px] absolute z-21 inset-0 top-[-100px] overflow-hidden mx-auto shadow-md outline outline-1 outline-slate-300">
-            <img src={userData.profileThumbnailUrl} alt="" />
+            <img src={userData.profileThumbnailUrl ? userData.profileThumbnailUrl : "../../public/user.png"} alt="" />
           </div>
           <div className="px-6 mt-14 w-full relative">
             {
@@ -296,6 +295,63 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Display notifications on left side on medium screens only */}
+        <div className="mt-[150px] pr-4 md:flex md:justify-start hidden lg:hidden">
+        <div className="hidden md:flex md:flex-col md:items-end md:gap-8  md:fixed">
+          {
+            pendingRequests.length > 0 && (
+
+              <div className='bg-white border border-sky-700 sticky top-[138px] rounded-md shadow-md overflow-hidden w-[260px]'>
+                <div className='flex gap-2 items-center px-3 bg-sky-900 text-white'>
+                  <FaUserFriends size={20} className='text-white'/>
+                  <h1 className='text-lg font-semibold mb-2 mt-1'>Friend Requests</h1>
+                </div>
+                {
+                  pendingRequests.map(request => (
+                    <HomeFriendReqCard key={request.id} name={request.sender.name} surname={request.sender.surname} username={request.sender.username} userId={request.sender.id} requestId={request.id} profile_pic={request.sender.profileThumbnailUrl}/>
+                  ))
+                }
+              </div>
+            )
+          }
+          
+          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm w-[260px]">
+              <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs To Be Scored</h4>
+              <div className="flex flex-col bg-white min-h-[60px] justify-center">
+                {
+                  pendingMealLogs.length > 0 ? (
+                    pendingMealLogs.map((log, index) => (
+                      <div key={log+index} className={`px-3 py-1 ${index === pendingMealLogs.length - 1 ? "" : "border-b border-slate-700"}`}>
+                        <a href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</a>
+                      </div>
+                    ))
+                  ):(
+                    <p className="mx-auto my-auto text-slate-400">No pending meal logs</p>
+                  )
+                }
+              </div>
+          </div>
+
+          <div className="border border-sky-700 rounded-md overflow-hidden shadow-sm md:w-[260px]">
+            <h4 className="px-3 bg-sky-900 text-white py-1 text-lg">Meal Logs Countdown</h4>
+            <div className="flex flex-col bg-white min-h-[60px]">
+            {
+                mealCountdowns.length > 0 ? (
+                  mealCountdowns.map((log, index) => (
+                    <div key={log+index} className={`px-3 py-1 flex justify-between ${index === mealCountdowns.length - 1 ? "" : "border-b border-slate-700"}`}>
+                      <p href={`/my-meals/${log.mealId}/log/${log.id}`} className="hover:underline">{log.mealName}</p>
+                      <p>{log.formattedTimeLeft}</p>
+                    </div>
+                  ))
+                ):(
+                  <p className="mx-auto my-auto text-slate-400">No pending meal logs</p>
+                )
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* End medium screen notifications */}
       </div>
 
       {/* Middle */}
@@ -316,10 +372,17 @@ const Home = () => {
                 ))
               )
           }
+          {
+            !loading && logs.length === 0 && (
+              <div className='flex justify-center items-center bg-white rounded-lg h-[445px] shadow-md'>
+                  <p className='text-lg text-slate-700'>You have not logged any meals yet</p>
+              </div>
+            )
+          }
         </div>
       </div>
           {/* Right */}
-      <div className="mt-[135px] pr-4 md:flex md:justify-end">
+      <div className="mt-[135px] pr-4 lg:flex lg:justify-end hidden">
         <div className="hidden md:flex md:flex-col md:items-end md:gap-8  md:fixed">
           {
             pendingRequests.length > 0 && (

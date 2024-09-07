@@ -4,7 +4,7 @@ import React from 'react'
 
 //UI loading component
 
-const UpdateUserModal = ({credentialDetails, setCredentialDetails, setDisplayModal, handleSubmit, setLoading}) => {
+const UpdateUserModal = ({credentialDetails, setCredentialDetails, setDisplayModal, handleSubmit, handleDelete, setLoading, deleteUser}) => {
     
     //method to close modal
     const handleCancel = () => {
@@ -45,7 +45,7 @@ const UpdateUserModal = ({credentialDetails, setCredentialDetails, setDisplayMod
                 </button>
                 <button 
                     type="button"
-                    onClick={handleSubmit} 
+                    onClick={!deleteUser ? handleSubmit : handleDelete} 
                     className="py-1 px-2 rounded-md bg-blue-700 border border-blue-700 text-white mt-3 w-full"
                 >
                     Confirm

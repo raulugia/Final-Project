@@ -131,7 +131,7 @@ const LogMeal = () => {
           </div>
         )
       }
-      <div className="border mt-12 py-5 px-3 rounded-lg lg:w-[50%] md:w-1/3 shadow-md bg-white">
+      <div className="border mt-12 py-5 px-3 rounded-lg lg:w-[50%] md:w-[60%] max-w-[520px] shadow-md bg-white">
       {
         error && (
           <div className="mb-3 border border-red-700 bg-red-100 text-red-900 font-semibold rounded-sm px-3 py-1">
@@ -140,7 +140,7 @@ const LogMeal = () => {
         )
       }
         <form action="" className="flex flex-col gap-3" onSubmit={handleSubmit}>
-          <div className="flex items-center justify-center w-[280px] md:w-[50%] mx-auto mb-2 ">
+          <div className="flex items-center justify-center w-[280px] lg:w-[50%] mx-auto mb-2 ">
             <label
               htmlFor="dropzone-file"
               className={`flex flex-col items-center justify-center w-full h-64 rounded-lg cursor-pointer overflow-hidden ${imagePreviewUrl ? "" : "border-2 border-gray-300 border-dashed bg-gray-50 dark:hover:bg-bray-800 hover:bg-gray-100"}`}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import Navbar from './components/Navbar'
 import Login from './components/auth/Login'
+import ResetPassword from './components/auth/ResetPassword'
 import Register from './components/auth/Register'
 import LogMeal from './pages/LogMeal'
 import Home from './pages/Home'
@@ -93,12 +94,13 @@ function App() {
   return (
     <div className='bg-slate-200'>
       {
-        location.pathname !== "/" && location.pathname !== "/register"   && <Navbar name={user?.displayName}/>
+        location.pathname !== "/" && location.pathname !== "/register" && location.pathname !== "/reset-password"   && <Navbar name={user?.displayName}/>
       }
     <div className='max-w-[1200px] mx-auto'>
      <Routes>
       <Route path='/' element={<Login />}/>
       <Route path='/register' element={<Register />}/>
+      <Route path='/reset-password' element={<ResetPassword />}/>
 
       <Route element={ <ProtectedRoute><Outlet /></ProtectedRoute> }>
         <Route path='/home' element={<Home />}/>

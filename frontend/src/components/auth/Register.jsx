@@ -206,9 +206,9 @@ const Register = () => {
 
 
   return (
-    <div className="flex justify-center items-center h-full min-h-screen">
-      <div className="border py-5 px-3 rounded-lg shadow-md bg-white">
-        <p className="mb-5 text-2xl font-semibold">Register Now!</p>
+    <div className="flex justify-center items-center h-full min-h-screen px-3">
+      <div className="border py-5 px-3 rounded-lg shadow-md bg-white w-full md:w-[446px]">
+        <p className="mb-5 text-2xl text-sky-900 font-semibold">Register Now!</p>
 
         <form action="" className="flex flex-col gap-3 max-w-[446px]">
         <div className="flex items-center justify-center w-[50%] mx-auto mb-2">
@@ -247,7 +247,7 @@ const Register = () => {
             <input
               type="text"
               placeholder="Name"
-              className="border py-2 px-3 rounded-md"
+              className="border py-2 px-3 rounded-md w-full"
               onChange={(e) =>
                 dispatch({ type: "name", payload: e.target.value })
               }
@@ -256,7 +256,7 @@ const Register = () => {
             <input
               type="text"
               placeholder="Surname"
-              className="border py-2 px-3 rounded-md"
+              className="border py-2 px-3 rounded-md w-full"
               onChange={(e) =>
                 dispatch({ type: "surname", payload: e.target.value })
               }
@@ -308,7 +308,7 @@ const Register = () => {
 
           <button
             type="submit"
-            className="border py-1.5 rounded-md mt-4 bg-black text-white font-semibold"
+            className="border py-1.5 rounded-md mt-4 bg-sky-900 text-white font-semibold"
             onClick={handleSubmit}
           >
             Register

@@ -50,6 +50,8 @@ const Account = () => {
     //state to display a preview image of the new image
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const navigate = useNavigate()
+    //flag
+    const [deleteUser, setDeleteUser] = useState(false)
     
 
 
@@ -196,6 +198,7 @@ const Account = () => {
         setLoading(true)
         //reset modal state
         setDisplayModal(false)
+        setDeleteUser(true)
 
         try{
             //get token for server authentication
@@ -226,7 +229,7 @@ const Account = () => {
             })
 
             //case success
-            if(response.statusCode === 200) {
+            if(response.status === 200) {
                 //await deleteUser(user)
                 navigate("/")
             }
@@ -237,7 +240,11 @@ const Account = () => {
             //update state to display an error message
             if(err.response && err.response.data && err.response.data.error){
                 setServerError(err.response.data.error)
+            } else if(err.code && err.code === "auth/wrong-password") {
+                console.log(err)
+                setDisplayMessage({error: "Authentication details did not match."})
             } else {
+                console.log(err)
                 setServerError("Failed to delete your account. Please try again.")
             }
         } finally {
@@ -377,14 +384,14 @@ const Account = () => {
                             <p className='text-sm text-slate-600'>Click on the Save button to save your changes.</p>
                             {
                                 displayMessage?.success ? (
-                                    <div className='mt-3 text-sm text-green-700 font-medium'>
+                                    <div className='mt-3 text-sm text-green-700 font-medium bg-green-100 py-2 px-3 rounded-md border border-green-700'>
                                         <p>{ displayMessage.success }</p>
                                     </div>
-                                ) : (
-                                    <div className='mt-3 text-sm text-red-600 font-medium'>
+                                ) : displayMessage?.error ? (
+                                    <div className='mt-3 text-sm text-red-600 font-medium bg-red-100 py-2 px-3 rounded-md border border-red-700'>
                                         <p>{ displayMessage?.error }</p>
                                     </div>
-                                )
+                                ) : null
                             }
                         </div>
                         <div className="border-b-2 border-slate-200 w-full mb-6"></div>
@@ -393,7 +400,7 @@ const Account = () => {
                             <div>
                                 <div className="bg-slate-700 h-20 w-20 rounded-full overflow-hidden">
                                     <img 
-                                        src={imagePreviewUrl ? imagePreviewUrl :  userData.profileThumbnailUrl ? userData.profileThumbnailUrl : userData.profilePicUrl ? userData.profilePicUrl : ""} 
+                                        src={imagePreviewUrl ? imagePreviewUrl :  userData.profileThumbnailUrl ? userData.profileThumbnailUrl : userData.profilePicUrl ? userData.profilePicUrl : "../../public/user.png"} 
                                         className='w-full' 
                                     />
                                 </div>
@@ -560,7 +567,9 @@ const Account = () => {
                     setCredentialDetails={setCredentialDetails}
                     setDisplayModal={setDisplayModal}
                     handleSubmit={handleSubmit}
-                    setLoading={setLoading} 
+                    setLoading={setLoading}
+                    handleDelete={handleDelete}
+                    deleteUser={deleteUser} 
                 />
             )
         }

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import {auth} from '../../utils/firebase'
 import CommonRestaurantCard from '../components/CommonRestaurantCard'
 import axiosInstance from '../../utils/axiosInstance';
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import HomeMealCard from '../components/HomeMealCard';
 import ProfileCard from '../components/ProfileCard';
 import NotFriendsProfile from '../components/NotFriendsProfile';
@@ -39,6 +39,7 @@ const Profile = () => {
   const { username } = useParams()
   //state to store an error message
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
 
   //method to format the createdAt date
@@ -79,6 +80,11 @@ const Profile = () => {
             limit: 5
           }
         })
+
+        //case other user and current user are the same
+        if(data.otherUserUid === user.uid){
+          navigate("/home")
+        }
 
         //case there is an error
         if(data.error) {

@@ -14,7 +14,7 @@ const SkeletonFriends = () => {
 
                 <div className="my-auto flex md:flex-row flex-col  md:items-center">
                     <div className= "animate-pulse-fast bg-slate-300  h-5 w-28"></div>
-                    <div className="mt-2 md:mt-0 md:ml-14 animate-pulse-fast bg-slate-300  h-4 w-20"></div>
+                    <div className="mt-2 md:mt-0 md:ml-6 lg:ml-14 animate-pulse-fast bg-slate-300  h-4 w-20"></div>
                 </div>
             </div>
             <MdKeyboardArrowRight size={40} className='animate-pulse-fast'/>
@@ -25,7 +25,7 @@ const SkeletonFriends = () => {
 
                 <div className="my-auto flex md:flex-row flex-col  md:items-center">
                     <div className= "animate-pulse-fast bg-slate-300  h-5 w-28"></div>
-                    <div className="mt-2 md:mt-0 md:ml-14 animate-pulse-fast bg-slate-300  h-4 w-20"></div>
+                    <div className="mt-2 md:mt-0 md:ml-6 lg:ml-14 animate-pulse-fast bg-slate-300  h-4 w-20"></div>
                 </div>
             </div>
             <MdKeyboardArrowRight size={40} className='animate-pulse-fast'/>
@@ -36,7 +36,7 @@ const SkeletonFriends = () => {
 
                 <div className="my-auto flex md:flex-row flex-col  md:items-center">
                     <div className= "animate-pulse-fast bg-slate-300  h-5 w-28"></div>
-                    <div className="mt-2 md:mt-0 md:ml-14 animate-pulse-fast bg-slate-300  h-4 w-20"></div>
+                    <div className="mt-2 md:mt-0 md:ml-6 lg:ml-14 animate-pulse-fast bg-slate-300  h-4 w-20"></div>
                 </div>
             </div>
             <MdKeyboardArrowRight size={40} className='animate-pulse-fast'/>

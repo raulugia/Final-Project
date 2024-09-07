@@ -161,7 +161,7 @@ const initializeSocket = server => {
         })
 
         socket.on("disconnect", () => {
-            console.log("user disconnected")
+            //console.log("user disconnected")
         })
     })
 }

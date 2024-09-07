@@ -92,6 +92,7 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
 
 //endpoint for getting all the data needed by the Home component
 app.get("/api/home", authenticateUser, async(req, res) => {
+    console.time("Home")
     try{
         //infinite scrolling params
         const page = parseInt(req.query.page) || 1;
@@ -149,7 +150,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 
         //combine the logs and user data and return
         const response = {logs: responseLogs, user: userData}
-
+        console.timeEnd("Home")
         res.json(response)
     }catch(err){
         return res.status(500).json({error: "Internal server error"})
@@ -158,6 +159,7 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 
 //endpoint for displaying data linked to a certain user
 app.get("/api/user/:username", authenticateUser, async(req, res) => {
+    console.time("Profile")
     try{
         //get the other user's username
         const { username } = req.params
@@ -230,7 +232,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                 logs: otherUserAndMeals.meals,
                 commonRestaurants,
             }
-
+            console.timeEnd("Profile")
             //send response to client
             res.json(response)
         //case users are not friends
@@ -685,6 +687,7 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
 app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
+        console.log("UPDATING USER")
 
         //validate data and return an error if it does not match the criteria
         if(name){
@@ -759,7 +762,7 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
 //endpoint for deleting a user
 app.delete("/api/delete-user/:username", authenticateUser, async(req, res) => {
     const { username } = req.params
-
+    console.log("trying to delete user")
     try{
         //fetch the user to be deleted
         const userToDelete = await prisma.user.findUnique({
@@ -790,7 +793,9 @@ app.delete("/api/delete-user/:username", authenticateUser, async(req, res) => {
         //return a success message
         return res.status(200).json({ message: "User deleted successfully"})
     }catch(err){
-        if(err.code && err.code.startsWith("auth/")){
+        if(err.code && err.code === "auth/too-many-requests"){
+            return res.status(500).json({error: "Failed to delete your account. Too many attempts. Please reset your password."})
+        }else if(err.code && err.code.startsWith("auth/")){
             return res.status(500).json({error: "Failed to delete your account."})
         }
 
@@ -1037,6 +1042,7 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
 //endpoint for getting the user's friends
 app.get("/api/friends", authenticateUser, async (req, res) => {
     try {
+        console.time("Friends")
         const user = await prisma.user.findUnique({
             where : { uid: req.user.uid },
             include: {
@@ -1083,7 +1089,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
             ...user.friends.map(data => data.friend),
             ...user.friendOf.map(data => data.user),
         ]
-
+        console.timeEnd("Friends")
         //return all user's friends
         res.json(friends)
 

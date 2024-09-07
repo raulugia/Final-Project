@@ -5,7 +5,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate} from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import Register from "./Register";
 import axiosInstance from "../../../utils/axiosInstance"
@@ -120,9 +120,11 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="border py-2 px-3 rounded-md"
             />
-
+            <span className="font-bold text-xs cursor-pointer ml-auto underline text-blue-500 hover:underline" onClick={() => navigate("/reset-password")}>
+              Forgot Password
+            </span>
             {error && (
-              <div class="flex items-center gap-1 border py-1 rounded-md text-sm font-semibold text-red-700 bg-red-100 border-red-900 px-2">
+              <div className="flex items-center gap-1 border py-1 rounded-md text-sm font-semibold text-red-700 bg-red-100 border-red-900 px-2">
                 <VscError />
                 <p className="">{error}</p>
               </div>
@@ -140,7 +142,7 @@ const Login = () => {
             <div className="flex justify-end">
               <p className="text-xs">
                 Don't have an account?
-                <span className="font-bold cursor-pointer text-blue-500 hover:underline" onClick={() => navigate("/register")}>
+                <span className="font-bold cursor-pointer ml-1 underline text-blue-500 hover:underline" onClick={() => navigate("/register")}>
                   Register
                 </span>
               </p>

@@ -13,11 +13,7 @@ const ChatFriendCard = ({name, surname, username, joinRoom, currentChat, profile
     >
         <div>
             <div className='bg-slate-700 rounded-full h-16 w-16 overflow-hidden'>
-              {
-                profileThumbnailUrl && (
-                  <img src={profileThumbnailUrl} alt="profile picture" />
-                )
-              }
+              <img src={profileThumbnailUrl ? profileThumbnailUrl : "../../public/user.png"} alt="profile picture" />
             </div>
         </div>
         <div>

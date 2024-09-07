@@ -116,11 +116,8 @@ const UserCard = ({username, name, surname, isFriend, uid, friendRequestStatus, 
             <div className="flex items-center justify-between gap-2 md:gap-10">
                 <div>
                     <div className="bg-slate-500 rounded-full w-14 h-14 md:w-20 md:h-20 overflow-hidden">
-                        {
-                            profile_pic && (
-                                <img src={profile_pic} alt="profile picture" />
-                            )
-                        }
+                   
+                        <img src={profile_pic ? profile_pic : "../../public/user.png"} alt="profile picture" />
                     </div>
                 </div>
                 <Link to={`/user/${username}`} className='flex flex-col items-center'>
