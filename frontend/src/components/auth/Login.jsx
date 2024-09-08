@@ -43,7 +43,6 @@ const Login = () => {
           setUser(user)
           //update authenticated to true
           setAuthenticated(true);
-          console.log("success", user);
       } catch(err) {
           //update the error state if there was an error
         if(err.message === "Firebase: Error (auth/user-not-found)."){
@@ -84,8 +83,6 @@ const Login = () => {
                 surname: "",
             })
         }
-
-        console.log("success", user)
     } catch(err) {
       setError("Log in with Google failed")
     }

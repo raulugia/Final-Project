@@ -92,7 +92,6 @@ const isFriend = async(currentUserUid, otherUserUsername) => {
 
 //endpoint for getting all the data needed by the Home component
 app.get("/api/home", authenticateUser, async(req, res) => {
-    console.time("Home")
     try{
         //infinite scrolling params
         const page = parseInt(req.query.page) || 1;
@@ -129,7 +128,8 @@ app.get("/api/home", authenticateUser, async(req, res) => {
                 surname: true,
                 username: true,
                 profilePicUrl: true,
-                profileThumbnailUrl: true
+                profileThumbnailUrl: true,
+                imgStatus: true
             }
         })
 
@@ -145,12 +145,12 @@ app.get("/api/home", authenticateUser, async(req, res) => {
             rating: log.rating,
             description: log.description,
             imgStatus: log.imgStatus,
+            picture: log.thumbnail,
             user: userData
         }))
 
         //combine the logs and user data and return
         const response = {logs: responseLogs, user: userData}
-        console.timeEnd("Home")
         res.json(response)
     }catch(err){
         return res.status(500).json({error: "Internal server error"})
@@ -159,7 +159,8 @@ app.get("/api/home", authenticateUser, async(req, res) => {
 
 //endpoint for displaying data linked to a certain user
 app.get("/api/user/:username", authenticateUser, async(req, res) => {
-    console.time("Profile")
+    const label = "Profile label " + Date.now()
+
     try{
         //get the other user's username
         const { username } = req.params
@@ -213,12 +214,15 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
             //create a set of restaurant ids discarding duplicated ids (sets do not allow duplicates)
             const currentUserRestaurantIds = new Set(currentUserMeals.map(log => log.meal.restaurant.id))
 
-            //get common restaurants
-            const commonRestaurants = otherUserAndMeals.meals
-                //create an array with the other user's restaurants
-                .map(log => log.meal.restaurant)
-                //create an array of the restaurants that both users have in common
-                .filter(restaurant => currentUserRestaurantIds.has(restaurant.id))
+            //get common restaurants without duplicates
+            const commonRestaurants = otherUserAndMeals.meals.reduce((acc, log) => {
+                const restaurant = log.meal.restaurant
+
+                if(currentUserRestaurantIds.has(restaurant.id) && !acc.some(rest => rest.id == restaurant.id)){
+                    acc.push(restaurant)
+                }
+                return acc
+            }, [])
 
             //create the response object    
             const response = {
@@ -232,7 +236,7 @@ app.get("/api/user/:username", authenticateUser, async(req, res) => {
                 logs: otherUserAndMeals.meals,
                 commonRestaurants,
             }
-            console.timeEnd("Profile")
+
             //send response to client
             res.json(response)
         //case users are not friends
@@ -593,6 +597,32 @@ app.post("/api/register", upload.single("profilePicUrl"),async (req, res) => {
   //extract email, name and surname from the request body
   const { email, name, surname, username, uid } = req.body;
 
+  //validate data and return an error if it does not match the criteria
+  if(name){
+    const validatedName = validateNameSurname(name, "Name")
+        if(validatedName !== true){
+            return res.status(400).json({error: validatedName})
+        }
+    }
+    if(surname){
+        const validatedSurname = validateNameSurname(name, "Surname")
+        if(validatedSurname !== true){
+            return res.status(400).json({error: validatedSurname})
+        }
+    }
+    if(username){
+        const validatedUsername = validateUsername(username)
+        if(validatedUsername !== true){
+            return res.status(400).json({error: validatedUsername})
+        }
+    }
+    if(email){
+        const validatedEmail = validateEmail(email)
+        if(validatedEmail !== true){
+            return res.status(400).json({error: validatedEmail})
+        }
+    }
+
   try {
     //create a new user in the database with the extracted data
     const user = await prisma.user.create({
@@ -687,7 +717,6 @@ app.post("/api/update-user/is-unique", authenticateUser,async(req, res) => {
 app.put("/api/update-user", authenticateUser, upload.single("picture"), async(req, res) => {
     try{
         const { name, surname, username, email, profileThumbnailUrl, profilePicUrl} = req.body;
-        console.log("UPDATING USER")
 
         //validate data and return an error if it does not match the criteria
         if(name){
@@ -762,7 +791,7 @@ app.put("/api/update-user", authenticateUser, upload.single("picture"), async(re
 //endpoint for deleting a user
 app.delete("/api/delete-user/:username", authenticateUser, async(req, res) => {
     const { username } = req.params
-    console.log("trying to delete user")
+
     try{
         //fetch the user to be deleted
         const userToDelete = await prisma.user.findUnique({
@@ -1042,7 +1071,6 @@ app.get("/api/user-data", authenticateUser, async (req, res) => {
 //endpoint for getting the user's friends
 app.get("/api/friends", authenticateUser, async (req, res) => {
     try {
-        console.time("Friends")
         const user = await prisma.user.findUnique({
             where : { uid: req.user.uid },
             include: {
@@ -1089,7 +1117,7 @@ app.get("/api/friends", authenticateUser, async (req, res) => {
             ...user.friends.map(data => data.friend),
             ...user.friendOf.map(data => data.user),
         ]
-        console.timeEnd("Friends")
+
         //return all user's friends
         res.json(friends)
 
@@ -1316,6 +1344,8 @@ app.get("/api/my-meals/:mealId/log/:logId", authenticateUser, async(req, res) =>
 app.get("/api/search", authenticateUser, async(req, res) => {
     const { query } = req.query
 
+    const queryTerms = query.split(" ").filter(Boolean)
+
     try{
         const meals = await prisma.meal.findMany({
             where: {
@@ -1373,25 +1403,27 @@ app.get("/api/search", authenticateUser, async(req, res) => {
 
         const users =  await prisma.user.findMany({
             where : {
-                OR: [ {
-                    name: {
-                        contains: query,
-                        mode: "insensitive"
+                OR: queryTerms.map(term => ({
+                    OR: [ {
+                        name: {
+                            contains: term,
+                            mode: "insensitive"
+                        },
                     },
-                },
-                {
-                    surname: {
-                        contains: query,
-                        mode: "insensitive"
+                    {
+                        surname: {
+                            contains: term,
+                            mode: "insensitive"
+                        },
                     },
-                },
-                {
-                    username: {
-                        contains: query,
-                        mode: "insensitive"
+                    {
+                        username: {
+                            contains: term,
+                            mode: "insensitive"
+                        },
                     },
-                },
-            ]
+                ]
+                }))                
             },
             //this is needed to know if users are friends 
             include: {
@@ -1717,10 +1749,6 @@ app.get("/api/chat/:username/messages", authenticateUser, async(req, res) => {
     }
 })
 
-// //start express server
-// server.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
 
 if(process.env.NODE_ENV !== 'test') {
     //start express server

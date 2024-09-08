@@ -57,6 +57,10 @@ jest.mock("@prisma/client", () => {
             findMany: jest.fn(),
             upsert: jest.fn()
         },
+        restaurant: {
+            findUnique: jest.fn(),
+            create: jest.fn(),
+        },
         friendRequest: {
             findFirst: jest.fn(),
             findUnique: jest.fn(),
@@ -69,10 +73,6 @@ jest.mock("@prisma/client", () => {
         },
         message: {
             findMany: jest.fn(),
-        },
-        restaurant: {
-            findUnique: jest.fn(),
-            create: jest.fn(),
         }
     }
     return { PrismaClient: jest.fn(() => mockPrisma) }
@@ -408,7 +408,6 @@ describe("POST /api/log-meal", () => {
             .post("/api/log-meal")
             .set("Authorization", "Bearer faketoken")
             .field("mealName", "Test Meal")
-            .field("mealName", "Test Meal")
             .field("restaurantName", "Test Restaurant")
             .field("carbEstimate", 50)
             .field("description", "Test Description")
@@ -417,6 +416,8 @@ describe("POST /api/log-meal", () => {
 
         //ensue that the response contains the meal log
         expect(response.body.mealId).toBe(1)
+        expect(response.body.carbEstimate).toBe(50)
+        expect(response.body.rating).toBe("PENDING")
         expect(response.body.userUid).toBe("test-uid")
 
         //ensure that the imageQueue.add method was called with the right data

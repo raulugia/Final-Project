@@ -26,7 +26,7 @@ model User {
   profileThumbnailUrl String?
   imgStatus ImgStatus? @default(COMPLETED)
   meals MealLog[]
-  friends Friendship[] @relation("UserFriends") //friendships initiated by the user
+  friends Friendship[] @relation("UserFriends")
   friendOf Friendship[] @relation("FriendFriends")
   chatsSent Message[] @relation("SentMessages")
   chatsReceived Message[] @relation("ReceivedMessages")
@@ -59,7 +59,7 @@ model MealLog {
   id Int @id @default(autoincrement())
   user User @relation(fields:[userUid], references: [uid], onDelete: Cascade)
   userUid String
-  meal Meal @relation(fields:[mealId], references: [id])
+  meal Meal @relation(fields:[mealId], references: [id], onDelete: Cascade)
   mealId Int
   picture String
   thumbnail String

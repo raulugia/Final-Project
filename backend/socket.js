@@ -29,7 +29,7 @@ const initializeSocket = server => {
                 const decodedToken = await admin.auth().verifyIdToken(token)
                 //store the decoded token (user)
                 socket.request.user = decodedToken
-                //establich connection
+                //establish connection
                 next()
             }else{
                 next(new Error("Authentication failed"))

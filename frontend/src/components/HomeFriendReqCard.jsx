@@ -45,7 +45,7 @@ const HomeFriendReqCard = ({name, surname, username, requestId, profile_pic}) =>
     }
 
   return (
-    <div className='flex gap-4 border-y border-slate-200 w-full px-3 py-1'>
+    <div className='flex justify-between border-y border-slate-200 w-full px-3 py-1'>
 
         {
             error ? (
@@ -54,17 +54,17 @@ const HomeFriendReqCard = ({name, surname, username, requestId, profile_pic}) =>
                 </div>
             ) : (
                 <>
+                <div className="flex gap-2">
                 <Link to={`/user/${username}`}>
                     <div className="h-10 w-10 rounded-full bg-slate-700 overflow-hidden">
-                        <img src={profile_pic} alt="profile picture" />
+                        <img src={profile_pic ? profile_pic : "../../public/user.png"} alt="profile picture" />
                     </div>
                 </Link>
 
                 <Link to={`/user/${username}`} className='flex gap-2 items-center'>
-                    <p>{name}{surname}</p>
-                    <p className='text-sm'>@{username}</p>
+                    <p>{name} {surname}</p>
                 </Link>
-
+                </div>
                 <div className='flex gap-2 items-center'>
                     <TiTick 
                         size={25} className='border bg-blue-600 text-white rounded-md hover:bg-blue-800 hover:shadow-sm hover:cursor-pointer'

@@ -123,7 +123,6 @@ const Chat = () => {
 
                         //case the server responds
                         if(data){
-                            console.log(data.reverse())
                             const displayMessages = data.map(message => ({...message, timestamp: formatTime(message.timestamp)}))
                             //update state with newly fetched messages
                             setMessages(prevMessages => [...displayMessages, ...prevMessages])
@@ -135,7 +134,6 @@ const Chat = () => {
                             }
                         }
                     }catch(err) {
-                        console.log("error: ", err)
                         //update state to display an error message
                         if(err.response && err.response.data && err.response.data.error){
                             setError(err.response.data.error)
@@ -178,7 +176,6 @@ const Chat = () => {
 
         //make the observer watch the oldest message
         if(oldestMessageRef.current) observer.current.observe(oldestMessageRef.current)
-        console.log("oldest mess", oldestMessageRef)
     }, [hasMoreMessages, loading, messages])
 
     //add event listener for responsiveness - screen resize

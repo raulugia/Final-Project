@@ -5,7 +5,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 
 //UI component
 
-const CommonRestaurantCard = ({ name }) => {
+const CommonRestaurantCard = ({ name}) => {
   return (
     <div className="flex w-full border pl-3 pr-1 py-2">
         <p className="text-md">{name}</p>

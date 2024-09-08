@@ -50,5 +50,5 @@ test("Link has the correct route", () => {
     //get the a tag
     const a = container.querySelector("a")
     ////test whether its href attribute has the right route
-    expect(a).toHaveAttribute("href", "/ashley.smith")
+    expect(a).toHaveAttribute("href", "/user/ashley.smith")
 })

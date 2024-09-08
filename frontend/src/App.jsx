@@ -42,7 +42,6 @@ function App() {
       if(user) {
         //get the token
         const token = await user.getIdToken()
-        //console.log("CLIENT TOKEN LOGGED",token)
         //set the token in the socket authentication object
         socket.auth = { token }
         //connect to the WebSocket
@@ -57,7 +56,6 @@ function App() {
   }, [])
 
   useEffect(() => {
-    console.log("app socket listeners added")
     socket.on("connect", () => {
       console.log("Connected to server")
     })
@@ -66,18 +64,20 @@ function App() {
       console.log("disconnected from server")
     })
 
+    //listener to display the pending friend requests in Home
+    //event emitted when the user signs in
     socket.on("pendingFriendRequests", requests => {
-      console.log("REQS: ", requests)
       setPendingRequests(requests)
     })
 
+    //listener to notify the user that they received a new friend request
+    //this event is emitted on the server when a friend request is created
     socket.on("newFriendRequest", request => {
-      console.log("new req: ", request)
       setPendingRequests(prevRequests => [...prevRequests, request])
     })
 
+    //listener to notify the user a new log can be reviewed now 
     socket.on("notifyAccuracyReview", ({ message, mealLogId}) => {
-      console.log("new log to review ", mealLogId)
       alert(message)
     } )
 

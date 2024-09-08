@@ -241,10 +241,8 @@ const Account = () => {
             if(err.response && err.response.data && err.response.data.error){
                 setServerError(err.response.data.error)
             } else if(err.code && err.code === "auth/wrong-password") {
-                console.log(err)
                 setDisplayMessage({error: "Authentication details did not match."})
             } else {
-                console.log(err)
                 setServerError("Failed to delete your account. Please try again.")
             }
         } finally {

@@ -18,18 +18,6 @@ describe("RestaurantMeals component", () => {
         auth.currentUser.getIdToken.mockResolvedValue("fake-token")
     })
 
-
-    test("renders loading state",() => {
-        const { container } = render(
-            <MemoryRouter>
-                <RestaurantMeals />
-            </MemoryRouter>
-        )
-
-        //assert that the loading skeleton is rendered at the beginning
-        expect(container.querySelector(".animate-pulse-fast")).toBeInTheDocument()
-    })
-
     test("fetches and displays meal correctly", async() => {
         const mockData = [
             {

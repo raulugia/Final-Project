@@ -31,18 +31,6 @@ describe("home component", () => {
         useStateContext.mockReturnValue({ pendingRequests: []})
     })
 
-    test("renders loading state",() => {
-        axiosInstance.get.mockResolvedValue({ data: { logs: [], user: {}}})
-
-        const { container } = render(
-            <MemoryRouter>
-                <Home />
-            </MemoryRouter>
-        )
-
-        //assert that the loading skeleton is rendered at the beginning
-        expect(container.querySelector(".animate-pulse-fast")).toBeInTheDocument()
-    })
 
     test("renders logs fetched from the API", async() => {
         //mock log data

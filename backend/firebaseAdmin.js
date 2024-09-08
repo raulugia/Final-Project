@@ -1,7 +1,7 @@
 //import the Firebase Admin SDK
 const admin = require("firebase-admin");
 //import the service account key
-const serviceAccount = require("./config/final-project-d6c13-firebase-adminsdk-67z7e-a668b6241d.json")
+const serviceAccount = require("./config/diamate-b1603-firebase-adminsdk-52spz-d9d943b047.json")
 
 //initialize the Firebase Admin SDK
 admin.initializeApp({

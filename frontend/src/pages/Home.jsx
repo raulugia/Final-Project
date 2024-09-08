@@ -38,6 +38,7 @@ const Home = () => {
   const { pendingRequests } = useStateContext()
   //state to needed to fetch the image of the meal log that is still being processed by tasks
   const [pendingPic, setPendingPic] = useState({logId: "", mealId: "", url: ""})
+  const [pendingProfilePic, setPendingProfilePic] = useState(false)
   
   //method to format the createdAt date
   const formatDate = (dateString) => {
@@ -82,7 +83,6 @@ const Home = () => {
         if(!ignore){
           //format date of every log
           const displayData = data.logs.map(log => {
-            console.log(log.imgStatus)
             //case the image is not ready
             if(log.imgStatus === "PROCESSING"){
               //update state with the log details so the image can be fetched - Polling mechanism
@@ -93,6 +93,12 @@ const Home = () => {
           })
           //update logs state with formatted logs
           setLogs(prevLogs => [...prevLogs, ...displayData])
+          //start polling mechanism to get the profile picture once it is ready
+          if(data.user.imgStatus === "PROCESSING"){
+
+            setPendingProfilePic(true)
+          }
+
           setUserData(data.user)
           //hide loading component
           setLoading(false)
@@ -103,9 +109,9 @@ const Home = () => {
           }
         }
       } catch(err) {
-        console.log(err)
         //hide loading component
         setLoading(false)
+        alert("There was an error while fetching your data.")
       }
     })()
 
@@ -131,20 +137,21 @@ const Home = () => {
               Authorization: `Bearer ${token}`,
             }
 
-            })
+          })
           
           //case image has been processed successfully
           if(data.imgStatus === "COMPLETED" && !pendingPic.url){
             //update the log that did not have a picture
             setLogs(prevLogs => prevLogs.map(log => {
               if(log.logId === pendingPic.logId) {
-                return {...log, picture: data.thumbnail}
+                return {...log, picture: data.thumbnail, imgStatus: data.imgStatus}
               }
 
               return log
             }))
             //reset state
             setPendingPic({logId: "", mealId: "", url: ""})
+          //case the image was not processed  
           }else if(data.imgStatus === "FAILED" && !pendingPic.url){
             setLogs(prevLogs => prevLogs.map(log => {
               if(log.logId === pendingPic.logId) {
@@ -162,6 +169,45 @@ const Home = () => {
       return () => clearInterval(intervalId)
     }
   },[pendingPic])
+
+  //polling mechanism for the profile picture - new user or user has just updated their profile picture
+  useEffect(() => {
+    if(pendingProfilePic){
+      const intervalId = setInterval(async() => {
+        try{
+          //get the id token
+          const token = await user.getIdToken();
+  
+          //fetch first meal log
+          const { data } = await axiosInstance.get(`/api/user-data`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          })
+  
+          if(data){
+            //case the image has been processed - display it
+            if(data.imgStatus === "COMPLETED"){
+              setUserData({...userData, imgStatus: "COMPLETED", profileThumbnailUrl: data.profileThumbnailUrl})
+              setPendingProfilePic(false)
+              clearInterval(intervalId)
+            //case the image could not be processed - inform user
+            }else if(data.imgStatus === "FAILED"){
+              setUserData({...userData, imgStatus: "FAILED", profileThumbnailUrl: data.profileThumbnailUrl})
+              setPendingProfilePic(false)
+              clearInterval(intervalId)
+              alert("There was a problem with your profile picture.")
+            }
+          }
+        }catch(err){
+          clearInterval(intervalId)
+          alert("There was an error while trying to fetch your profile picture.")
+        }
+      }, 5000)
+  
+      return () => clearInterval(intervalId)
+    }
+  }, [pendingProfilePic])
 
   //set up intersection observer and track last HomeMealCard
   useEffect(() => {
